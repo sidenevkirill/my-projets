@@ -1,1 +1,3 @@
-go mod init my-projets
+module my-projets
+
+go 1.24
