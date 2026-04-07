@@ -526,19 +526,20 @@ func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
 			} `json:"items"`
 		} `json:"response"`
 		Error *struct {
-			ErrorMsg string `json:"error_msg"`
+			ErrorCode int    `json:"error_code"`
+			ErrorMsg  string `json:"error_msg"`
 		} `json:"error"`
 	}
 
 	if err := json.Unmarshal(body, &result); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("Ошибка парсинга: %v", err)})
 		return
 	}
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": result.Error.ErrorMsg})
+		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)})
 		return
 	}
 
@@ -584,6 +585,7 @@ func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
 	params.Set("owner_id", strconv.Itoa(userID))
 	params.Set("playlist_id", playlistID)
 
+	// Используем метод audio.getPlaylistById
 	apiURL := "https://api.vk.com/method/audio.getPlaylistById?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
@@ -597,7 +599,7 @@ func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := client.Do(req)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-	json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}
 	defer resp.Body.Close()
@@ -611,42 +613,44 @@ func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
 
 	var result struct {
 		Response struct {
-			ID    int    `json:"id"`
-			Title string `json:"title"`
-			List  []struct {
+			ID     int    `json:"id"`
+			Title  string `json:"title"`
+			Audios []struct {
 				ID       int    `json:"id"`
 				OwnerID  int    `json:"owner_id"`
 				Artist   string `json:"artist"`
 				Title    string `json:"title"`
 				Duration int    `json:"duration"`
-			} `json:"list"`
+				URL      string `json:"url"`
+			} `json:"audios"`
 		} `json:"response"`
 		Error *struct {
-			ErrorMsg string `json:"error_msg"`
+			ErrorCode int    `json:"error_code"`
+			ErrorMsg  string `json:"error_msg"`
 		} `json:"error"`
 	}
 
 	if err := json.Unmarshal(body, &result); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("Ошибка парсинга: %v", err)})
 		return
 	}
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": result.Error.ErrorMsg})
+		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)})
 		return
 	}
 
 	tracks := make([]Track, 0)
-	for _, item := range result.Response.List {
+	for _, item := range result.Response.Audios {
 		tracks = append(tracks, Track{
 			ID:       item.ID,
 			OwnerID:  item.OwnerID,
 			Artist:   item.Artist,
 			Title:    item.Title,
 			Duration: item.Duration,
-			URL:      "",
+			URL:      item.URL,
 		})
 	}
 
