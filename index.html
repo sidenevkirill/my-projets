@@ -249,98 +249,6 @@
             margin-top: 4px;
         }
         
-        /* Стили для плейлистов */
-        .playlist-list {
-            padding: 12px;
-        }
-        
-        .playlist-item {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            background: var(--md-surface);
-            margin-bottom: 8px;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: var(--shadow);
-        }
-        
-        .playlist-item:hover {
-            background: var(--md-surface-light);
-            transform: translateX(4px);
-        }
-        
-        .playlist-cover {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--md-primary), var(--md-primary-light));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 16px;
-        }
-        
-        .playlist-cover .material-symbols-outlined {
-            font-size: 32px;
-            color: white;
-        }
-        
-        .playlist-info {
-            flex: 1;
-        }
-        
-        .playlist-title {
-            font-weight: 500;
-            color: var(--md-on-surface);
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-        
-        .playlist-count {
-            font-size: 12px;
-            color: var(--md-on-surface-variant);
-        }
-        
-        /* Стили для треков внутри плейлиста */
-        .playlist-header {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            background: var(--md-surface);
-            border-bottom: 1px solid rgba(128,128,128,0.2);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        
-        .back-to-playlists {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 12px;
-            border-radius: 28px;
-            transition: all 0.2s;
-        }
-        
-        .back-to-playlists:hover {
-            background: var(--md-surface-light);
-        }
-        
-        .playlist-title-large {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--md-on-surface);
-            margin-left: 16px;
-        }
-        
         .track-list {
             padding: 8px 12px 20px 12px;
         }
@@ -488,6 +396,18 @@
             justify-content: center;
             padding: 4px;
             border-radius: 50%;
+        }
+        
+        .search-loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--md-on-surface-variant);
+        }
+        
+        .search-empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--md-on-surface-variant);
         }
         
         .context-menu {
@@ -837,6 +757,15 @@
             font-size: 14px;
             cursor: pointer;
         }
+        
+        .recommendation-badge {
+            background: var(--md-primary);
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body class="light">
@@ -904,29 +833,12 @@
         </div>
     </div>
     
-    <!-- Плейлисты -->
-    <div id="playlistsPage" class="page">
-        <div class="playlist-list" id="playlistsList">
+    <!-- Рекомендации -->
+    <div id="recommendationsPage" class="page">
+        <div class="track-list" id="recommendationsList">
             <div class="loading">
                 <div class="loading-spinner"></div>
-                <p>Загрузка плейлистов</p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Просмотр плейлиста -->
-    <div id="playlistViewPage" class="page">
-        <div class="playlist-header">
-            <button class="back-to-playlists" id="backToPlaylistsBtn">
-                <span class="material-symbols-outlined">arrow_back</span>
-                <span>К плейлистам</span>
-            </button>
-            <div class="playlist-title-large" id="playlistTitleLarge"></div>
-        </div>
-        <div class="track-list" id="playlistTracksList">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p>Загрузка треков плейлиста...</p>
+                <p>Загрузка рекомендаций...</p>
             </div>
         </div>
     </div>
@@ -940,9 +852,9 @@
             <span class="material-symbols-outlined">search</span>
             <span>Поиск</span>
         </button>
-        <button class="nav-item" data-page="playlists">
-            <span class="material-symbols-outlined">playlist_play</span>
-            <span>Плейлисты</span>
+        <button class="nav-item" data-page="recommendations">
+            <span class="material-symbols-outlined">recommend</span>
+            <span>Рекомендации</span>
         </button>
     </div>
     
@@ -988,14 +900,14 @@
                     <span class="material-symbols-outlined">music_note</span>
                 </div>
                 <h3>VK Moosic Web Player</h3>
-                <p>Версия 0.0.4</p>
+                <p>Версия 0.0.5</p>
                 <p>Удобный плеер для прослушивания музыки из ВКонтакте</p>
                 <div class="about-features">
                     <h4>Возможности:</h4>
                     <ul>
                         <li>Мои аудиозаписи</li>
                         <li>Поиск треков</li>
-                        <li>Плейлисты пользователя</li>
+                        <li>Рекомендации ВК</li>
                         <li>Скачивание треков</li>
                         <li>Светлая/тёмная тема</li>
                     </ul>
@@ -1015,11 +927,9 @@
     <script>
     let myTracks = [];
     let searchResults = [];
-    let playlists = [];
-    let playlistTracks = [];
+    let recommendations = [];
     let currentTrackIndex = 0;
     let currentTrackSource = 'myTracks';
-    let currentPlaylistId = null;
     let audioPlayer = new Audio();
     let isPlaying = false;
     let searchDebounceTimer = null;
@@ -1027,12 +937,10 @@
     // DOM элементы
     const myTracksPage = document.getElementById('myTracksPage');
     const searchPage = document.getElementById('searchPage');
-    const playlistsPage = document.getElementById('playlistsPage');
-    const playlistViewPage = document.getElementById('playlistViewPage');
+    const recommendationsPage = document.getElementById('recommendationsPage');
     const myTracksList = document.getElementById('myTracksList');
     const searchResultsList = document.getElementById('searchResultsList');
-    const playlistsList = document.getElementById('playlistsList');
-    const playlistTracksList = document.getElementById('playlistTracksList');
+    const recommendationsList = document.getElementById('recommendationsList');
     const globalSearchInput = document.getElementById('globalSearchInput');
     const clearGlobalSearch = document.getElementById('clearGlobalSearch');
     const appBarTitle = document.getElementById('appBarTitle');
@@ -1044,8 +952,6 @@
     const aboutModal = document.getElementById('aboutModal');
     const closeModal = document.getElementById('closeModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
-    const backToPlaylistsBtn = document.getElementById('backToPlaylistsBtn');
-    const playlistTitleLarge = document.getElementById('playlistTitleLarge');
     
     // Модальное окно
     aboutBtn.addEventListener('click', () => {
@@ -1107,8 +1013,7 @@
     function switchPage(pageId) {
         myTracksPage.classList.remove('active');
         searchPage.classList.remove('active');
-        playlistsPage.classList.remove('active');
-        playlistViewPage.classList.remove('active');
+        recommendationsPage.classList.remove('active');
         
         if (pageId === 'myTracks') {
             myTracksPage.classList.add('active');
@@ -1116,11 +1021,11 @@
         } else if (pageId === 'search') {
             searchPage.classList.add('active');
             appBarTitle.textContent = 'Поиск';
-        } else if (pageId === 'playlists') {
-            playlistsPage.classList.add('active');
-            appBarTitle.textContent = 'Плейлисты';
-            if (playlists.length === 0) {
-                loadPlaylists();
+        } else if (pageId === 'recommendations') {
+            recommendationsPage.classList.add('active');
+            appBarTitle.textContent = 'Рекомендации';
+            if (recommendations.length === 0) {
+                loadRecommendations();
             }
         }
         
@@ -1185,12 +1090,12 @@
         icon.textContent = isPlaying ? 'pause' : 'play_arrow';
     }
     
-    // Загрузка плейлистов
-    async function loadPlaylists() {
-        playlistsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка плейлистов...</p></div>';
+    // Загрузка рекомендаций
+    async function loadRecommendations() {
+        recommendationsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка рекомендаций...</p></div>';
         
         try {
-            const response = await fetch('/api/playlists');
+            const response = await fetch('/api/recommendations');
             if (response.status === 401) {
                 window.location.href = '/login';
                 return;
@@ -1198,82 +1103,22 @@
             const data = await response.json();
             
             if (data.error) {
-                playlistsList.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+                recommendationsList.innerHTML = `<div class="error">❌ ${data.error}</div>`;
                 return;
             }
             
-            playlists = data;
-            displayPlaylists(playlists);
+            recommendations = data;
+            displayRecommendations(recommendations);
         } catch (err) {
-            playlistsList.innerHTML = `<div class="error">❌ Ошибка: ${err.message}</div>`;
+            recommendationsList.innerHTML = `<div class="error">❌ Ошибка: ${err.message}</div>`;
         }
     }
     
-    function displayPlaylists(playlistsListData) {
-        playlistsList.innerHTML = '';
-        
-        if (playlistsListData.length === 0) {
-            playlistsList.innerHTML = '<div class="loading"><p>😔 Нет плейлистов</p></div>';
-            return;
-        }
-        
-        playlistsListData.forEach(playlist => {
-            const div = document.createElement('div');
-            div.className = 'playlist-item';
-            div.innerHTML = `
-                <div class="playlist-cover">
-                    <span class="material-symbols-outlined">playlist_play</span>
-                </div>
-                <div class="playlist-info">
-                    <div class="playlist-title">${escapeHtml(playlist.title)}</div>
-                    <div class="playlist-count">${playlist.count || 0} треков</div>
-                </div>
-                <span class="material-symbols-outlined" style="color: var(--md-on-surface-variant);">chevron_right</span>
-            `;
-            div.addEventListener('click', () => {
-                openPlaylist(playlist);
-            });
-            playlistsList.appendChild(div);
-        });
-    }
-    
-async function openPlaylist(playlist) {
-    currentPlaylistId = playlist.id;
-    playlistTitleLarge.textContent = playlist.title;
-    
-    playlistViewPage.classList.add('active');
-    playlistsPage.classList.remove('active');
-    appBarTitle.textContent = playlist.title;
-    
-    playlistTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков...</p></div>';
-    
-    try {
-        // Правильный URL с owner_id
-        const response = await fetch(`/api/playlist/${playlist.id}/${playlist.owner_id}`);
-        if (response.status === 401) {
-            window.location.href = '/login';
-            return;
-        }
-        const data = await response.json();
-        
-        if (data.error) {
-            playlistTracksList.innerHTML = `<div class="error">❌ ${data.error}</div>`;
-            return;
-        }
-        
-        playlistTracks = data;
-        displayPlaylistTracks(playlistTracks);
-    } catch (err) {
-        console.error('Ошибка загрузки треков плейлиста:', err);
-        playlistTracksList.innerHTML = `<div class="error">❌ Ошибка: ${err.message}</div>`;
-    }
-}
-    
-    function displayPlaylistTracks(tracksList) {
-        playlistTracksList.innerHTML = '';
+    function displayRecommendations(tracksList) {
+        recommendationsList.innerHTML = '';
         
         if (tracksList.length === 0) {
-            playlistTracksList.innerHTML = '<div class="loading"><p>😔 Нет треков в плейлисте</p></div>';
+            recommendationsList.innerHTML = '<div class="loading"><p>😔 Нет рекомендаций</p></div>';
             return;
         }
         
@@ -1284,6 +1129,8 @@ async function openPlaylist(playlist) {
             const secs = (track.duration || 0) % 60;
             const duration = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
             
+            const isAlreadyInMyTracks = myTracks.some(t => t.id === track.id);
+            
             const div = document.createElement('div');
             div.className = 'track-item';
             div.innerHTML = `
@@ -1293,14 +1140,14 @@ async function openPlaylist(playlist) {
                     <div class="track-artist">${escapeHtml(artist)}</div>
                 </div>
                 <div class="track-duration">${duration}</div>
-                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}" data-title="${escapeHtml(title)}" data-artist="${escapeHtml(artist)}">
+                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}" data-title="${escapeHtml(title)}" data-is-added="${isAlreadyInMyTracks}">
                     <span class="material-symbols-outlined">more_vert</span>
                 </button>
             `;
             
             div.addEventListener('click', (e) => {
                 if (!e.target.closest('.menu-btn')) {
-                    playTrack(track, 'playlist');
+                    playTrack(track, 'recommendations');
                 }
             });
             
@@ -1311,32 +1158,65 @@ async function openPlaylist(playlist) {
                 const trackId = parseInt(menuBtn.getAttribute('data-id'));
                 const ownerId = parseInt(menuBtn.getAttribute('data-owner-id'));
                 const trackTitle = menuBtn.getAttribute('data-title');
-                showPlaylistTrackMenu(rect.right - 200, rect.bottom + 5, trackId, ownerId, trackTitle);
+                const isAdded = menuBtn.getAttribute('data-is-added') === 'true';
+                showRecommendationMenu(rect.right - 200, rect.bottom + 5, trackId, ownerId, trackTitle, isAdded);
             });
             
-            playlistTracksList.appendChild(div);
+            recommendationsList.appendChild(div);
         });
     }
     
-    function showPlaylistTrackMenu(x, y, trackId, ownerId, trackTitle) {
+    function showRecommendationMenu(x, y, trackId, ownerId, trackTitle, isAdded) {
         if (activeContextMenu) activeContextMenu.remove();
         
         const menu = document.createElement('div');
         menu.className = 'context-menu';
         menu.style.left = x + 'px';
         menu.style.top = y + 'px';
-        menu.innerHTML = `
-            <div class="context-menu-item download" data-action="download">
-                <span class="material-symbols-outlined">download</span>
-                <span>Скачать MP3</span>
-            </div>
-        `;
         
-        menu.querySelector('[data-action="download"]').addEventListener('click', () => {
-            menu.remove();
-            activeContextMenu = null;
-            downloadTrack(trackId, ownerId);
-        });
+        if (isAdded) {
+            menu.innerHTML = `
+                <div class="context-menu-item delete" data-action="delete">
+                    <span class="material-symbols-outlined">delete_forever</span>
+                    <span>Удалить из моих треков</span>
+                </div>
+                <div class="context-menu-item download" data-action="download">
+                    <span class="material-symbols-outlined">download</span>
+                    <span>Скачать MP3</span>
+                </div>
+            `;
+            menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
+                menu.remove();
+                activeContextMenu = null;
+                await deleteTrackFromVK(trackId, trackTitle);
+            });
+            menu.querySelector('[data-action="download"]').addEventListener('click', () => {
+                menu.remove();
+                activeContextMenu = null;
+                downloadTrack(trackId, ownerId);
+            });
+        } else {
+            menu.innerHTML = `
+                <div class="context-menu-item add" data-action="add">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span>Добавить в мои треки</span>
+                </div>
+                <div class="context-menu-item download" data-action="download">
+                    <span class="material-symbols-outlined">download</span>
+                    <span>Скачать MP3</span>
+                </div>
+            `;
+            menu.querySelector('[data-action="add"]').addEventListener('click', async () => {
+                menu.remove();
+                activeContextMenu = null;
+                await addTrackToVK(trackId, ownerId, trackTitle);
+            });
+            menu.querySelector('[data-action="download"]').addEventListener('click', () => {
+                menu.remove();
+                activeContextMenu = null;
+                downloadTrack(trackId, ownerId);
+            });
+        }
         
         document.body.appendChild(menu);
         activeContextMenu = menu;
@@ -1350,13 +1230,6 @@ async function openPlaylist(playlist) {
         };
         setTimeout(() => document.addEventListener('click', closeMenu), 10);
     }
-    
-    backToPlaylistsBtn.addEventListener('click', () => {
-        playlistViewPage.classList.remove('active');
-        playlistsPage.classList.add('active');
-        appBarTitle.textContent = 'Плейлисты';
-        currentPlaylistId = null;
-    });
     
     // Отображение моих треков
     function displayMyTracks(tracksList) {
@@ -1492,6 +1365,10 @@ async function openPlaylist(playlist) {
                 myTracks = data;
                 displayMyTracks(myTracks);
                 updateStats(myTracks);
+                // Обновляем статус добавления в рекомендациях
+                if (recommendationsPage.classList.contains('active')) {
+                    displayRecommendations(recommendations);
+                }
             }
         } catch (err) {
             console.error('Ошибка обновления:', err);
@@ -1570,11 +1447,20 @@ async function openPlaylist(playlist) {
                     <span class="material-symbols-outlined">delete_forever</span>
                     <span>Удалить из моих треков</span>
                 </div>
+                <div class="context-menu-item download" data-action="download">
+                    <span class="material-symbols-outlined">download</span>
+                    <span>Скачать MP3</span>
+                </div>
             `;
             menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
                 menu.remove();
                 activeContextMenu = null;
                 await deleteTrackFromVK(trackId, trackTitle);
+            });
+            menu.querySelector('[data-action="download"]').addEventListener('click', () => {
+                menu.remove();
+                activeContextMenu = null;
+                downloadTrack(trackId, ownerId);
             });
         } else {
             menu.innerHTML = `
@@ -1582,11 +1468,20 @@ async function openPlaylist(playlist) {
                     <span class="material-symbols-outlined">add_circle</span>
                     <span>Добавить в мои треки</span>
                 </div>
+                <div class="context-menu-item download" data-action="download">
+                    <span class="material-symbols-outlined">download</span>
+                    <span>Скачать MP3</span>
+                </div>
             `;
             menu.querySelector('[data-action="add"]').addEventListener('click', async () => {
                 menu.remove();
                 activeContextMenu = null;
                 await addTrackToVK(trackId, ownerId, trackTitle);
+            });
+            menu.querySelector('[data-action="download"]').addEventListener('click', () => {
+                menu.remove();
+                activeContextMenu = null;
+                downloadTrack(trackId, ownerId);
             });
         }
         
