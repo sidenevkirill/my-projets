@@ -535,23 +535,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
             color: #9ca3af;
         }
         
-        .error-message {
-            background: #fee2e2;
-            border-left: 4px solid #ef4444;
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #dc2626;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .error-message .material-symbols-outlined {
-            font-size: 18px;
-        }
-        
         @media (max-width: 480px) {
             .login-card {
                 padding: 32px 24px;
@@ -561,7 +544,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
             }
         }
         
-        /* Тёмная тема */
         @media (prefers-color-scheme: dark) {
             .login-card {
                 background: rgba(31, 41, 55, 0.95);
@@ -603,7 +585,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
                 <span class="material-symbols-outlined">info</span>
                 <div class="info-box-text">
                     Для входа нужен токен доступа ВКонтакте.<br>
-                    <a href="#" onclick="showInstructions(); return false;">📖 Как получить токен?</a>
+                    <a href="#" onclick="showInstructions(); return false;">Как получить токен?</a>
                 </div>
             </div>
             
@@ -614,7 +596,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
                         <input type="text" name="token" id="tokenInput" placeholder="Введите access_token" required autocomplete="off">
                     </div>
                     <div class="token-hint">
-                        💡 Токен начинается с "vk1.a."
+                        Токен начинается с "vk1.a."
                     </div>
                 </div>
                 
@@ -633,24 +615,13 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
     
     <script>
         function showInstructions() {
-            const instructions = `🔐 КАК ПОЛУЧИТЬ ТОКЕН ВКОНТАКТЕ:
-            
-1. Перейдите на сайт: vkhost.github.io
-2. Выберите приложение "Kate Mobile" или "VK Music"
-3. Отметьте права доступа:
-   • Аудиозаписи (audio)
-4. Нажмите "Получить токен"
-5. Скопируйте access_token (начинается с vk1.a.)
-6. Вставьте его в поле выше`;
-            
-            alert(instructions);
+            alert("Как получить токен ВКонтакте:\n\n1. Перейдите на сайт: vkhost.github.io\n2. Выберите приложение 'Kate Mobile' или 'VK Music'\n3. Отметьте права доступа: Аудиозаписи (audio)\n4. Нажмите 'Получить токен'\n5. Скопируйте access_token (начинается с vk1.a.)\n6. Вставьте его в поле выше");
         }
         
-        // Проверка при вставке
         const tokenInput = document.getElementById('tokenInput');
         tokenInput.addEventListener('paste', function(e) {
-            setTimeout(() => {
-                let value = this.value.trim();
+            setTimeout(function() {
+                var value = tokenInput.value.trim();
                 if (value && !value.startsWith('vk1.a.')) {
                     console.warn('Похоже, это не токен VK');
                 }
