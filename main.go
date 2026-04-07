@@ -23,6 +23,15 @@ type Track struct {
 	URL      string `json:"url"`
 }
 
+type Playlist struct {
+	ID        int    `json:"id"`
+	OwnerID   int    `json:"owner_id"`
+	Title     string `json:"title"`
+	Count     int    `json:"count"`
+	Photo     string `json:"photo"`
+	AccessKey string `json:"access_key"`
+}
+
 type VKResponse struct {
 	Response *struct {
 		Count int     `json:"count"`
@@ -485,6 +494,7 @@ func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
 	params.Set("v", "5.131")
 	params.Set("owner_id", strconv.Itoa(userID))
 	params.Set("count", "100")
+	params.Set("extended", "1")
 
 	apiURL := "https://api.vk.com/method/audio.getPlaylists?" + params.Encode()
 
@@ -511,13 +521,17 @@ func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("Playlists API response: %s\n", string(body))
+
 	var result struct {
 		Response struct {
 			Count int `json:"count"`
 			Items []struct {
 				ID        int    `json:"id"`
+				OwnerID   int    `json:"owner_id"`
 				Title     string `json:"title"`
 				Count     int    `json:"count"`
+				AccessKey string `json:"access_key"`
 				Photo     struct {
 					Photo1280 string `json:"photo_1280"`
 					Photo640  string `json:"photo_640"`
@@ -546,9 +560,11 @@ func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
 	playlists := make([]map[string]interface{}, 0)
 	for _, item := range result.Response.Items {
 		playlist := map[string]interface{}{
-			"id":    item.ID,
-			"title": item.Title,
-			"count": item.Count,
+			"id":         item.ID,
+			"owner_id":   item.OwnerID,
+			"title":      item.Title,
+			"count":      item.Count,
+			"access_key": item.AccessKey,
 		}
 		if item.Photo.Photo320 != "" {
 			playlist["cover"] = item.Photo.Photo320
@@ -566,26 +582,26 @@ func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
 func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, _ := r.Cookie("vk_token")
 	userIDCookie, _ := r.Cookie("vk_user_id")
-	userID, _ := strconv.Atoi(userIDCookie.Value)
 
-	// Извлекаем ID плейлиста из URL
+	// Извлекаем параметры из URL
 	path := r.URL.Path
 	parts := strings.Split(path, "/")
-	if len(parts) < 4 {
+	if len(parts) < 5 {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid playlist ID"})
 		return
 	}
+	
 	playlistID := parts[3]
+	ownerID := parts[4]
 
 	client := &http.Client{Timeout: 15 * time.Second}
 	params := url.Values{}
 	params.Set("access_token", tokenCookie.Value)
 	params.Set("v", "5.131")
-	params.Set("owner_id", strconv.Itoa(userID))
+	params.Set("owner_id", ownerID)
 	params.Set("playlist_id", playlistID)
 
-	// Используем метод audio.getPlaylistById
 	apiURL := "https://api.vk.com/method/audio.getPlaylistById?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
@@ -611,10 +627,12 @@ func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("Playlist tracks API response: %s\n", string(body))
+
 	var result struct {
 		Response struct {
-			ID     int    `json:"id"`
-			Title  string `json:"title"`
+			ID    int    `json:"id"`
+			Title string `json:"title"`
 			Audios []struct {
 				ID       int    `json:"id"`
 				OwnerID  int    `json:"owner_id"`
@@ -644,13 +662,15 @@ func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
 
 	tracks := make([]Track, 0)
 	for _, item := range result.Response.Audios {
+		// Нормализуем URL если есть
+		url := strings.ReplaceAll(item.URL, "\\/", "/")
 		tracks = append(tracks, Track{
 			ID:       item.ID,
 			OwnerID:  item.OwnerID,
 			Artist:   item.Artist,
 			Title:    item.Title,
 			Duration: item.Duration,
-			URL:      item.URL,
+			URL:      url,
 		})
 	}
 
