@@ -97,6 +97,24 @@
             gap: 8px;
         }
         
+        .about-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .about-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
         .theme-toggle {
             background: none;
             border: none;
@@ -445,6 +463,10 @@
             color: var(--md-success);
         }
         
+        .context-menu-item.download {
+            color: var(--md-primary);
+        }
+        
         .context-menu-item .material-symbols-outlined {
             font-size: 20px;
         }
@@ -623,6 +645,143 @@
             animation: spin 1s linear infinite;
             margin: 20px auto;
         }
+        
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--md-surface);
+            border-radius: 28px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+        }
+        
+        .modal-header h2 {
+            font-size: 20px;
+            color: var(--md-on-surface);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--md-on-surface-variant);
+        }
+        
+        .modal-body {
+            padding: 24px;
+            text-align: center;
+        }
+        
+        .about-icon {
+            background: var(--md-primary);
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+        
+        .about-icon .material-symbols-outlined {
+            font-size: 36px;
+            color: white;
+        }
+        
+        .modal-body h3 {
+            font-size: 18px;
+            color: var(--md-on-surface);
+            margin-bottom: 4px;
+        }
+        
+        .modal-body p {
+            color: var(--md-on-surface-variant);
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        
+        .about-features, .about-developer {
+            text-align: left;
+            margin-top: 16px;
+        }
+        
+        .about-features h4, .about-developer h4 {
+            font-size: 14px;
+            color: var(--md-primary);
+            margin-bottom: 8px;
+        }
+        
+        .about-features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .about-features li {
+            font-size: 13px;
+            color: var(--md-on-surface);
+            padding: 4px 0;
+        }
+        
+        .about-developer p {
+            font-size: 13px;
+            margin: 4px 0;
+            color: var(--md-on-surface);
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(128,128,128,0.2);
+            text-align: center;
+        }
+        
+        .modal-ok {
+            background: var(--md-primary);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 28px;
+            font-size: 14px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="light">
@@ -632,6 +791,9 @@
             <h1 id="appBarTitle">Мои треки</h1>
         </div>
         <div class="app-bar-actions">
+            <button class="about-btn" id="aboutBtn" title="О программе">
+                <span class="material-symbols-outlined">info</span>
+            </button>
             <div class="user-info" id="userInfo" style="display: none;">
                 <span class="user-name" id="userName"></span>
                 <button class="logout-btn" id="logoutBtn" title="Выйти">
@@ -726,6 +888,43 @@
     </div>
     
     <div class="toast" id="toast">Действие выполнено</div>
+    
+    <!-- Модальное окно "О программе" -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>О программе</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="about-icon">
+                    <span class="material-symbols-outlined">music_note</span>
+                </div>
+                <h3>VK Music Player</h3>
+                <p>Версия 2.0.0</p>
+                <p>Удобный плеер для прослушивания музыки из ВКонтакте</p>
+                <div class="about-features">
+                    <h4>Возможности:</h4>
+                    <ul>
+                        <li>🎵 Прослушивание аудиозаписей</li>
+                        <li>🔍 Поиск треков по всей библиотеке ВК</li>
+                        <li>➕ Добавление треков в свою коллекцию</li>
+                        <li>🗑 Удаление треков из ВКонтакте</li>
+                        <li>📥 Скачивание треков в MP3</li>
+                        <li>🌙 Светлая/тёмная тема</li>
+                    </ul>
+                </div>
+                <div class="about-developer">
+                    <h4>Разработчик:</h4>
+                    <p>TG: @dev_moosic</p>
+                    <p>GitHub: github.com/moosic</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-ok" id="closeModalBtn">Закрыть</button>
+            </div>
+        </div>
+    </div>
 
     <script>
     let myTracks = [];
@@ -747,6 +946,25 @@
     const userInfoDiv = document.getElementById('userInfo');
     const userNameSpan = document.getElementById('userName');
     const logoutBtn = document.getElementById('logoutBtn');
+    const aboutBtn = document.getElementById('aboutBtn');
+    const aboutModal = document.getElementById('aboutModal');
+    const closeModal = document.getElementById('closeModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    
+    // Модальное окно
+    aboutBtn.addEventListener('click', () => {
+        aboutModal.classList.add('active');
+    });
+    
+    function closeModalFn() {
+        aboutModal.classList.remove('active');
+    }
+    
+    closeModal.addEventListener('click', closeModalFn);
+    closeModalBtn.addEventListener('click', closeModalFn);
+    aboutModal.addEventListener('click', (e) => {
+        if (e.target === aboutModal) closeModalFn();
+    });
     
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = themeToggle.querySelector('.material-symbols-outlined');
@@ -816,6 +1034,10 @@
             switchPage(item.getAttribute('data-page'));
         });
     });
+    
+    function downloadTrack(trackId, ownerId) {
+        window.location.href = `/download?id=${trackId}&owner_id=${ownerId}`;
+    }
     
     function displayMyTracks(tracksList) {
         if (!myTracksList) return;
@@ -1193,11 +1415,20 @@
             }
         } else if (source === 'myTracks') {
             menu.innerHTML = `
+                <div class="context-menu-item download" data-action="download">
+                    <span class="material-symbols-outlined">download</span>
+                    <span>Скачать MP3</span>
+                </div>
                 <div class="context-menu-item delete" data-action="delete">
                     <span class="material-symbols-outlined">delete_forever</span>
                     <span>Удалить из ВКонтакте</span>
                 </div>
             `;
+            menu.querySelector('[data-action="download"]').addEventListener('click', () => {
+                menu.remove();
+                activeContextMenu = null;
+                downloadTrack(trackId, ownerId);
+            });
             menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
                 menu.remove();
                 activeContextMenu = null;
