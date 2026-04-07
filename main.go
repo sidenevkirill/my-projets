@@ -889,7 +889,7 @@ func apiRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
     params := url.Values{}
     params.Set("access_token", tokenCookie.Value)
     params.Set("v", "5.131")
-    params.Set("count", "50")
+    params.Set("count", "100")
 
     apiURL := "https://api.vk.com/method/audio.getRecommendations?" + params.Encode()
 
