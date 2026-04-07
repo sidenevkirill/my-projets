@@ -67,8 +67,8 @@ var trackURLCache = struct {
 
 // Конфигурация OAuth
 var (
-	clientID     = "54529729"
-	clientSecret = "" // Оставь пустым для Public приложения
+	clientID     = "2685278"
+	clientSecret = "lxhD8OD7dMsqtXIm5IUY" // Оставь пустым для Public приложения
 	redirectURI  = "https://my-projets.onrender.com/"
 )
 
