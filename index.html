@@ -1237,35 +1237,36 @@
         });
     }
     
-    async function openPlaylist(playlist) {
-        currentPlaylistId = playlist.id;
-        playlistTitleLarge.textContent = playlist.title;
-        
-        playlistViewPage.classList.add('active');
-        playlistsPage.classList.remove('active');
-        appBarTitle.textContent = playlist.title;
-        
-        playlistTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков...</p></div>';
-        
-        try {
-            const response = await fetch(`/api/playlist/${playlist.id}/tracks`);
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            const data = await response.json();
-            
-            if (data.error) {
-                playlistTracksList.innerHTML = `<div class="error">❌ ${data.error}</div>`;
-                return;
-            }
-            
-            playlistTracks = data;
-            displayPlaylistTracks(playlistTracks);
-        } catch (err) {
-            playlistTracksList.innerHTML = `<div class="error">❌ Ошибка: ${err.message}</div>`;
+   async function openPlaylist(playlist) {
+    currentPlaylistId = playlist.id;
+    playlistTitleLarge.textContent = playlist.title;
+    
+    playlistViewPage.classList.add('active');
+    playlistsPage.classList.remove('active');
+    appBarTitle.textContent = playlist.title;
+    
+    playlistTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков...</p></div>';
+    
+    try {
+        const response = await fetch(`/api/playlist/${playlist.id}`);
+        if (response.status === 401) {
+            window.location.href = '/login';
+            return;
         }
+        const data = await response.json();
+        
+        if (data.error) {
+            playlistTracksList.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+            return;
+        }
+        
+        playlistTracks = data;
+        displayPlaylistTracks(playlistTracks);
+    } catch (err) {
+        console.error('Ошибка загрузки треков плейлиста:', err);
+        playlistTracksList.innerHTML = `<div class="error">❌ Ошибка: ${err.message}</div>`;
     }
+}
     
     function displayPlaylistTracks(tracksList) {
         playlistTracksList.innerHTML = '';
