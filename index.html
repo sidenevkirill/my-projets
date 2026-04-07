@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>VK Music Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+        
+        body.light {
+            --md-primary: #4b7cad;
+            --md-primary-dark: #3a6288;
+            --md-primary-light: #6b9bc4;
+            --md-secondary: #4b7cad;
+            --md-background: #f5f5f5;
+            --md-surface: #ffffff;
+            --md-surface-light: #f0f0f0;
+            --md-error: #cf6679;
+            --md-success: #4caf50;
+            --md-on-primary: #ffffff;
+            --md-on-background: #1e1e1e;
+            --md-on-surface: #1e1e1e;
+            --md-on-surface-variant: #6b6b6b;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        body.dark {
+            --md-primary: #4b7cad;
+            --md-primary-dark: #3a6288;
+            --md-primary-light: #6b9bc4;
+            --md-secondary: #4b7cad;
+            --md-background: #121212;
+            --md-surface: #1e1e1e;
+            --md-surface-light: #2d2d2d;
+            --md-error: #cf6679;
+            --md-success: #4caf50;
+            --md-on-primary: #ffffff;
+            --md-on-background: #ffffff;
+            --md-on-surface: #ffffff;
+            --md-on-surface-variant: #a0a0a0;
+            --shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        body {
+            background: var(--md-background);
+        }
+        
+        .app-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--md-primary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            height: 64px;
+        }
+        
+        .app-bar-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .app-bar-title .material-symbols-outlined {
+            font-size: 28px;
+            color: var(--md-on-primary);
+        }
+        
+        .app-bar-title h1 {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--md-on-primary);
+            letter-spacing: 0.5px;
+        }
+        
+        .app-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            padding: 5px 12px;
+            border-radius: 28px;
+        }
+        
+        .user-name {
+            font-size: 13px;
+            color: white;
+        }
+        
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border-radius: 50%;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            background: var(--md-surface);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+            border-top: 1px solid rgba(128,128,128,0.2);
+            padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-surface-variant);
+            transition: all 0.2s;
+            padding: 8px 0;
+        }
+        
+        .nav-item.active {
+            color: var(--md-primary);
+        }
+        
+        .nav-item .material-symbols-outlined {
+            font-size: 24px;
+        }
+        
+        .nav-item span:last-child {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .page {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            bottom: 72px;
+            overflow-y: auto;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s;
+        }
+        
+        .page.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .stats {
+            background: var(--md-surface);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+            margin-bottom: 8px;
+        }
+        
+        .stats-item {
+            text-align: center;
+        }
+        
+        .stats-value {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--md-primary);
+        }
+        
+        .stats-label {
+            font-size: 11px;
+            color: var(--md-on-surface-variant);
+            margin-top: 4px;
+        }
+        
+        .track-list {
+            padding: 8px 12px 20px 12px;
+        }
+        
+        .track-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--md-surface);
+            margin-bottom: 8px;
+            border-radius: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        
+        .track-item:hover {
+            background: var(--md-surface-light);
+            transform: translateX(4px);
+        }
+        
+        .track-item.active {
+            background: var(--md-primary-light);
+            border-left: 4px solid var(--md-primary);
+        }
+        
+        .track-item.active .track-title,
+        .track-item.active .track-artist {
+            color: white;
+        }
+        
+        .track-number {
+            width: 36px;
+            color: var(--md-on-surface-variant);
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .track-item.active .track-number {
+            color: white;
+        }
+        
+        .track-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .track-title {
+            font-weight: 500;
+            color: var(--md-on-surface);
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .track-artist {
+            font-size: 12px;
+            color: var(--md-on-surface-variant);
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .track-duration {
+            width: 55px;
+            color: var(--md-on-surface-variant);
+            font-size: 12px;
+            text-align: right;
+        }
+        
+        .menu-btn {
+            width: 36px;
+            height: 36px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            transition: all 0.2s;
+            border-radius: 50%;
+            color: var(--md-on-surface-variant);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .menu-btn:hover {
+            background: var(--md-surface-light);
+            color: var(--md-on-surface);
+        }
+        
+        .track-item.active .menu-btn {
+            color: white;
+        }
+        
+        .track-item.active .menu-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .menu-btn .material-symbols-outlined {
+            font-size: 20px;
+        }
+        
+        .search-bar {
+            padding: 12px 16px;
+            background: var(--md-surface);
+            margin-bottom: 8px;
+        }
+        
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--md-surface-light);
+            border-radius: 28px;
+            padding: 4px 16px;
+            gap: 12px;
+        }
+        
+        .search-input-wrapper .material-symbols-outlined {
+            color: var(--md-on-surface-variant);
+            font-size: 20px;
+        }
+        
+        .search-input-wrapper input {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 12px 0;
+            color: var(--md-on-surface);
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .search-input-wrapper input::placeholder {
+            color: var(--md-on-surface-variant);
+        }
+        
+        .clear-search {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-surface-variant);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border-radius: 50%;
+        }
+        
+        .clear-search:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .search-loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--md-on-surface-variant);
+        }
+        
+        .search-empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--md-on-surface-variant);
+        }
+        
+        .context-menu {
+            position: fixed;
+            background: var(--md-surface);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 200;
+            min-width: 200px;
+            overflow: hidden;
+            animation: fadeIn 0.15s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .context-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: var(--md-on-surface);
+            font-size: 14px;
+        }
+        
+        .context-menu-item:hover {
+            background: var(--md-surface-light);
+        }
+        
+        .context-menu-item.delete {
+            color: var(--md-error);
+        }
+        
+        .context-menu-item.add {
+            color: var(--md-success);
+        }
+        
+        .context-menu-item .material-symbols-outlined {
+            font-size: 20px;
+        }
+        
+        .mini-player {
+            position: fixed;
+            bottom: 72px;
+            left: 0;
+            right: 0;
+            background: var(--md-surface);
+            border-top: 1px solid rgba(128,128,128,0.2);
+            padding: 10px 16px;
+            z-index: 99;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .now-playing {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        
+        .track-info-mini {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .track-title-mini {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--md-on-surface);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .track-artist-mini {
+            font-size: 11px;
+            color: var(--md-on-surface-variant);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .player-controls button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-surface);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .player-controls button:hover {
+            background: var(--md-surface-light);
+        }
+        
+        .player-controls button .material-symbols-outlined {
+            font-size: 22px;
+        }
+        
+        .play-pause-btn {
+            background: var(--md-primary) !important;
+        }
+        
+        .play-pause-btn:hover {
+            background: var(--md-primary-dark) !important;
+        }
+        
+        .play-pause-btn .material-symbols-outlined {
+            color: white !important;
+        }
+        
+        .progress-container {
+            margin-top: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 3px;
+            background: var(--md-surface-light);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--md-primary);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 10px;
+            color: var(--md-on-surface-variant);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: var(--md-on-surface-variant);
+        }
+        
+        .error {
+            background: rgba(207, 102, 121, 0.2);
+            color: var(--md-error);
+            padding: 16px;
+            margin: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 160px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--md-surface);
+            color: var(--md-on-surface);
+            padding: 10px 20px;
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            z-index: 150;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        .track-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .track-list::-webkit-scrollbar-track {
+            background: var(--md-surface);
+        }
+        
+        .track-list::-webkit-scrollbar-thumb {
+            background: var(--md-primary);
+            border-radius: 2px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--md-surface-light);
+            border-top-color: var(--md-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body class="light">
+    <div class="app-bar">
+        <div class="app-bar-title">
+            <span class="material-symbols-outlined">music_note</span>
+            <h1 id="appBarTitle">Мои треки</h1>
+        </div>
+        <div class="app-bar-actions">
+            <div class="user-info" id="userInfo" style="display: none;">
+                <span class="user-name" id="userName"></span>
+                <button class="logout-btn" id="logoutBtn" title="Выйти">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">logout</span>
+                </button>
+            </div>
+            <button class="theme-toggle" id="themeToggle">
+                <span class="material-symbols-outlined">dark_mode</span>
+            </button>
+        </div>
+    </div>
+    
+    <div id="myTracksPage" class="page active">
+        <div class="stats">
+            <div class="stats-item">
+                <div class="stats-value" id="totalCount">0</div>
+                <div class="stats-label">Треков</div>
+            </div>
+            <div class="stats-item">
+                <div class="stats-value" id="totalDuration">0ч 0м</div>
+                <div class="stats-label">Длительность</div>
+            </div>
+            <div class="stats-item">
+                <div class="stats-value" id="totalArtists">0</div>
+                <div class="stats-label">Исполнителей</div>
+            </div>
+        </div>
+        <div class="track-list" id="myTracksList">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Загрузка треков...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="searchPage" class="page">
+        <div class="search-bar">
+            <div class="search-input-wrapper">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" id="globalSearchInput" placeholder="Поиск треков ВКонтакте..." autocomplete="off">
+                <button class="clear-search" id="clearGlobalSearch">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </div>
+        <div class="track-list" id="searchResultsList">
+            <div class="search-empty">
+                <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5;">search</span>
+                <p style="margin-top: 12px;">Введите название трека или исполнителя</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bottom-nav">
+        <button class="nav-item active" data-page="myTracks">
+            <span class="material-symbols-outlined">library_music</span>
+            <span>Мои треки</span>
+        </button>
+        <button class="nav-item" data-page="search">
+            <span class="material-symbols-outlined">search</span>
+            <span>Поиск</span>
+        </button>
+    </div>
+    
+    <div class="mini-player">
+        <div class="now-playing">
+            <div class="track-info-mini">
+                <div class="track-title-mini" id="nowPlayingTitle">Выберите трек</div>
+                <div class="track-artist-mini" id="nowPlayingArtist">-</div>
+            </div>
+            <div class="player-controls">
+                <button id="prevBtn">
+                    <span class="material-symbols-outlined">skip_previous</span>
+                </button>
+                <button id="playPauseBtn" class="play-pause-btn">
+                    <span class="material-symbols-outlined">play_arrow</span>
+                </button>
+                <button id="nextBtn">
+                    <span class="material-symbols-outlined">skip_next</span>
+                </button>
+            </div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="time-info">
+                <span id="currentTime">0:00</span>
+                <span id="totalTime">0:00</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">Действие выполнено</div>
+
+    <script>
+    let myTracks = [];
+    let searchResults = [];
+    let currentTrackIndex = 0;
+    let currentTrackSource = 'myTracks';
+    let audioPlayer = new Audio();
+    let isPlaying = false;
+    let searchDebounceTimer = null;
+    
+    const myTracksPage = document.getElementById('myTracksPage');
+    const searchPage = document.getElementById('searchPage');
+    const myTracksList = document.getElementById('myTracksList');
+    const searchResultsList = document.getElementById('searchResultsList');
+    const globalSearchInput = document.getElementById('globalSearchInput');
+    const clearGlobalSearch = document.getElementById('clearGlobalSearch');
+    const appBarTitle = document.getElementById('appBarTitle');
+    const navItems = document.querySelectorAll('.nav-item');
+    const userInfoDiv = document.getElementById('userInfo');
+    const userNameSpan = document.getElementById('userName');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = themeToggle.querySelector('.material-symbols-outlined');
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.remove('light');
+        document.body.classList.add('dark');
+        themeIcon.textContent = 'light_mode';
+    }
+    themeToggle.addEventListener('click', () => {
+        if (document.body.classList.contains('light')) {
+            document.body.classList.remove('light');
+            document.body.classList.add('dark');
+            themeIcon.textContent = 'light_mode';
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark');
+            document.body.classList.add('light');
+            themeIcon.textContent = 'dark_mode';
+            localStorage.setItem('theme', 'light');
+        }
+    });
+    
+    // Загрузка информации о пользователе
+    async function loadUserInfo() {
+        try {
+            const response = await fetch('/api/user');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.name && data.name !== 'Пользователь') {
+                    userNameSpan.textContent = data.name;
+                    userInfoDiv.style.display = 'flex';
+                }
+            }
+        } catch (err) {
+            console.error('Ошибка загрузки пользователя:', err);
+        }
+    }
+    
+    logoutBtn.addEventListener('click', () => {
+        window.location.href = '/logout';
+    });
+    
+    function switchPage(pageId) {
+        myTracksPage.classList.remove('active');
+        searchPage.classList.remove('active');
+        
+        if (pageId === 'myTracks') {
+            myTracksPage.classList.add('active');
+            appBarTitle.textContent = 'Мои треки';
+        } else {
+            searchPage.classList.add('active');
+            appBarTitle.textContent = 'Поиск';
+        }
+        
+        navItems.forEach(item => {
+            if (item.getAttribute('data-page') === pageId) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+    
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            switchPage(item.getAttribute('data-page'));
+        });
+    });
+    
+    function displayMyTracks(tracksList) {
+        if (!myTracksList) return;
+        myTracksList.innerHTML = '';
+        
+        if (tracksList.length === 0) {
+            myTracksList.innerHTML = '<div class="loading"><p>😔 Нет треков</p></div>';
+            return;
+        }
+        
+        tracksList.forEach((track, i) => {
+            const artist = track.artist || 'Неизвестный исполнитель';
+            const title = track.title || 'Без названия';
+            const mins = Math.floor((track.duration || 0) / 60);
+            const secs = (track.duration || 0) % 60;
+            const duration = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            
+            const div = document.createElement('div');
+            div.className = 'track-item';
+            div.innerHTML = `
+                <div class="track-number">${i+1}</div>
+                <div class="track-info">
+                    <div class="track-title">${escapeHtml(title)}</div>
+                    <div class="track-artist">${escapeHtml(artist)}</div>
+                </div>
+                <div class="track-duration">${duration}</div>
+                <button class="menu-btn" data-index="${i}" data-id="${track.id}" data-title="${escapeHtml(title)}" data-source="myTracks" data-owner-id="${track.owner_id || 0}">
+                    <span class="material-symbols-outlined">more_vert</span>
+                </button>
+            `;
+            myTracksList.appendChild(div);
+        });
+        
+        attachTrackEvents('myTracks');
+        highlightActiveTrack('myTracks');
+    }
+    
+    function displaySearchResults(tracksList) {
+        if (!searchResultsList) return;
+        searchResultsList.innerHTML = '';
+        
+        if (!tracksList || tracksList.length === 0) {
+            searchResultsList.innerHTML = `
+                <div class="search-empty">
+                    <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5;">search</span>
+                    <p style="margin-top: 12px;">Ничего не найдено</p>
+                </div>
+            `;
+            return;
+        }
+        
+        tracksList.forEach((track, i) => {
+            const artist = track.artist || 'Неизвестный исполнитель';
+            const title = track.title || 'Без названия';
+            const mins = Math.floor((track.duration || 0) / 60);
+            const secs = (track.duration || 0) % 60;
+            const duration = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            
+            const isAlreadyInMyTracks = myTracks.some(t => t.id === track.id);
+            
+            const div = document.createElement('div');
+            div.className = 'track-item';
+            div.innerHTML = `
+                <div class="track-number">${i+1}</div>
+                <div class="track-info">
+                    <div class="track-title">${escapeHtml(title)}</div>
+                    <div class="track-artist">${escapeHtml(artist)}</div>
+                </div>
+                <div class="track-duration">${duration}</div>
+                <button class="menu-btn" data-index="${i}" data-id="${track.id}" data-title="${escapeHtml(title)}" data-source="search" data-owner-id="${track.owner_id || 0}" data-is-added="${isAlreadyInMyTracks}">
+                    <span class="material-symbols-outlined">more_vert</span>
+                </button>
+            `;
+            searchResultsList.appendChild(div);
+        });
+        
+        attachTrackEvents('search');
+        highlightActiveTrack('search');
+    }
+    
+    function attachTrackEvents(source) {
+        const container = source === 'myTracks' ? myTracksList : searchResultsList;
+        if (!container) return;
+        
+        container.querySelectorAll('.track-item').forEach(item => {
+            const menuBtn = item.querySelector('.menu-btn');
+            const index = parseInt(menuBtn.getAttribute('data-index'));
+            const trackId = parseInt(menuBtn.getAttribute('data-id'));
+            const trackTitle = menuBtn.getAttribute('data-title');
+            const trackSource = menuBtn.getAttribute('data-source');
+            const ownerId = parseInt(menuBtn.getAttribute('data-owner-id'));
+            
+            item.addEventListener('click', (e) => {
+                if (e.target !== menuBtn && !menuBtn.contains(e.target)) {
+                    playTrackFromSource(index, trackSource);
+                }
+            });
+            
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const rect = menuBtn.getBoundingClientRect();
+                const isAdded = menuBtn.getAttribute('data-is-added') === 'true';
+                showContextMenu(rect.right - 220, rect.bottom + 5, trackId, trackTitle, index, trackSource, ownerId, isAdded);
+            });
+        });
+    }
+    
+    function playTrackFromSource(index, source) {
+        let trackToPlay;
+        if (source === 'myTracks') {
+            trackToPlay = myTracks[index];
+            currentTrackIndex = myTracks.findIndex(t => t === trackToPlay);
+            currentTrackSource = 'myTracks';
+        } else {
+            trackToPlay = searchResults[index];
+            const realTrack = myTracks.find(t => t.id === trackToPlay.id);
+            if (realTrack) {
+                currentTrackIndex = myTracks.findIndex(t => t === realTrack);
+                currentTrackSource = 'myTracks';
+                trackToPlay = realTrack;
+            } else {
+                currentTrackIndex = index;
+                currentTrackSource = 'search';
+            }
+        }
+        
+        if (!trackToPlay || !trackToPlay.url) {
+            showToast('Ссылка на трек недоступна', true);
+            return;
+        }
+        
+        let url = trackToPlay.url.replace(/\\\//g, '/');
+        audioPlayer.src = url;
+        audioPlayer.load();
+        audioPlayer.play().then(() => {
+            isPlaying = true;
+            updatePlayPauseButton();
+            updateNowPlayingInfo(trackToPlay);
+            highlightActiveTrack(currentTrackSource);
+        }).catch(e => {
+            console.error('Ошибка:', e);
+            showToast('Ошибка воспроизведения', true);
+        });
+    }
+    
+    function highlightActiveTrack(source) {
+        const container = source === 'myTracks' ? myTracksList : searchResultsList;
+        if (!container) return;
+        
+        const currentTrack = currentTrackSource === 'myTracks' ? myTracks[currentTrackIndex] : searchResults[currentTrackIndex];
+        if (!currentTrack) return;
+        
+        container.querySelectorAll('.track-item').forEach(item => {
+            const menuBtn = item.querySelector('.menu-btn');
+            const idx = parseInt(menuBtn.getAttribute('data-index'));
+            const itemSource = menuBtn.getAttribute('data-source');
+            
+            let isActive = false;
+            if (itemSource === 'myTracks' && currentTrackSource === 'myTracks') {
+                isActive = myTracks[idx] === currentTrack;
+            } else if (itemSource === 'search' && currentTrackSource === 'search') {
+                isActive = searchResults[idx] === currentTrack;
+            }
+            
+            if (isActive) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+    
+    function updateNowPlayingInfo(track) {
+        document.getElementById('nowPlayingTitle').textContent = track.title || 'Без названия';
+        document.getElementById('nowPlayingArtist').textContent = track.artist || 'Неизвестный исполнитель';
+    }
+    
+    function updatePlayPauseButton() {
+        const btn = document.getElementById('playPauseBtn');
+        const icon = btn.querySelector('.material-symbols-outlined');
+        icon.textContent = isPlaying ? 'pause' : 'play_arrow';
+    }
+    
+    async function performGlobalSearch(query) {
+        if (!query.trim()) {
+            displaySearchResults([]);
+            return;
+        }
+        
+        searchResultsList.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div><p>Поиск...</p></div>';
+        
+        try {
+            const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            const data = await response.json();
+            
+            if (data.error) {
+                searchResultsList.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+                return;
+            }
+            
+            searchResults = data;
+            displaySearchResults(searchResults);
+        } catch (err) {
+            searchResultsList.innerHTML = `<div class="error">❌ Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    globalSearchInput.addEventListener('input', (e) => {
+        if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+            performGlobalSearch(e.target.value);
+        }, 500);
+    });
+    
+    clearGlobalSearch.addEventListener('click', () => {
+        globalSearchInput.value = '';
+        performGlobalSearch('');
+        globalSearchInput.focus();
+    });
+    
+    async function addTrackToVK(trackId, ownerId, trackTitle, index) {
+        try {
+            const response = await fetch('/api/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ track_id: trackId, owner_id: ownerId })
+            });
+            
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return false;
+            }
+            
+            const result = await response.json();
+            
+            if (result.error) {
+                showToast(`❌ Ошибка: ${result.error}`, true);
+                return false;
+            }
+            
+            await refreshMyTracks();
+            
+            if (globalSearchInput.value.trim()) {
+                await performGlobalSearch(globalSearchInput.value);
+            }
+            
+            showToast(`✅ Добавлен: ${trackTitle}`);
+            return true;
+            
+        } catch (error) {
+            showToast(`❌ Ошибка: ${error.message}`, true);
+            return false;
+        }
+    }
+    
+    async function deleteTrackFromVK(trackId, trackTitle, index, source) {
+        try {
+            const response = await fetch('/api/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ track_id: trackId })
+            });
+            
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return false;
+            }
+            
+            const result = await response.json();
+            
+            if (result.error) {
+                showToast(`❌ Ошибка: ${result.error}`, true);
+                return false;
+            }
+            
+            const trackToDelete = myTracks.find(t => t.id === trackId);
+            if (trackToDelete) {
+                const realIndex = myTracks.findIndex(t => t.id === trackId);
+                if (realIndex !== -1) {
+                    const wasPlaying = (currentTrackSource === 'myTracks' && currentTrackIndex === realIndex);
+                    myTracks.splice(realIndex, 1);
+                    
+                    if (wasPlaying) {
+                        if (myTracks.length > 0 && realIndex < myTracks.length) {
+                            playTrackFromSource(realIndex, 'myTracks');
+                        } else if (myTracks.length > 0 && realIndex > 0) {
+                            playTrackFromSource(realIndex - 1, 'myTracks');
+                        } else {
+                            audioPlayer.pause();
+                            isPlaying = false;
+                            updatePlayPauseButton();
+                            document.getElementById('nowPlayingTitle').textContent = 'Выберите трек';
+                            document.getElementById('nowPlayingArtist').textContent = '-';
+                            currentTrackIndex = -1;
+                        }
+                    } else if (realIndex < currentTrackIndex && currentTrackSource === 'myTracks') {
+                        currentTrackIndex--;
+                    }
+                }
+            }
+            
+            displayMyTracks(myTracks);
+            updateStats(myTracks);
+            
+            if (globalSearchInput.value.trim()) {
+                await performGlobalSearch(globalSearchInput.value);
+            }
+            
+            showToast(`🗑 Удалён: ${trackTitle}`);
+            return true;
+            
+        } catch (error) {
+            showToast(`❌ Ошибка: ${error.message}`, true);
+            return false;
+        }
+    }
+    
+    async function refreshMyTracks() {
+        try {
+            const response = await fetch('/api/tracks');
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            const data = await response.json();
+            if (!data.error) {
+                myTracks = data;
+                displayMyTracks(myTracks);
+                updateStats(myTracks);
+            }
+        } catch (err) {
+            console.error('Ошибка обновления:', err);
+        }
+    }
+    
+    let activeContextMenu = null;
+    
+    function showContextMenu(x, y, trackId, trackTitle, index, source, ownerId, isAlreadyAdded) {
+        if (activeContextMenu) activeContextMenu.remove();
+        
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        
+        if (source === 'search') {
+            if (isAlreadyAdded) {
+                menu.innerHTML = `
+                    <div class="context-menu-item delete" data-action="delete">
+                        <span class="material-symbols-outlined">delete_forever</span>
+                        <span>Удалить из моих треков</span>
+                    </div>
+                `;
+                menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
+                    menu.remove();
+                    activeContextMenu = null;
+                    await deleteTrackFromVK(trackId, trackTitle, index, source);
+                });
+            } else {
+                menu.innerHTML = `
+                    <div class="context-menu-item add" data-action="add">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span>Добавить в мои треки</span>
+                    </div>
+                `;
+                menu.querySelector('[data-action="add"]').addEventListener('click', async () => {
+                    menu.remove();
+                    activeContextMenu = null;
+                    await addTrackToVK(trackId, ownerId, trackTitle, index);
+                });
+            }
+        } else if (source === 'myTracks') {
+            menu.innerHTML = `
+                <div class="context-menu-item delete" data-action="delete">
+                    <span class="material-symbols-outlined">delete_forever</span>
+                    <span>Удалить из ВКонтакте</span>
+                </div>
+            `;
+            menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
+                menu.remove();
+                activeContextMenu = null;
+                await deleteTrackFromVK(trackId, trackTitle, index, source);
+            });
+        }
+        
+        document.body.appendChild(menu);
+        activeContextMenu = menu;
+        
+        const closeMenu = (e) => {
+            if (!menu.contains(e.target)) {
+                menu.remove();
+                activeContextMenu = null;
+                document.removeEventListener('click', closeMenu);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeMenu), 10);
+    }
+    
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.background = isError ? 'var(--md-error)' : 'var(--md-primary)';
+        toast.style.color = 'white';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    function updateStats(tracksList) {
+        document.getElementById('totalCount').textContent = tracksList.length;
+        let totalSec = 0;
+        const artists = new Set();
+        tracksList.forEach(t => {
+            totalSec += t.duration || 0;
+            if (t.artist) artists.add(t.artist);
+        });
+        const hours = Math.floor(totalSec / 3600);
+        const mins = Math.floor((totalSec % 3600) / 60);
+        document.getElementById('totalDuration').textContent = `${hours}ч ${mins}м`;
+        document.getElementById('totalArtists').textContent = artists.size;
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Загрузка данных
+    loadUserInfo();
+    
+    fetch('/api/tracks')
+        .then(res => {
+            if (res.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data && data.error) {
+                myTracksList.innerHTML = '<div class="error">❌ ' + data.error + '</div>';
+                return;
+            }
+            if (data) {
+                myTracks = data;
+                displayMyTracks(myTracks);
+                updateStats(myTracks);
+            }
+        })
+        .catch(err => {
+            myTracksList.innerHTML = '<div class="error">❌ Ошибка загрузки: ' + err + '</div>';
+        });
+    
+    document.getElementById('playPauseBtn').addEventListener('click', () => {
+        if (isPlaying) {
+            audioPlayer.pause();
+        } else {
+            audioPlayer.play();
+        }
+        isPlaying = !isPlaying;
+        updatePlayPauseButton();
+    });
+    
+    document.getElementById('prevBtn').addEventListener('click', () => {
+        if (currentTrackSource === 'myTracks') {
+            if (currentTrackIndex > 0) {
+                playTrackFromSource(currentTrackIndex - 1, 'myTracks');
+            }
+        } else {
+            if (currentTrackIndex > 0) {
+                playTrackFromSource(currentTrackIndex - 1, 'search');
+            }
+        }
+    });
+    
+    document.getElementById('nextBtn').addEventListener('click', () => {
+        if (currentTrackSource === 'myTracks') {
+            if (currentTrackIndex < myTracks.length - 1) {
+                playTrackFromSource(currentTrackIndex + 1, 'myTracks');
+            }
+        } else {
+            if (currentTrackIndex < searchResults.length - 1) {
+                playTrackFromSource(currentTrackIndex + 1, 'search');
+            }
+        }
+    });
+    
+    audioPlayer.addEventListener('timeupdate', () => {
+        if (audioPlayer.duration) {
+            const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
+            document.getElementById('totalTime').textContent = formatTime(audioPlayer.duration);
+        }
+    });
+    
+    audioPlayer.addEventListener('ended', () => {
+        if (currentTrackSource === 'myTracks') {
+            if (currentTrackIndex < myTracks.length - 1) {
+                playTrackFromSource(currentTrackIndex + 1, 'myTracks');
+            } else {
+                isPlaying = false;
+                updatePlayPauseButton();
+            }
+        } else {
+            if (currentTrackIndex < searchResults.length - 1) {
+                playTrackFromSource(currentTrackIndex + 1, 'search');
+            } else {
+                isPlaying = false;
+                updatePlayPauseButton();
+            }
+        }
+    });
+    
+    document.getElementById('progressBar').addEventListener('click', (e) => {
+        if (audioPlayer.duration) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percent = x / rect.width;
+            audioPlayer.currentTime = percent * audioPlayer.duration;
+        }
+    });
+    
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+    </script>
+</body>
+</html>
