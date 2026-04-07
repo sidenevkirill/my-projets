@@ -68,7 +68,7 @@ var trackURLCache = struct {
 // Получение ссылки на трек с кэшированием
 func getTrackURL(token string, ownerID int, trackID int) string {
 	cacheKey := fmt.Sprintf("%d_%d", ownerID, trackID)
-	
+
 	trackURLCache.RLock()
 	if url, ok := trackURLCache.data[cacheKey]; ok {
 		trackURLCache.RUnlock()
@@ -113,11 +113,11 @@ func getTrackURL(token string, ownerID int, trackID int) string {
 	}
 
 	url := strings.ReplaceAll(result.Response[0].URL, "\\/", "/")
-	
+
 	trackURLCache.Lock()
 	trackURLCache.data[cacheKey] = url
 	trackURLCache.Unlock()
-	
+
 	return url
 }
 
@@ -128,7 +128,7 @@ func searchTracks(token string, query string) ([]Track, error) {
 	params.Set("access_token", token)
 	params.Set("v", "5.131")
 	params.Set("q", query)
-	params.Set("count", "30") // Уменьшил для скорости
+	params.Set("count", "30")
 
 	apiURL := "https://api.vk.com/method/audio.search?" + params.Encode()
 
@@ -162,7 +162,6 @@ func searchTracks(token string, query string) ([]Track, error) {
 		return []Track{}, nil
 	}
 
-	// URL для поиска не получаем, только для воспроизведения
 	return vkResp.Response.Items, nil
 }
 
@@ -250,7 +249,6 @@ func getAllTracks(token string, ownerID int) ([]Track, error) {
 		}
 
 		if vkResp.Error != nil {
-			// Если ошибка авторизации, возвращаем её
 			if vkResp.Error.ErrorCode == 5 {
 				return nil, fmt.Errorf("unauthorized")
 			}
@@ -393,7 +391,7 @@ func getTrackURLHandler(w http.ResponseWriter, r *http.Request) {
 
 	ownerIDInt, _ := strconv.Atoi(ownerID)
 	trackIDInt, _ := strconv.Atoi(trackID)
-	
+
 	url := getTrackURL(tokenCookie.Value, ownerIDInt, trackIDInt)
 	json.NewEncoder(w).Encode(map[string]string{"url": url})
 }
@@ -415,7 +413,7 @@ func downloadTrackHandler(w http.ResponseWriter, r *http.Request) {
 
 	ownerIDInt, _ := strconv.Atoi(ownerID)
 	trackIDInt, _ := strconv.Atoi(trackID)
-	
+
 	trackURL := getTrackURL(tokenCookie.Value, ownerIDInt, trackIDInt)
 	if trackURL == "" {
 		http.Error(w, "Track URL not found", http.StatusNotFound)
@@ -475,6 +473,187 @@ func downloadTrackHandler(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, downloadResp.Body)
 }
 
+// Получение списка плейлистов пользователя
+func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+	userIDCookie, _ := r.Cookie("vk_user_id")
+	userID, _ := strconv.Atoi(userIDCookie.Value)
+
+	client := &http.Client{Timeout: 15 * time.Second}
+	params := url.Values{}
+	params.Set("access_token", tokenCookie.Value)
+	params.Set("v", "5.131")
+	params.Set("owner_id", strconv.Itoa(userID))
+	params.Set("count", "100")
+
+	apiURL := "https://api.vk.com/method/audio.getPlaylists?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	var result struct {
+		Response struct {
+			Count int `json:"count"`
+			Items []struct {
+				ID        int    `json:"id"`
+				Title     string `json:"title"`
+				Count     int    `json:"count"`
+				Photo     struct {
+					Photo1280 string `json:"photo_1280"`
+					Photo640  string `json:"photo_640"`
+					Photo320  string `json:"photo_320"`
+				} `json:"photo"`
+			} `json:"items"`
+		} `json:"response"`
+		Error *struct {
+			ErrorMsg string `json:"error_msg"`
+		} `json:"error"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": result.Error.ErrorMsg})
+		return
+	}
+
+	playlists := make([]map[string]interface{}, 0)
+	for _, item := range result.Response.Items {
+		playlist := map[string]interface{}{
+			"id":    item.ID,
+			"title": item.Title,
+			"count": item.Count,
+		}
+		if item.Photo.Photo320 != "" {
+			playlist["cover"] = item.Photo.Photo320
+		} else if item.Photo.Photo640 != "" {
+			playlist["cover"] = item.Photo.Photo640
+		}
+		playlists = append(playlists, playlist)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(playlists)
+}
+
+// Получение треков плейлиста
+func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+	userIDCookie, _ := r.Cookie("vk_user_id")
+	userID, _ := strconv.Atoi(userIDCookie.Value)
+
+	// Извлекаем ID плейлиста из URL
+	path := r.URL.Path
+	parts := strings.Split(path, "/")
+	if len(parts) < 4 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid playlist ID"})
+		return
+	}
+	playlistID := parts[3]
+
+	client := &http.Client{Timeout: 15 * time.Second}
+	params := url.Values{}
+	params.Set("access_token", tokenCookie.Value)
+	params.Set("v", "5.131")
+	params.Set("owner_id", strconv.Itoa(userID))
+	params.Set("playlist_id", playlistID)
+
+	apiURL := "https://api.vk.com/method/audio.getPlaylistById?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	var result struct {
+		Response struct {
+			ID    int    `json:"id"`
+			Title string `json:"title"`
+			List  []struct {
+				ID       int    `json:"id"`
+				OwnerID  int    `json:"owner_id"`
+				Artist   string `json:"artist"`
+				Title    string `json:"title"`
+				Duration int    `json:"duration"`
+			} `json:"list"`
+		} `json:"response"`
+		Error *struct {
+			ErrorMsg string `json:"error_msg"`
+		} `json:"error"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": result.Error.ErrorMsg})
+		return
+	}
+
+	tracks := make([]Track, 0)
+	for _, item := range result.Response.List {
+		tracks = append(tracks, Track{
+			ID:       item.ID,
+			OwnerID:  item.OwnerID,
+			Artist:   item.Artist,
+			Title:    item.Title,
+			Duration: item.Duration,
+			URL:      "",
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tracks)
+}
+
 // Обработчики
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -483,7 +662,298 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	http.ServeFile(w, r, "login.html")
+
+	html := `<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>VK Moosic — Вход</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 40px 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transition: transform 0.3s ease;
+        }
+        
+        .login-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .logo-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 80px;
+            height: 80px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo-icon .material-symbols-outlined {
+            font-size: 48px;
+            color: white;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        
+        .logo p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .info-box {
+            background: #f3f4f6;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .info-box .material-symbols-outlined {
+            color: #667eea;
+            font-size: 24px;
+        }
+        
+        .info-box-text {
+            flex: 1;
+            font-size: 13px;
+            color: #4b5563;
+            line-height: 1.4;
+        }
+        
+        .info-box-text a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .info-box-text a:hover {
+            text-decoration: underline;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 4px 16px;
+            transition: all 0.2s;
+        }
+        
+        .input-wrapper:focus-within {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .input-wrapper .material-symbols-outlined {
+            color: #9ca3af;
+            font-size: 20px;
+            margin-right: 12px;
+        }
+        
+        .input-wrapper input {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 16px 0;
+            font-size: 16px;
+            outline: none;
+            font-family: 'Roboto', monospace;
+            color: #1f2937;
+        }
+        
+        .input-wrapper input::placeholder {
+            color: #9ca3af;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        .token-hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #6b7280;
+            padding-left: 12px;
+        }
+        
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 32px 24px;
+            }
+            .logo h1 {
+                font-size: 24px;
+            }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .login-card {
+                background: rgba(31, 41, 55, 0.95);
+            }
+            .logo p {
+                color: #9ca3af;
+            }
+            .info-box {
+                background: #374151;
+            }
+            .info-box-text {
+                color: #d1d5db;
+            }
+            .input-wrapper {
+                background: #374151;
+                border-color: #4b5563;
+            }
+            .input-wrapper input {
+                color: #f3f4f6;
+            }
+            .token-hint {
+                color: #9ca3af;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span class="material-symbols-outlined">music_note</span>
+                </div>
+                <h1>VK Moosic</h1>
+                <p>Войдите, чтобы слушать музыку</p>
+            </div>
+            
+            <div class="info-box">
+                <span class="material-symbols-outlined">info</span>
+                <div class="info-box-text">
+                    Для входа нужен токен доступа ВКонтакте.<br>
+                    <a href="#" onclick="showInstructions(); return false;">Как получить токен?</a>
+                </div>
+            </div>
+            
+            <form method="POST" action="/auth/set-token">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <span class="material-symbols-outlined">key</span>
+                        <input type="text" name="token" id="tokenInput" placeholder="Введите access_token" required autocomplete="off">
+                    </div>
+                    <div class="token-hint">
+                        Токен начинается с "vk1.a."
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-login">
+                    <span class="material-symbols-outlined">login</span>
+                    <span>Войти</span>
+                </button>
+            </form>
+            
+            <div class="footer">
+                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">security</span>
+                Токен хранится только в вашем браузере
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showInstructions() {
+            alert("Как получить токен ВКонтакте:\n\n1. Перейдите на сайт: vkhost.github.io\n2. Выберите приложение 'Kate Mobile' или 'VK Music'\n3. Отметьте права доступа: Аудиозаписи (audio)\n4. Нажмите 'Получить токен'\n5. Скопируйте access_token (начинается с vk1.a.)\n6. Вставьте его в поле выше");
+        }
+        
+        const tokenInput = document.getElementById('tokenInput');
+        tokenInput.addEventListener('paste', function(e) {
+            setTimeout(function() {
+                var value = tokenInput.value.trim();
+                if (value && !value.startsWith('vk1.a.')) {
+                    console.warn('Похоже, это не токен VK');
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>`
+
+	w.Write([]byte(html))
 }
 
 func setTokenHandler(w http.ResponseWriter, r *http.Request) {
@@ -501,7 +971,17 @@ func setTokenHandler(w http.ResponseWriter, r *http.Request) {
 	userInfo, err := getUserInfo(token)
 	if err != nil {
 		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprintf(w, `<h2>Ошибка авторизации</h2><p>%s</p><a href="/login">Назад</a>`, err.Error())
+		fmt.Fprintf(w, `
+			<!DOCTYPE html>
+			<html>
+			<head><title>Ошибка</title></head>
+			<body style="font-family: Arial; text-align: center; padding: 50px;">
+				<h2>❌ Ошибка авторизации</h2>
+				<p>%s</p>
+				<a href="/login">↺ Попробовать снова</a>
+			</body>
+			</html>
+		`, err.Error())
 		return
 	}
 
@@ -509,6 +989,7 @@ func setTokenHandler(w http.ResponseWriter, r *http.Request) {
 		Name:     "vk_token",
 		Value:    token,
 		HttpOnly: true,
+		Secure:   r.TLS != nil,
 		Path:     "/",
 		MaxAge:   86400 * 30,
 	})
@@ -517,6 +998,7 @@ func setTokenHandler(w http.ResponseWriter, r *http.Request) {
 		Name:     "vk_user_id",
 		Value:    strconv.Itoa(userInfo.ID),
 		HttpOnly: true,
+		Secure:   r.TLS != nil,
 		Path:     "/",
 		MaxAge:   86400 * 30,
 	})
@@ -524,6 +1006,8 @@ func setTokenHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "vk_user_name",
 		Value:    userInfo.FirstName + " " + userInfo.LastName,
+		HttpOnly: false,
+		Secure:   r.TLS != nil,
 		Path:     "/",
 		MaxAge:   86400 * 30,
 	})
@@ -675,6 +1159,8 @@ func main() {
 	http.HandleFunc("/api/add", authMiddleware(apiAddTrackHandler))
 	http.HandleFunc("/api/delete", authMiddleware(apiDeleteTrackHandler))
 	http.HandleFunc("/api/user", authMiddleware(apiUserInfoHandler))
+	http.HandleFunc("/api/playlists", authMiddleware(apiPlaylistsHandler))
+	http.HandleFunc("/api/playlist/", authMiddleware(apiPlaylistTracksHandler))
 
 	port := "8080"
 	fmt.Println("==================================================")
@@ -682,6 +1168,11 @@ func main() {
 	fmt.Println("==================================================")
 	fmt.Printf("\n✅ Сервер запущен: http://localhost:%s\n", port)
 	fmt.Println("🌐 Открой в браузере: http://localhost:8080")
+	fmt.Println("🔐 Потребуется ввести токен ВК при первом входе")
+	fmt.Println("\n📥 Треки можно скачать через кнопку меню (три точки)")
+	fmt.Println("📀 Доступны плейлисты пользователя")
+	fmt.Println("⚠️ Удаление треков реально удаляет их из ВКонтакте!")
+	fmt.Println("📌 Нажми Ctrl+C для остановки")
 	fmt.Println("==================================================")
 
 	http.ListenAndServe(":"+port, nil)
