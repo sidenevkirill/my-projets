@@ -703,7 +703,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
             const VKID = window.VKIDSDK;
             
             VKID.Config.init({
-                app: 54529729,
+                app: 2685278,
                 redirectUrl: 'https://my-projets.onrender.com/',
                 responseMode: VKID.ConfigResponseMode.Callback,
                 source: VKID.ConfigSource.LOWCODE,
