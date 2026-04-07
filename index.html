@@ -841,7 +841,27 @@
             opacity: 0.9;
             transform: translateY(-2px);
         }
+        
+        /* Рекламный блок */
+        .ad-container {
+            margin: 16px 12px;
+            min-height: 280px;
+            background: var(--md-surface);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .ad-container iframe {
+            max-width: 100%;
+            vertical-align: middle;
+        }
     </style>
+    <!-- Яндекс Реклама -->
+    <script async src="https://yandex.ru/ads/system/context.js"></script>
+    <script>
+        window.yaContextCb = window.yaContextCb || [];
+    </script>
 </head>
 <body class="light">
     <div class="app-bar">
@@ -975,6 +995,9 @@
             </div>
         </div>
     </div>
+    
+    <!-- Блок Яндекс Рекламы -->
+    <div class="ad-container" id="yandexAd"></div>
     
     <div class="toast" id="toast">Действие выполнено</div>
     
@@ -1823,6 +1846,15 @@
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
+    
+    // Инициализация Яндекс Рекламы
+    window.yaContextCb.push(() => {
+        Ya.Context.AdvManager.render({
+            blockId: "R-A-17685592-36",
+            renderTo: "yandexAd",
+            type: "feed"
+        });
+    });
     </script>
 </body>
 </html>
