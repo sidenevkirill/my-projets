@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>VK Moosic Player Web</title>
+    <title>VK Music Player</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
     <style>
@@ -249,6 +249,98 @@
             margin-top: 4px;
         }
         
+        /* Стили для плейлистов */
+        .playlist-list {
+            padding: 12px;
+        }
+        
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: var(--md-surface);
+            margin-bottom: 8px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+        
+        .playlist-item:hover {
+            background: var(--md-surface-light);
+            transform: translateX(4px);
+        }
+        
+        .playlist-cover {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--md-primary), var(--md-primary-light));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+        
+        .playlist-cover .material-symbols-outlined {
+            font-size: 32px;
+            color: white;
+        }
+        
+        .playlist-info {
+            flex: 1;
+        }
+        
+        .playlist-title {
+            font-weight: 500;
+            color: var(--md-on-surface);
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .playlist-count {
+            font-size: 12px;
+            color: var(--md-on-surface-variant);
+        }
+        
+        /* Стили для треков внутри плейлиста */
+        .playlist-header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: var(--md-surface);
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .back-to-playlists {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 28px;
+            transition: all 0.2s;
+        }
+        
+        .back-to-playlists:hover {
+            background: var(--md-surface-light);
+        }
+        
+        .playlist-title-large {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--md-on-surface);
+            margin-left: 16px;
+        }
+        
         .track-list {
             padding: 8px 12px 20px 12px;
         }
@@ -348,10 +440,6 @@
             color: white;
         }
         
-        .track-item.active .menu-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        
         .menu-btn .material-symbols-outlined {
             font-size: 20px;
         }
@@ -402,22 +490,6 @@
             border-radius: 50%;
         }
         
-        .clear-search:hover {
-            background: rgba(0,0,0,0.1);
-        }
-        
-        .search-loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--md-on-surface-variant);
-        }
-        
-        .search-empty {
-            text-align: center;
-            padding: 40px;
-            color: var(--md-on-surface-variant);
-        }
-        
         .context-menu {
             position: fixed;
             background: var(--md-surface);
@@ -430,14 +502,8 @@
         }
         
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
         
         .context-menu-item {
@@ -465,10 +531,6 @@
         
         .context-menu-item.download {
             color: var(--md-primary);
-        }
-        
-        .context-menu-item .material-symbols-outlined {
-            font-size: 20px;
         }
         
         .mini-player {
@@ -646,7 +708,6 @@
             margin: 20px auto;
         }
         
-        /* Модальное окно */
         .modal {
             display: none;
             position: fixed;
@@ -675,14 +736,8 @@
         }
         
         @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
         
         .modal-header {
@@ -806,6 +861,7 @@
         </div>
     </div>
     
+    <!-- Мои треки -->
     <div id="myTracksPage" class="page active">
         <div class="stats">
             <div class="stats-item">
@@ -829,6 +885,7 @@
         </div>
     </div>
     
+    <!-- Поиск -->
     <div id="searchPage" class="page">
         <div class="search-bar">
             <div class="search-input-wrapper">
@@ -847,6 +904,33 @@
         </div>
     </div>
     
+    <!-- Плейлисты -->
+    <div id="playlistsPage" class="page">
+        <div class="playlist-list" id="playlistsList">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Загрузка плейлистов</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Просмотр плейлиста -->
+    <div id="playlistViewPage" class="page">
+        <div class="playlist-header">
+            <button class="back-to-playlists" id="backToPlaylistsBtn">
+                <span class="material-symbols-outlined">arrow_back</span>
+                <span>К плейлистам</span>
+            </button>
+            <div class="playlist-title-large" id="playlistTitleLarge"></div>
+        </div>
+        <div class="track-list" id="playlistTracksList">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Загрузка треков плейлиста...</p>
+            </div>
+        </div>
+    </div>
+    
     <div class="bottom-nav">
         <button class="nav-item active" data-page="myTracks">
             <span class="material-symbols-outlined">library_music</span>
@@ -855,6 +939,10 @@
         <button class="nav-item" data-page="search">
             <span class="material-symbols-outlined">search</span>
             <span>Поиск</span>
+        </button>
+        <button class="nav-item" data-page="playlists">
+            <span class="material-symbols-outlined">playlist_play</span>
+            <span>Плейлисты</span>
         </button>
     </div>
     
@@ -889,7 +977,6 @@
     
     <div class="toast" id="toast">Действие выполнено</div>
     
-    <!-- Модальное окно "О программе" -->
     <div class="modal" id="aboutModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -900,14 +987,15 @@
                 <div class="about-icon">
                     <span class="material-symbols-outlined">music_note</span>
                 </div>
-                <h3>VK Moosic Player Web</h3>
+                <h3>VK Moosic Web Player</h3>
                 <p>Версия 0.0.4</p>
                 <p>Удобный плеер для прослушивания музыки из ВКонтакте</p>
                 <div class="about-features">
                     <h4>Возможности:</h4>
                     <ul>
-                        <li>Моя музыка</li>
-                        <li>Поиск музыки</li>
+                        <li>Мои аудиозаписи</li>
+                        <li>Поиск треков</li>
+                        <li>Плейлисты пользователя</li>
                         <li>Скачивание треков</li>
                         <li>Светлая/тёмная тема</li>
                     </ul>
@@ -927,16 +1015,24 @@
     <script>
     let myTracks = [];
     let searchResults = [];
+    let playlists = [];
+    let playlistTracks = [];
     let currentTrackIndex = 0;
     let currentTrackSource = 'myTracks';
+    let currentPlaylistId = null;
     let audioPlayer = new Audio();
     let isPlaying = false;
     let searchDebounceTimer = null;
     
+    // DOM элементы
     const myTracksPage = document.getElementById('myTracksPage');
     const searchPage = document.getElementById('searchPage');
+    const playlistsPage = document.getElementById('playlistsPage');
+    const playlistViewPage = document.getElementById('playlistViewPage');
     const myTracksList = document.getElementById('myTracksList');
     const searchResultsList = document.getElementById('searchResultsList');
+    const playlistsList = document.getElementById('playlistsList');
+    const playlistTracksList = document.getElementById('playlistTracksList');
     const globalSearchInput = document.getElementById('globalSearchInput');
     const clearGlobalSearch = document.getElementById('clearGlobalSearch');
     const appBarTitle = document.getElementById('appBarTitle');
@@ -948,6 +1044,8 @@
     const aboutModal = document.getElementById('aboutModal');
     const closeModal = document.getElementById('closeModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
+    const backToPlaylistsBtn = document.getElementById('backToPlaylistsBtn');
+    const playlistTitleLarge = document.getElementById('playlistTitleLarge');
     
     // Модальное окно
     aboutBtn.addEventListener('click', () => {
@@ -964,6 +1062,7 @@
         if (e.target === aboutModal) closeModalFn();
     });
     
+    // Тема
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = themeToggle.querySelector('.material-symbols-outlined');
     const savedTheme = localStorage.getItem('theme');
@@ -986,7 +1085,6 @@
         }
     });
     
-    // Загрузка информации о пользователе
     async function loadUserInfo() {
         try {
             const response = await fetch('/api/user');
@@ -1009,13 +1107,21 @@
     function switchPage(pageId) {
         myTracksPage.classList.remove('active');
         searchPage.classList.remove('active');
+        playlistsPage.classList.remove('active');
+        playlistViewPage.classList.remove('active');
         
         if (pageId === 'myTracks') {
             myTracksPage.classList.add('active');
             appBarTitle.textContent = 'Мои треки';
-        } else {
+        } else if (pageId === 'search') {
             searchPage.classList.add('active');
             appBarTitle.textContent = 'Поиск';
+        } else if (pageId === 'playlists') {
+            playlistsPage.classList.add('active');
+            appBarTitle.textContent = 'Плейлисты';
+            if (playlists.length === 0) {
+                loadPlaylists();
+            }
         }
         
         navItems.forEach(item => {
@@ -1037,8 +1143,221 @@
         window.location.href = `/download?id=${trackId}&owner_id=${ownerId}`;
     }
     
+    async function getTrackUrl(trackId, ownerId) {
+        const response = await fetch(`/get-track-url?id=${trackId}&owner_id=${ownerId}`);
+        const data = await response.json();
+        return data.url;
+    }
+    
+    async function playTrack(track, source) {
+        if (!track || !track.id) {
+            showToast('Информация о треке недоступна', true);
+            return;
+        }
+        
+        const url = await getTrackUrl(track.id, track.owner_id);
+        if (!url) {
+            showToast('Ссылка на трек недоступна', true);
+            return;
+        }
+        
+        let cleanUrl = url.replace(/\\\//g, '/');
+        audioPlayer.src = cleanUrl;
+        audioPlayer.load();
+        audioPlayer.play().then(() => {
+            isPlaying = true;
+            updatePlayPauseButton();
+            updateNowPlayingInfo(track);
+        }).catch(e => {
+            console.error('Ошибка:', e);
+            showToast('Ошибка воспроизведения', true);
+        });
+    }
+    
+    function updateNowPlayingInfo(track) {
+        document.getElementById('nowPlayingTitle').textContent = track.title || 'Без названия';
+        document.getElementById('nowPlayingArtist').textContent = track.artist || 'Неизвестный исполнитель';
+    }
+    
+    function updatePlayPauseButton() {
+        const btn = document.getElementById('playPauseBtn');
+        const icon = btn.querySelector('.material-symbols-outlined');
+        icon.textContent = isPlaying ? 'pause' : 'play_arrow';
+    }
+    
+    // Загрузка плейлистов
+    async function loadPlaylists() {
+        playlistsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка плейлистов...</p></div>';
+        
+        try {
+            const response = await fetch('/api/playlists');
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            const data = await response.json();
+            
+            if (data.error) {
+                playlistsList.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+                return;
+            }
+            
+            playlists = data;
+            displayPlaylists(playlists);
+        } catch (err) {
+            playlistsList.innerHTML = `<div class="error">❌ Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    function displayPlaylists(playlistsListData) {
+        playlistsList.innerHTML = '';
+        
+        if (playlistsListData.length === 0) {
+            playlistsList.innerHTML = '<div class="loading"><p>😔 Нет плейлистов</p></div>';
+            return;
+        }
+        
+        playlistsListData.forEach(playlist => {
+            const div = document.createElement('div');
+            div.className = 'playlist-item';
+            div.innerHTML = `
+                <div class="playlist-cover">
+                    <span class="material-symbols-outlined">playlist_play</span>
+                </div>
+                <div class="playlist-info">
+                    <div class="playlist-title">${escapeHtml(playlist.title)}</div>
+                    <div class="playlist-count">${playlist.count || 0} треков</div>
+                </div>
+                <span class="material-symbols-outlined" style="color: var(--md-on-surface-variant);">chevron_right</span>
+            `;
+            div.addEventListener('click', () => {
+                openPlaylist(playlist);
+            });
+            playlistsList.appendChild(div);
+        });
+    }
+    
+    async function openPlaylist(playlist) {
+        currentPlaylistId = playlist.id;
+        playlistTitleLarge.textContent = playlist.title;
+        
+        playlistViewPage.classList.add('active');
+        playlistsPage.classList.remove('active');
+        appBarTitle.textContent = playlist.title;
+        
+        playlistTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков...</p></div>';
+        
+        try {
+            const response = await fetch(`/api/playlist/${playlist.id}/tracks`);
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            const data = await response.json();
+            
+            if (data.error) {
+                playlistTracksList.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+                return;
+            }
+            
+            playlistTracks = data;
+            displayPlaylistTracks(playlistTracks);
+        } catch (err) {
+            playlistTracksList.innerHTML = `<div class="error">❌ Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    function displayPlaylistTracks(tracksList) {
+        playlistTracksList.innerHTML = '';
+        
+        if (tracksList.length === 0) {
+            playlistTracksList.innerHTML = '<div class="loading"><p>😔 Нет треков в плейлисте</p></div>';
+            return;
+        }
+        
+        tracksList.forEach((track, i) => {
+            const artist = track.artist || 'Неизвестный исполнитель';
+            const title = track.title || 'Без названия';
+            const mins = Math.floor((track.duration || 0) / 60);
+            const secs = (track.duration || 0) % 60;
+            const duration = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            
+            const div = document.createElement('div');
+            div.className = 'track-item';
+            div.innerHTML = `
+                <div class="track-number">${i+1}</div>
+                <div class="track-info">
+                    <div class="track-title">${escapeHtml(title)}</div>
+                    <div class="track-artist">${escapeHtml(artist)}</div>
+                </div>
+                <div class="track-duration">${duration}</div>
+                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}" data-title="${escapeHtml(title)}" data-artist="${escapeHtml(artist)}">
+                    <span class="material-symbols-outlined">more_vert</span>
+                </button>
+            `;
+            
+            div.addEventListener('click', (e) => {
+                if (!e.target.closest('.menu-btn')) {
+                    playTrack(track, 'playlist');
+                }
+            });
+            
+            const menuBtn = div.querySelector('.menu-btn');
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const rect = menuBtn.getBoundingClientRect();
+                const trackId = parseInt(menuBtn.getAttribute('data-id'));
+                const ownerId = parseInt(menuBtn.getAttribute('data-owner-id'));
+                const trackTitle = menuBtn.getAttribute('data-title');
+                showPlaylistTrackMenu(rect.right - 200, rect.bottom + 5, trackId, ownerId, trackTitle);
+            });
+            
+            playlistTracksList.appendChild(div);
+        });
+    }
+    
+    function showPlaylistTrackMenu(x, y, trackId, ownerId, trackTitle) {
+        if (activeContextMenu) activeContextMenu.remove();
+        
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        menu.innerHTML = `
+            <div class="context-menu-item download" data-action="download">
+                <span class="material-symbols-outlined">download</span>
+                <span>Скачать MP3</span>
+            </div>
+        `;
+        
+        menu.querySelector('[data-action="download"]').addEventListener('click', () => {
+            menu.remove();
+            activeContextMenu = null;
+            downloadTrack(trackId, ownerId);
+        });
+        
+        document.body.appendChild(menu);
+        activeContextMenu = menu;
+        
+        const closeMenu = (e) => {
+            if (!menu.contains(e.target)) {
+                menu.remove();
+                activeContextMenu = null;
+                document.removeEventListener('click', closeMenu);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeMenu), 10);
+    }
+    
+    backToPlaylistsBtn.addEventListener('click', () => {
+        playlistViewPage.classList.remove('active');
+        playlistsPage.classList.add('active');
+        appBarTitle.textContent = 'Плейлисты';
+        currentPlaylistId = null;
+    });
+    
+    // Отображение моих треков
     function displayMyTracks(tracksList) {
-        if (!myTracksList) return;
         myTracksList.innerHTML = '';
         
         if (tracksList.length === 0) {
@@ -1062,19 +1381,123 @@
                     <div class="track-artist">${escapeHtml(artist)}</div>
                 </div>
                 <div class="track-duration">${duration}</div>
-                <button class="menu-btn" data-index="${i}" data-id="${track.id}" data-title="${escapeHtml(title)}" data-source="myTracks" data-owner-id="${track.owner_id || 0}">
+                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}" data-title="${escapeHtml(title)}">
                     <span class="material-symbols-outlined">more_vert</span>
                 </button>
             `;
+            
+            div.addEventListener('click', (e) => {
+                if (!e.target.closest('.menu-btn')) {
+                    playTrack(track, 'myTracks');
+                }
+            });
+            
+            const menuBtn = div.querySelector('.menu-btn');
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const rect = menuBtn.getBoundingClientRect();
+                const trackId = parseInt(menuBtn.getAttribute('data-id'));
+                const ownerId = parseInt(menuBtn.getAttribute('data-owner-id'));
+                const trackTitle = menuBtn.getAttribute('data-title');
+                showMyTrackMenu(rect.right - 200, rect.bottom + 5, trackId, ownerId, trackTitle);
+            });
+            
             myTracksList.appendChild(div);
         });
-        
-        attachTrackEvents('myTracks');
-        highlightActiveTrack('myTracks');
     }
     
+    function showMyTrackMenu(x, y, trackId, ownerId, trackTitle) {
+        if (activeContextMenu) activeContextMenu.remove();
+        
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        menu.innerHTML = `
+            <div class="context-menu-item download" data-action="download">
+                <span class="material-symbols-outlined">download</span>
+                <span>Скачать MP3</span>
+            </div>
+            <div class="context-menu-item delete" data-action="delete">
+                <span class="material-symbols-outlined">delete_forever</span>
+                <span>Удалить</span>
+            </div>
+        `;
+        
+        menu.querySelector('[data-action="download"]').addEventListener('click', () => {
+            menu.remove();
+            activeContextMenu = null;
+            downloadTrack(trackId, ownerId);
+        });
+        
+        menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
+            menu.remove();
+            activeContextMenu = null;
+            await deleteTrackFromVK(trackId, trackTitle);
+        });
+        
+        document.body.appendChild(menu);
+        activeContextMenu = menu;
+        
+        const closeMenu = (e) => {
+            if (!menu.contains(e.target)) {
+                menu.remove();
+                activeContextMenu = null;
+                document.removeEventListener('click', closeMenu);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeMenu), 10);
+    }
+    
+    async function deleteTrackFromVK(trackId, trackTitle) {
+        try {
+            const response = await fetch('/api/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ track_id: trackId })
+            });
+            
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return false;
+            }
+            
+            const result = await response.json();
+            
+            if (result.error) {
+                showToast(`❌ Ошибка: ${result.error}`, true);
+                return false;
+            }
+            
+            await refreshMyTracks();
+            showToast(`🗑 Удалён: ${trackTitle}`);
+            return true;
+        } catch (error) {
+            showToast(`❌ Ошибка: ${error.message}`, true);
+            return false;
+        }
+    }
+    
+    async function refreshMyTracks() {
+        try {
+            const response = await fetch('/api/tracks');
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            const data = await response.json();
+            if (!data.error) {
+                myTracks = data;
+                displayMyTracks(myTracks);
+                updateStats(myTracks);
+            }
+        } catch (err) {
+            console.error('Ошибка обновления:', err);
+        }
+    }
+    
+    // Отображение результатов поиска
     function displaySearchResults(tracksList) {
-        if (!searchResultsList) return;
         searchResultsList.innerHTML = '';
         
         if (!tracksList || tracksList.length === 0) {
@@ -1105,118 +1528,106 @@
                     <div class="track-artist">${escapeHtml(artist)}</div>
                 </div>
                 <div class="track-duration">${duration}</div>
-                <button class="menu-btn" data-index="${i}" data-id="${track.id}" data-title="${escapeHtml(title)}" data-source="search" data-owner-id="${track.owner_id || 0}" data-is-added="${isAlreadyInMyTracks}">
+                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}" data-title="${escapeHtml(title)}" data-is-added="${isAlreadyInMyTracks}">
                     <span class="material-symbols-outlined">more_vert</span>
                 </button>
             `;
-            searchResultsList.appendChild(div);
-        });
-        
-        attachTrackEvents('search');
-        highlightActiveTrack('search');
-    }
-    
-    function attachTrackEvents(source) {
-        const container = source === 'myTracks' ? myTracksList : searchResultsList;
-        if (!container) return;
-        
-        container.querySelectorAll('.track-item').forEach(item => {
-            const menuBtn = item.querySelector('.menu-btn');
-            const index = parseInt(menuBtn.getAttribute('data-index'));
-            const trackId = parseInt(menuBtn.getAttribute('data-id'));
-            const trackTitle = menuBtn.getAttribute('data-title');
-            const trackSource = menuBtn.getAttribute('data-source');
-            const ownerId = parseInt(menuBtn.getAttribute('data-owner-id'));
             
-            item.addEventListener('click', (e) => {
-                if (e.target !== menuBtn && !menuBtn.contains(e.target)) {
-                    playTrackFromSource(index, trackSource);
+            div.addEventListener('click', (e) => {
+                if (!e.target.closest('.menu-btn')) {
+                    playTrack(track, 'search');
                 }
             });
             
+            const menuBtn = div.querySelector('.menu-btn');
             menuBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const rect = menuBtn.getBoundingClientRect();
+                const trackId = parseInt(menuBtn.getAttribute('data-id'));
+                const ownerId = parseInt(menuBtn.getAttribute('data-owner-id'));
+                const trackTitle = menuBtn.getAttribute('data-title');
                 const isAdded = menuBtn.getAttribute('data-is-added') === 'true';
-                showContextMenu(rect.right - 220, rect.bottom + 5, trackId, trackTitle, index, trackSource, ownerId, isAdded);
+                showSearchTrackMenu(rect.right - 200, rect.bottom + 5, trackId, ownerId, trackTitle, isAdded);
             });
+            
+            searchResultsList.appendChild(div);
         });
     }
     
-    function playTrackFromSource(index, source) {
-        let trackToPlay;
-        if (source === 'myTracks') {
-            trackToPlay = myTracks[index];
-            currentTrackIndex = myTracks.findIndex(t => t === trackToPlay);
-            currentTrackSource = 'myTracks';
+    function showSearchTrackMenu(x, y, trackId, ownerId, trackTitle, isAdded) {
+        if (activeContextMenu) activeContextMenu.remove();
+        
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        
+        if (isAdded) {
+            menu.innerHTML = `
+                <div class="context-menu-item delete" data-action="delete">
+                    <span class="material-symbols-outlined">delete_forever</span>
+                    <span>Удалить из моих треков</span>
+                </div>
+            `;
+            menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
+                menu.remove();
+                activeContextMenu = null;
+                await deleteTrackFromVK(trackId, trackTitle);
+            });
         } else {
-            trackToPlay = searchResults[index];
-            const realTrack = myTracks.find(t => t.id === trackToPlay.id);
-            if (realTrack) {
-                currentTrackIndex = myTracks.findIndex(t => t === realTrack);
-                currentTrackSource = 'myTracks';
-                trackToPlay = realTrack;
-            } else {
-                currentTrackIndex = index;
-                currentTrackSource = 'search';
-            }
+            menu.innerHTML = `
+                <div class="context-menu-item add" data-action="add">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span>Добавить в мои треки</span>
+                </div>
+            `;
+            menu.querySelector('[data-action="add"]').addEventListener('click', async () => {
+                menu.remove();
+                activeContextMenu = null;
+                await addTrackToVK(trackId, ownerId, trackTitle);
+            });
         }
         
-        if (!trackToPlay || !trackToPlay.url) {
-            showToast('Ссылка на трек недоступна', true);
-            return;
+        document.body.appendChild(menu);
+        activeContextMenu = menu;
+        
+        const closeMenu = (e) => {
+            if (!menu.contains(e.target)) {
+                menu.remove();
+                activeContextMenu = null;
+                document.removeEventListener('click', closeMenu);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeMenu), 10);
+    }
+    
+    async function addTrackToVK(trackId, ownerId, trackTitle) {
+        try {
+            const response = await fetch('/api/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ track_id: trackId, owner_id: ownerId })
+            });
+            
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return false;
+            }
+            
+            const result = await response.json();
+            
+            if (result.error) {
+                showToast(`❌ Ошибка: ${result.error}`, true);
+                return false;
+            }
+            
+            await refreshMyTracks();
+            showToast(`✅ Добавлен: ${trackTitle}`);
+            return true;
+        } catch (error) {
+            showToast(`❌ Ошибка: ${error.message}`, true);
+            return false;
         }
-        
-        let url = trackToPlay.url.replace(/\\\//g, '/');
-        audioPlayer.src = url;
-        audioPlayer.load();
-        audioPlayer.play().then(() => {
-            isPlaying = true;
-            updatePlayPauseButton();
-            updateNowPlayingInfo(trackToPlay);
-            highlightActiveTrack(currentTrackSource);
-        }).catch(e => {
-            console.error('Ошибка:', e);
-            showToast('Ошибка воспроизведения', true);
-        });
-    }
-    
-    function highlightActiveTrack(source) {
-        const container = source === 'myTracks' ? myTracksList : searchResultsList;
-        if (!container) return;
-        
-        const currentTrack = currentTrackSource === 'myTracks' ? myTracks[currentTrackIndex] : searchResults[currentTrackIndex];
-        if (!currentTrack) return;
-        
-        container.querySelectorAll('.track-item').forEach(item => {
-            const menuBtn = item.querySelector('.menu-btn');
-            const idx = parseInt(menuBtn.getAttribute('data-index'));
-            const itemSource = menuBtn.getAttribute('data-source');
-            
-            let isActive = false;
-            if (itemSource === 'myTracks' && currentTrackSource === 'myTracks') {
-                isActive = myTracks[idx] === currentTrack;
-            } else if (itemSource === 'search' && currentTrackSource === 'search') {
-                isActive = searchResults[idx] === currentTrack;
-            }
-            
-            if (isActive) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
-        });
-    }
-    
-    function updateNowPlayingInfo(track) {
-        document.getElementById('nowPlayingTitle').textContent = track.title || 'Без названия';
-        document.getElementById('nowPlayingArtist').textContent = track.artist || 'Неизвестный исполнитель';
-    }
-    
-    function updatePlayPauseButton() {
-        const btn = document.getElementById('playPauseBtn');
-        const icon = btn.querySelector('.material-symbols-outlined');
-        icon.textContent = isPlaying ? 'pause' : 'play_arrow';
     }
     
     async function performGlobalSearch(query) {
@@ -1260,193 +1671,6 @@
         globalSearchInput.focus();
     });
     
-    async function addTrackToVK(trackId, ownerId, trackTitle, index) {
-        try {
-            const response = await fetch('/api/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ track_id: trackId, owner_id: ownerId })
-            });
-            
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return false;
-            }
-            
-            const result = await response.json();
-            
-            if (result.error) {
-                showToast(`❌ Ошибка: ${result.error}`, true);
-                return false;
-            }
-            
-            await refreshMyTracks();
-            
-            if (globalSearchInput.value.trim()) {
-                await performGlobalSearch(globalSearchInput.value);
-            }
-            
-            showToast(`✅ Добавлен: ${trackTitle}`);
-            return true;
-            
-        } catch (error) {
-            showToast(`❌ Ошибка: ${error.message}`, true);
-            return false;
-        }
-    }
-    
-    async function deleteTrackFromVK(trackId, trackTitle, index, source) {
-        try {
-            const response = await fetch('/api/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ track_id: trackId })
-            });
-            
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return false;
-            }
-            
-            const result = await response.json();
-            
-            if (result.error) {
-                showToast(`❌ Ошибка: ${result.error}`, true);
-                return false;
-            }
-            
-            const trackToDelete = myTracks.find(t => t.id === trackId);
-            if (trackToDelete) {
-                const realIndex = myTracks.findIndex(t => t.id === trackId);
-                if (realIndex !== -1) {
-                    const wasPlaying = (currentTrackSource === 'myTracks' && currentTrackIndex === realIndex);
-                    myTracks.splice(realIndex, 1);
-                    
-                    if (wasPlaying) {
-                        if (myTracks.length > 0 && realIndex < myTracks.length) {
-                            playTrackFromSource(realIndex, 'myTracks');
-                        } else if (myTracks.length > 0 && realIndex > 0) {
-                            playTrackFromSource(realIndex - 1, 'myTracks');
-                        } else {
-                            audioPlayer.pause();
-                            isPlaying = false;
-                            updatePlayPauseButton();
-                            document.getElementById('nowPlayingTitle').textContent = 'Выберите трек';
-                            document.getElementById('nowPlayingArtist').textContent = '-';
-                            currentTrackIndex = -1;
-                        }
-                    } else if (realIndex < currentTrackIndex && currentTrackSource === 'myTracks') {
-                        currentTrackIndex--;
-                    }
-                }
-            }
-            
-            displayMyTracks(myTracks);
-            updateStats(myTracks);
-            
-            if (globalSearchInput.value.trim()) {
-                await performGlobalSearch(globalSearchInput.value);
-            }
-            
-            showToast(`🗑 Удалён: ${trackTitle}`);
-            return true;
-            
-        } catch (error) {
-            showToast(`❌ Ошибка: ${error.message}`, true);
-            return false;
-        }
-    }
-    
-    async function refreshMyTracks() {
-        try {
-            const response = await fetch('/api/tracks');
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            const data = await response.json();
-            if (!data.error) {
-                myTracks = data;
-                displayMyTracks(myTracks);
-                updateStats(myTracks);
-            }
-        } catch (err) {
-            console.error('Ошибка обновления:', err);
-        }
-    }
-    
-    let activeContextMenu = null;
-    
-    function showContextMenu(x, y, trackId, trackTitle, index, source, ownerId, isAlreadyAdded) {
-        if (activeContextMenu) activeContextMenu.remove();
-        
-        const menu = document.createElement('div');
-        menu.className = 'context-menu';
-        menu.style.left = x + 'px';
-        menu.style.top = y + 'px';
-        
-        if (source === 'search') {
-            if (isAlreadyAdded) {
-                menu.innerHTML = `
-                    <div class="context-menu-item delete" data-action="delete">
-                        <span class="material-symbols-outlined">delete_forever</span>
-                        <span>Удалить из моих треков</span>
-                    </div>
-                `;
-                menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
-                    menu.remove();
-                    activeContextMenu = null;
-                    await deleteTrackFromVK(trackId, trackTitle, index, source);
-                });
-            } else {
-                menu.innerHTML = `
-                    <div class="context-menu-item add" data-action="add">
-                        <span class="material-symbols-outlined">add_circle</span>
-                        <span>Добавить в мои треки</span>
-                    </div>
-                `;
-                menu.querySelector('[data-action="add"]').addEventListener('click', async () => {
-                    menu.remove();
-                    activeContextMenu = null;
-                    await addTrackToVK(trackId, ownerId, trackTitle, index);
-                });
-            }
-        } else if (source === 'myTracks') {
-            menu.innerHTML = `
-                <div class="context-menu-item download" data-action="download">
-                    <span class="material-symbols-outlined">download</span>
-                    <span>Скачать MP3</span>
-                </div>
-                <div class="context-menu-item delete" data-action="delete">
-                    <span class="material-symbols-outlined">delete_forever</span>
-                    <span>Удалить из ВКонтакте</span>
-                </div>
-            `;
-            menu.querySelector('[data-action="download"]').addEventListener('click', () => {
-                menu.remove();
-                activeContextMenu = null;
-                downloadTrack(trackId, ownerId);
-            });
-            menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
-                menu.remove();
-                activeContextMenu = null;
-                await deleteTrackFromVK(trackId, trackTitle, index, source);
-            });
-        }
-        
-        document.body.appendChild(menu);
-        activeContextMenu = menu;
-        
-        const closeMenu = (e) => {
-            if (!menu.contains(e.target)) {
-                menu.remove();
-                activeContextMenu = null;
-                document.removeEventListener('click', closeMenu);
-            }
-        };
-        setTimeout(() => document.addEventListener('click', closeMenu), 10);
-    }
-    
     function showToast(message, isError = false) {
         const toast = document.getElementById('toast');
         toast.textContent = message;
@@ -1480,6 +1704,8 @@
         });
     }
     
+    let activeContextMenu = null;
+    
     // Загрузка данных
     loadUserInfo();
     
@@ -1506,6 +1732,7 @@
             myTracksList.innerHTML = '<div class="error">❌ Ошибка загрузки: ' + err + '</div>';
         });
     
+    // Управление плеером
     document.getElementById('playPauseBtn').addEventListener('click', () => {
         if (isPlaying) {
             audioPlayer.pause();
@@ -1514,30 +1741,6 @@
         }
         isPlaying = !isPlaying;
         updatePlayPauseButton();
-    });
-    
-    document.getElementById('prevBtn').addEventListener('click', () => {
-        if (currentTrackSource === 'myTracks') {
-            if (currentTrackIndex > 0) {
-                playTrackFromSource(currentTrackIndex - 1, 'myTracks');
-            }
-        } else {
-            if (currentTrackIndex > 0) {
-                playTrackFromSource(currentTrackIndex - 1, 'search');
-            }
-        }
-    });
-    
-    document.getElementById('nextBtn').addEventListener('click', () => {
-        if (currentTrackSource === 'myTracks') {
-            if (currentTrackIndex < myTracks.length - 1) {
-                playTrackFromSource(currentTrackIndex + 1, 'myTracks');
-            }
-        } else {
-            if (currentTrackIndex < searchResults.length - 1) {
-                playTrackFromSource(currentTrackIndex + 1, 'search');
-            }
-        }
     });
     
     audioPlayer.addEventListener('timeupdate', () => {
@@ -1550,21 +1753,8 @@
     });
     
     audioPlayer.addEventListener('ended', () => {
-        if (currentTrackSource === 'myTracks') {
-            if (currentTrackIndex < myTracks.length - 1) {
-                playTrackFromSource(currentTrackIndex + 1, 'myTracks');
-            } else {
-                isPlaying = false;
-                updatePlayPauseButton();
-            }
-        } else {
-            if (currentTrackIndex < searchResults.length - 1) {
-                playTrackFromSource(currentTrackIndex + 1, 'search');
-            } else {
-                isPlaying = false;
-                updatePlayPauseButton();
-            }
-        }
+        isPlaying = false;
+        updatePlayPauseButton();
     });
     
     document.getElementById('progressBar').addEventListener('click', (e) => {
