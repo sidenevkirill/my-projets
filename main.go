@@ -23,15 +23,6 @@ type Track struct {
 	URL      string `json:"url"`
 }
 
-type Playlist struct {
-	ID        int    `json:"id"`
-	OwnerID   int    `json:"owner_id"`
-	Title     string `json:"title"`
-	Count     int    `json:"count"`
-	Photo     string `json:"photo"`
-	AccessKey string `json:"access_key"`
-}
-
 type VKResponse struct {
 	Response *struct {
 		Count int     `json:"count"`
@@ -68,13 +59,11 @@ type VKUserInfo struct {
 	Photo50   string `json:"photo_50"`
 }
 
-// Кэш для URL треков
 var trackURLCache = struct {
 	sync.RWMutex
 	data map[string]string
 }{data: make(map[string]string)}
 
-// Получение ссылки на трек с кэшированием
 func getTrackURL(token string, ownerID int, trackID int) string {
 	cacheKey := fmt.Sprintf("%d_%d", ownerID, trackID)
 
@@ -375,13 +364,6 @@ func getUserInfo(token string) (*VKUserInfo, error) {
 	return &result.Response[0], nil
 }
 
-func generateState() string {
-	bytes := make([]byte, 16)
-	rand.Read(bytes)
-	return hex.EncodeToString(bytes)
-}
-
-// Получение URL для воспроизведения (с кэшем)
 func getTrackURLHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, err := r.Cookie("vk_token")
 	if err != nil || tokenCookie.Value == "" {
@@ -405,7 +387,6 @@ func getTrackURLHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"url": url})
 }
 
-// Скачивание трека
 func downloadTrackHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, err := r.Cookie("vk_token")
 	if err != nil || tokenCookie.Value == "" {
@@ -429,7 +410,6 @@ func downloadTrackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Получаем информацию о треке
 	client := &http.Client{Timeout: 10 * time.Second}
 	params := url.Values{}
 	params.Set("access_token", tokenCookie.Value)
@@ -460,7 +440,6 @@ func downloadTrackHandler(w http.ResponseWriter, r *http.Request) {
 		title = result.Response[0].Title
 	}
 
-	// Скачиваем файл
 	downloadResp, err := http.Get(trackURL)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -482,21 +461,16 @@ func downloadTrackHandler(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, downloadResp.Body)
 }
 
-// Получение списка плейлистов пользователя
-func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
+func apiRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, _ := r.Cookie("vk_token")
-	userIDCookie, _ := r.Cookie("vk_user_id")
-	userID, _ := strconv.Atoi(userIDCookie.Value)
 
 	client := &http.Client{Timeout: 15 * time.Second}
 	params := url.Values{}
 	params.Set("access_token", tokenCookie.Value)
 	params.Set("v", "5.131")
-	params.Set("owner_id", strconv.Itoa(userID))
 	params.Set("count", "100")
-	params.Set("extended", "1")
 
-	apiURL := "https://api.vk.com/method/audio.getPlaylists?" + params.Encode()
+	apiURL := "https://api.vk.com/method/audio.getRecommendations?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -521,89 +495,38 @@ func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Playlists API response: %s\n", string(body))
-
-	var result struct {
-		Response struct {
-			Count int `json:"count"`
-			Items []struct {
-				ID        int    `json:"id"`
-				OwnerID   int    `json:"owner_id"`
-				Title     string `json:"title"`
-				Count     int    `json:"count"`
-				AccessKey string `json:"access_key"`
-				Photo     struct {
-					Photo1280 string `json:"photo_1280"`
-					Photo640  string `json:"photo_640"`
-					Photo320  string `json:"photo_320"`
-				} `json:"photo"`
-			} `json:"items"`
-		} `json:"response"`
-		Error *struct {
-			ErrorCode int    `json:"error_code"`
-			ErrorMsg  string `json:"error_msg"`
-		} `json:"error"`
-	}
-
-	if err := json.Unmarshal(body, &result); err != nil {
+	var vkResp VKResponse
+	if err := json.Unmarshal(body, &vkResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("Ошибка парсинга: %v", err)})
 		return
 	}
 
-	if result.Error != nil {
+	if vkResp.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)})
+		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s", vkResp.Error.ErrorMsg)})
 		return
 	}
 
-	playlists := make([]map[string]interface{}, 0)
-	for _, item := range result.Response.Items {
-		playlist := map[string]interface{}{
-			"id":         item.ID,
-			"owner_id":   item.OwnerID,
-			"title":      item.Title,
-			"count":      item.Count,
-			"access_key": item.AccessKey,
-		}
-		if item.Photo.Photo320 != "" {
-			playlist["cover"] = item.Photo.Photo320
-		} else if item.Photo.Photo640 != "" {
-			playlist["cover"] = item.Photo.Photo640
-		}
-		playlists = append(playlists, playlist)
+	if vkResp.Response == nil {
+		json.NewEncoder(w).Encode([]Track{})
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(playlists)
+	json.NewEncoder(w).Encode(vkResp.Response.Items)
 }
 
-// Получение треков плейлиста
-func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
+func apiProfileHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, _ := r.Cookie("vk_token")
-	// userIDCookie временно не используется
-	// userIDCookie, _ := r.Cookie("vk_user_id")
 
-	// Извлекаем параметры из URL
-	path := r.URL.Path
-	parts := strings.Split(path, "/")
-	if len(parts) < 5 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid playlist ID"})
-		return
-	}
-	
-	playlistID := parts[3]
-	ownerID := parts[4]
-
-	client := &http.Client{Timeout: 15 * time.Second}
+	client := &http.Client{Timeout: 10 * time.Second}
 	params := url.Values{}
 	params.Set("access_token", tokenCookie.Value)
 	params.Set("v", "5.131")
-	params.Set("owner_id", ownerID)
-	params.Set("playlist_id", playlistID)
+	params.Set("fields", "photo_100")
 
-	apiURL := "https://api.vk.com/method/audio.getPlaylistById?" + params.Encode()
+	apiURL := "https://api.vk.com/method/users.get?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -628,20 +551,12 @@ func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Playlist tracks API response: %s\n", string(body))
-
 	var result struct {
-		Response struct {
-			ID    int    `json:"id"`
-			Title string `json:"title"`
-			Audios []struct {
-				ID       int    `json:"id"`
-				OwnerID  int    `json:"owner_id"`
-				Artist   string `json:"artist"`
-				Title    string `json:"title"`
-				Duration int    `json:"duration"`
-				URL      string `json:"url"`
-			} `json:"audios"`
+		Response []struct {
+			ID        int    `json:"id"`
+			FirstName string `json:"first_name"`
+			LastName  string `json:"last_name"`
+			Photo100  string `json:"photo_100"`
 		} `json:"response"`
 		Error *struct {
 			ErrorCode int    `json:"error_code"`
@@ -657,29 +572,29 @@ func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)})
+		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s", result.Error.ErrorMsg)})
 		return
 	}
 
-	tracks := make([]Track, 0)
-	for _, item := range result.Response.Audios {
-		// Нормализуем URL если есть
-		url := strings.ReplaceAll(item.URL, "\\/", "/")
-		tracks = append(tracks, Track{
-			ID:       item.ID,
-			OwnerID:  item.OwnerID,
-			Artist:   item.Artist,
-			Title:    item.Title,
-			Duration: item.Duration,
-			URL:      url,
-		})
+	if len(result.Response) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Пользователь не найден"})
+		return
+	}
+
+	user := result.Response[0]
+	profile := map[string]interface{}{
+		"id":         user.ID,
+		"first_name": user.FirstName,
+		"last_name":  user.LastName,
+		"photo":      user.Photo100,
+		"full_name":  user.FirstName + " " + user.LastName,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(tracks)
+	json.NewEncoder(w).Encode(profile)
 }
 
-// Обработчики
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	http.ServeFile(w, r, "index.html")
@@ -710,7 +625,7 @@ func setTokenHandler(w http.ResponseWriter, r *http.Request) {
 			<html>
 			<head><title>Ошибка</title></head>
 			<body style="font-family: Arial; text-align: center; padding: 50px;">
-				<h2>❌ Ошибка авторизации</h2>
+				<h2>Ошибка авторизации</h2>
 				<p>%s</p>
 				<a href="/login">↺ Попробовать снова</a>
 			</body>
@@ -881,63 +796,6 @@ func apiUserInfoHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"name": name})
 }
 
-// Получение рекомендаций
-func apiRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
-    tokenCookie, _ := r.Cookie("vk_token")
-
-    client := &http.Client{Timeout: 15 * time.Second}
-    params := url.Values{}
-    params.Set("access_token", tokenCookie.Value)
-    params.Set("v", "5.131")
-    params.Set("count", "100")
-
-    apiURL := "https://api.vk.com/method/audio.getRecommendations?" + params.Encode()
-
-    req, err := http.NewRequest("GET", apiURL, nil)
-    if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-        return
-    }
-    req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
-
-    resp, err := client.Do(req)
-    if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-        return
-    }
-    defer resp.Body.Close()
-
-    body, err := io.ReadAll(resp.Body)
-    if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-        return
-    }
-
-    var vkResp VKResponse
-    if err := json.Unmarshal(body, &vkResp); err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("Ошибка парсинга: %v", err)})
-        return
-    }
-
-    if vkResp.Error != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s", vkResp.Error.ErrorMsg)})
-        return
-    }
-
-    if vkResp.Response == nil {
-        json.NewEncoder(w).Encode([]Track{})
-        return
-    }
-
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(vkResp.Response.Items)
-}
-
 func main() {
 	http.HandleFunc("/", authMiddleware(indexHandler))
 	http.HandleFunc("/login", loginHandler)
@@ -950,21 +808,19 @@ func main() {
 	http.HandleFunc("/api/add", authMiddleware(apiAddTrackHandler))
 	http.HandleFunc("/api/delete", authMiddleware(apiDeleteTrackHandler))
 	http.HandleFunc("/api/user", authMiddleware(apiUserInfoHandler))
-	http.HandleFunc("/api/playlists", authMiddleware(apiPlaylistsHandler))
-	http.HandleFunc("/api/playlist/", authMiddleware(apiPlaylistTracksHandler))
 	http.HandleFunc("/api/recommendations", authMiddleware(apiRecommendationsHandler))
+	http.HandleFunc("/api/profile", authMiddleware(apiProfileHandler))
 
 	port := "8080"
 	fmt.Println("==================================================")
-	fmt.Println("🎵 VK MUSIC PLAYER")
+	fmt.Println("VK MOOSIC WEB PLAYER")
 	fmt.Println("==================================================")
-	fmt.Printf("\n✅ Сервер запущен: http://localhost:%s\n", port)
-	fmt.Println("🌐 Открой в браузере: http://localhost:8080")
-	fmt.Println("🔐 Потребуется ввести токен ВК при первом входе")
-	fmt.Println("\n📥 Треки можно скачать через кнопку меню (три точки)")
-	fmt.Println("📀 Доступны плейлисты пользователя")
-	fmt.Println("⚠️ Удаление треков реально удаляет их из ВКонтакте!")
-	fmt.Println("📌 Нажми Ctrl+C для остановки")
+	fmt.Printf("\nСервер запущен: http://localhost:%s\n", port)
+	fmt.Println("Открой в браузере: http://localhost:8080")
+	fmt.Println("Потребуется ввести токен ВК при первом входе")
+	fmt.Println("Треки можно скачать через кнопку меню (три точки)")
+	fmt.Println("Удаление треков реально удаляет их из ВКонтакте!")
+	fmt.Println("Нажми Ctrl+C для остановки")
 	fmt.Println("==================================================")
 
 	http.ListenAndServe(":"+port, nil)
