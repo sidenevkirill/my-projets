@@ -881,6 +881,63 @@ func apiUserInfoHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"name": name})
 }
 
+// Получение рекомендаций
+func apiRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
+    tokenCookie, _ := r.Cookie("vk_token")
+
+    client := &http.Client{Timeout: 15 * time.Second}
+    params := url.Values{}
+    params.Set("access_token", tokenCookie.Value)
+    params.Set("v", "5.131")
+    params.Set("count", "50")
+
+    apiURL := "https://api.vk.com/method/audio.getRecommendations?" + params.Encode()
+
+    req, err := http.NewRequest("GET", apiURL, nil)
+    if err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+        return
+    }
+    req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+    resp, err := client.Do(req)
+    if err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+        return
+    }
+    defer resp.Body.Close()
+
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+        return
+    }
+
+    var vkResp VKResponse
+    if err := json.Unmarshal(body, &vkResp); err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("Ошибка парсинга: %v", err)})
+        return
+    }
+
+    if vkResp.Error != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s", vkResp.Error.ErrorMsg)})
+        return
+    }
+
+    if vkResp.Response == nil {
+        json.NewEncoder(w).Encode([]Track{})
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(vkResp.Response.Items)
+}
+
 func main() {
 	http.HandleFunc("/", authMiddleware(indexHandler))
 	http.HandleFunc("/login", loginHandler)
@@ -895,6 +952,7 @@ func main() {
 	http.HandleFunc("/api/user", authMiddleware(apiUserInfoHandler))
 	http.HandleFunc("/api/playlists", authMiddleware(apiPlaylistsHandler))
 	http.HandleFunc("/api/playlist/", authMiddleware(apiPlaylistTracksHandler))
+	http.HandleFunc("/api/recommendations", authMiddleware(apiRecommendationsHandler))
 
 	port := "8080"
 	fmt.Println("==================================================")
