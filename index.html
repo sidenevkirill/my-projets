@@ -64,12 +64,16 @@
             left: 0;
             right: 0;
             background: var(--md-primary);
-            padding: 12px 20px;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        .app-bar-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: var(--shadow);
-            z-index: 100;
+            padding: 12px 20px;
             height: 64px;
         }
         
@@ -77,6 +81,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            transition: opacity 0.2s ease;
         }
         
         .app-bar-title .material-symbols-outlined {
@@ -95,6 +100,108 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        
+        /* Строка поиска в toolbar */
+        .search-bar-expanded {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--md-primary);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateY(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 101;
+        }
+        
+        .search-bar-expanded.active {
+            transform: translateY(0);
+        }
+        
+        .search-bar-expanded .back-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-bar-expanded .back-icon:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .search-bar-expanded .search-input-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.2);
+            border-radius: 28px;
+            padding: 4px 16px;
+            gap: 12px;
+        }
+        
+        .search-bar-expanded .search-input-wrapper .material-symbols-outlined {
+            color: rgba(255,255,255,0.7);
+            font-size: 20px;
+        }
+        
+        .search-bar-expanded .search-input-wrapper input {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px 0;
+            color: var(--md-on-primary);
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .search-bar-expanded .search-input-wrapper input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .search-bar-expanded .clear-search {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-bar-expanded .clear-search:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .search-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .search-icon:hover {
+            background: rgba(255,255,255,0.1);
         }
         
         .theme-toggle {
@@ -302,58 +409,6 @@
         
         .menu-btn .material-symbols-outlined {
             font-size: 20px;
-        }
-        
-        .search-bar {
-            padding: 12px 16px;
-            background: var(--md-surface);
-            margin-bottom: 8px;
-        }
-        
-        .search-input-wrapper {
-            display: flex;
-            align-items: center;
-            background: var(--md-surface-light);
-            border-radius: 28px;
-            padding: 4px 16px;
-            gap: 12px;
-        }
-        
-        .search-input-wrapper .material-symbols-outlined {
-            color: var(--md-on-surface-variant);
-            font-size: 20px;
-        }
-        
-        .search-input-wrapper input {
-            flex: 1;
-            background: none;
-            border: none;
-            padding: 12px 0;
-            color: var(--md-on-surface);
-            font-size: 16px;
-            outline: none;
-        }
-        
-        .search-input-wrapper input::placeholder {
-            color: var(--md-on-surface-variant);
-        }
-        
-        .clear-search {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-surface-variant);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-            border-radius: 50%;
-        }
-        
-        .search-loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--md-on-surface-variant);
         }
         
         .search-empty {
@@ -580,134 +635,10 @@
             margin: 20px auto;
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 300;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: var(--md-surface);
-            border-radius: 28px;
-            max-width: 400px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: modalFadeIn 0.3s ease;
-        }
-        
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid rgba(128,128,128,0.2);
-        }
-        
-        .modal-header h2 {
-            font-size: 20px;
-            color: var(--md-on-surface);
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: var(--md-on-surface-variant);
-        }
-        
-        .modal-body {
-            padding: 24px;
+        .search-loading {
             text-align: center;
-        }
-        
-        .about-icon {
-            background: var(--md-primary);
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-        }
-        
-        .about-icon .material-symbols-outlined {
-            font-size: 36px;
-            color: white;
-        }
-        
-        .modal-body h3 {
-            font-size: 18px;
-            color: var(--md-on-surface);
-            margin-bottom: 4px;
-        }
-        
-        .modal-body p {
+            padding: 40px;
             color: var(--md-on-surface-variant);
-            font-size: 13px;
-            margin-bottom: 16px;
-        }
-        
-        .about-features, .about-developer {
-            text-align: left;
-            margin-top: 16px;
-        }
-        
-        .about-features h4, .about-developer h4 {
-            font-size: 14px;
-            color: var(--md-primary);
-            margin-bottom: 8px;
-        }
-        
-        .about-features ul {
-            list-style: none;
-            padding-left: 0;
-        }
-        
-        .about-features li {
-            font-size: 13px;
-            color: var(--md-on-surface);
-            padding: 4px 0;
-        }
-        
-        .about-developer p {
-            font-size: 13px;
-            margin: 4px 0;
-            color: var(--md-on-surface);
-        }
-        
-        .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid rgba(128,128,128,0.2);
-            text-align: center;
-        }
-        
-        .modal-ok {
-            background: var(--md-primary);
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 28px;
-            font-size: 14px;
-            cursor: pointer;
         }
         
         /* Профиль */
@@ -794,75 +725,109 @@
             transform: translateY(-2px);
         }
         
-        /* Стили для поля поиска по своим трекам */
-        .my-tracks-search {
-            padding: 12px 16px;
+        .about-section {
             background: var(--md-surface);
-            border-bottom: 1px solid rgba(128,128,128,0.2);
+            border-radius: 24px;
+            padding: 20px;
+            width: 100%;
+            max-width: 350px;
+            margin-top: 0;
+            box-shadow: var(--shadow);
         }
         
-        .my-tracks-search .search-input-wrapper {
-            background: var(--md-surface-light);
-            border-radius: 28px;
-            display: flex;
-            align-items: center;
-            padding: 4px 16px;
-            gap: 12px;
-        }
-        
-        .my-tracks-search .search-input-wrapper input {
-            flex: 1;
-            background: none;
-            border: none;
-            padding: 10px 0;
-            color: var(--md-on-surface);
-            font-size: 14px;
-            outline: none;
-        }
-        
-        .my-tracks-search .search-input-wrapper .material-symbols-outlined {
-            color: var(--md-on-surface-variant);
-            font-size: 20px;
-        }
-        
-        .my-tracks-search .clear-my-search {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-surface-variant);
+        .about-icon {
+            background: var(--md-primary);
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 4px;
-            border-radius: 50%;
+            margin: 0 auto 16px;
+        }
+        
+        .about-icon .material-symbols-outlined {
+            font-size: 36px;
+            color: white;
+        }
+        
+        .about-section h3 {
+            font-size: 18px;
+            color: var(--md-on-surface);
+            margin-bottom: 4px;
+            text-align: center;
+        }
+        
+        .about-section p {
+            color: var(--md-on-surface-variant);
+            font-size: 13px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .about-features, .about-developer {
+            text-align: left;
+            margin-top: 16px;
+        }
+        
+        .about-features h4, .about-developer h4 {
+            font-size: 14px;
+            color: var(--md-primary);
+            margin-bottom: 8px;
+        }
+        
+        .about-features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .about-features li {
+            font-size: 13px;
+            color: var(--md-on-surface);
+            padding: 4px 0;
+        }
+        
+        .about-developer p {
+            font-size: 13px;
+            margin: 4px 0;
+            color: var(--md-on-surface);
         }
     </style>
 </head>
 <body class="light">
     <div class="app-bar">
-        <div class="app-bar-title">
-            <span class="material-symbols-outlined">music_note</span>
-            <h1 id="appBarTitle">Мои треки</h1>
+        <div class="app-bar-content">
+            <div class="app-bar-title" id="appBarTitleBlock">
+                <span class="material-symbols-outlined">music_note</span>
+                <h1 id="appBarTitle">Мои треки</h1>
+            </div>
+            <div class="app-bar-actions">
+                <button class="search-icon" id="searchIcon">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+                <button class="theme-toggle" id="themeToggle">
+                    <span class="material-symbols-outlined">dark_mode</span>
+                </button>
+            </div>
         </div>
-        <div class="app-bar-actions">
-            <button class="theme-toggle" id="themeToggle">
-                <span class="material-symbols-outlined">dark_mode</span>
+        
+        <!-- Разворачиваемая строка поиска -->
+        <div class="search-bar-expanded" id="searchExpanded">
+            <button class="back-icon" id="closeSearch">
+                <span class="material-symbols-outlined">arrow_back</span>
             </button>
+            <div class="search-input-wrapper">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" id="globalSearchInput" placeholder="Поиск треков..." autocomplete="off">
+                <button class="clear-search" id="clearSearchInput">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
         </div>
     </div>
     
     <!-- Мои треки -->
     <div id="myTracksPage" class="page active">
-        <!-- Поле поиска по моим трекам -->
-        <div class="my-tracks-search" id="myTracksSearch">
-            <div class="search-input-wrapper">
-                <span class="material-symbols-outlined">search</span>
-                <input type="text" id="myTracksSearchInput" placeholder="Поиск в моих треках..." autocomplete="off">
-                <button class="clear-my-search" id="clearMyTracksSearch">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-        </div>
         <div class="stats">
             <div class="stats-item">
                 <div class="stats-value" id="totalCount">0</div>
@@ -885,17 +850,8 @@
         </div>
     </div>
     
-    <!-- Поиск (глобальный) -->
+    <!-- Поиск (результаты) -->
     <div id="searchPage" class="page">
-        <div class="search-bar">
-            <div class="search-input-wrapper">
-                <span class="material-symbols-outlined">search</span>
-                <input type="text" id="globalSearchInput" placeholder="Поиск треков ВКонтакте..." autocomplete="off">
-                <button class="clear-search" id="clearGlobalSearch">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-        </div>
         <div class="track-list" id="searchResultsList">
             <div class="search-empty">
                 <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5;">search</span>
@@ -923,20 +879,19 @@
             </div>
         </div>
         
-        <!-- Блок "О приложении" в профиле -->
         <div class="profile-container" style="padding-top: 0;">
-            <div class="profile-stats" style="width: 100%; max-width: 350px;">
-                <div class="about-icon" style="margin: 0 auto 16px;">
+            <div class="about-section">
+                <div class="about-icon">
                     <span class="material-symbols-outlined">info</span>
                 </div>
-                <h3 style="text-align: center; margin-bottom: 8px;">VK Moosic Web Player</h3>
-                <p style="text-align: center; font-size: 12px; color: var(--md-on-surface-variant); margin-bottom: 16px;">Версия 0.0.7</p>
-                <p style="text-align: center; font-size: 13px; margin-bottom: 16px;">Удобный плеер для прослушивания музыки из ВКонтакте</p>
+                <h3>VK Moosic Web Player</h3>
+                <p>Версия 0.0.7</p>
+                <p>Удобный плеер для прослушивания музыки из ВКонтакте</p>
                 <div class="about-features">
                     <h4>Возможности:</h4>
                     <ul>
-                        <li>Мои аудиозаписи с поиском</li>
-                        <li>Глобальный поиск треков</li>
+                        <li>Мои аудиозаписи</li>
+                        <li>Поиск треков</li>
                         <li>Рекомендации ВК</li>
                         <li>Профиль пользователя</li>
                         <li>Скачивание треков</li>
@@ -1011,9 +966,6 @@
     let audioPlayer = new Audio();
     let isPlaying = false;
     let searchDebounceTimer = null;
-    let myTracksSearchDebounceTimer = null;
-    let myTracksFiltered = [];
-    let isMyTracksSearchActive = false;
     
     // DOM элементы
     const myTracksPage = document.getElementById('myTracksPage');
@@ -1024,14 +976,16 @@
     const searchResultsList = document.getElementById('searchResultsList');
     const recommendationsList = document.getElementById('recommendationsList');
     const profileContainer = document.getElementById('profileContainer');
-    const globalSearchInput = document.getElementById('globalSearchInput');
-    const clearGlobalSearch = document.getElementById('clearGlobalSearch');
-    const myTracksSearchInput = document.getElementById('myTracksSearchInput');
-    const clearMyTracksSearch = document.getElementById('clearMyTracksSearch');
     const appBarTitle = document.getElementById('appBarTitle');
+    const appBarTitleBlock = document.getElementById('appBarTitleBlock');
     const navItems = document.querySelectorAll('.nav-item');
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = themeToggle.querySelector('.material-symbols-outlined');
+    const searchIcon = document.getElementById('searchIcon');
+    const searchExpanded = document.getElementById('searchExpanded');
+    const closeSearch = document.getElementById('closeSearch');
+    const globalSearchInput = document.getElementById('globalSearchInput');
+    const clearSearchInput = document.getElementById('clearSearchInput');
     
     // Тема
     const savedTheme = localStorage.getItem('theme');
@@ -1054,6 +1008,35 @@
         }
     });
     
+    // Открыть поиск
+    function openSearch() {
+        searchExpanded.classList.add('active');
+        appBarTitleBlock.style.opacity = '0';
+        setTimeout(() => {
+            globalSearchInput.focus();
+        }, 100);
+    }
+    
+    // Закрыть поиск
+    function closeSearchFn() {
+        searchExpanded.classList.remove('active');
+        appBarTitleBlock.style.opacity = '1';
+        globalSearchInput.value = '';
+        performGlobalSearch('');
+        // Возвращаемся на страницу "Мои треки" если поиск был активен
+        if (currentTrackSource === 'search' && searchResults.length > 0) {
+            switchPage('myTracks');
+        }
+    }
+    
+    searchIcon.addEventListener('click', openSearch);
+    closeSearch.addEventListener('click', closeSearchFn);
+    clearSearchInput.addEventListener('click', () => {
+        globalSearchInput.value = '';
+        performGlobalSearch('');
+        globalSearchInput.focus();
+    });
+    
     function switchPage(pageId) {
         myTracksPage.classList.remove('active');
         searchPage.classList.remove('active');
@@ -1066,19 +1049,26 @@
             if (myTracks.length === 0) {
                 loadMyTracks();
             }
+            closeSearchFn();
         } else if (pageId === 'search') {
             searchPage.classList.add('active');
             appBarTitle.textContent = 'Поиск';
+            // Если есть активный поиск, показываем результаты
+            if (globalSearchInput.value.trim()) {
+                performGlobalSearch(globalSearchInput.value);
+            }
         } else if (pageId === 'recommendations') {
             recommendationsPage.classList.add('active');
             appBarTitle.textContent = 'Рекомендации';
             if (recommendations.length === 0) {
                 loadRecommendations();
             }
+            closeSearchFn();
         } else if (pageId === 'profile') {
             profilePage.classList.add('active');
             appBarTitle.textContent = 'Профиль';
             loadProfile();
+            closeSearchFn();
         }
         
         navItems.forEach(item => {
@@ -1160,57 +1150,12 @@
             }
             
             myTracks = data;
-            myTracksFiltered = data;
-            displayMyTracks(myTracksFiltered);
+            displayMyTracks(myTracks);
             updateStats(myTracks);
         } catch (err) {
             myTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
         }
     }
-    
-    // Поиск по моим трекам
-    async function searchMyTracks(query) {
-        if (!query.trim()) {
-            isMyTracksSearchActive = false;
-            displayMyTracks(myTracks);
-            return;
-        }
-        
-        isMyTracksSearchActive = true;
-        myTracksList.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div><p>Поиск...</p></div>';
-        
-        try {
-            const response = await fetch(`/api/search-my?q=${encodeURIComponent(query)}`);
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            const data = await response.json();
-            
-            if (data.error) {
-                myTracksList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
-                return;
-            }
-            
-            myTracksFiltered = data;
-            displayMyTracks(myTracksFiltered);
-        } catch (err) {
-            myTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
-        }
-    }
-    
-    myTracksSearchInput.addEventListener('input', (e) => {
-        if (myTracksSearchDebounceTimer) clearTimeout(myTracksSearchDebounceTimer);
-        myTracksSearchDebounceTimer = setTimeout(() => {
-            searchMyTracks(e.target.value);
-        }, 300);
-    });
-    
-    clearMyTracksSearch.addEventListener('click', () => {
-        myTracksSearchInput.value = '';
-        searchMyTracks('');
-        myTracksSearchInput.focus();
-    });
     
     // Загрузка рекомендаций
     async function loadRecommendations() {
@@ -1426,11 +1371,7 @@
             const data = await response.json();
             if (!data.error) {
                 myTracks = data;
-                if (myTracksSearchInput.value.trim()) {
-                    searchMyTracks(myTracksSearchInput.value);
-                } else {
-                    displayMyTracks(myTracks);
-                }
+                displayMyTracks(myTracks);
                 updateStats(myTracks);
             }
         } catch (err) {
@@ -1740,12 +1681,6 @@
         searchDebounceTimer = setTimeout(() => {
             performGlobalSearch(e.target.value);
         }, 500);
-    });
-    
-    clearGlobalSearch.addEventListener('click', () => {
-        globalSearchInput.value = '';
-        performGlobalSearch('');
-        globalSearchInput.focus();
     });
     
     function showToast(message, isError = false) {
