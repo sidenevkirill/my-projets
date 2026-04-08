@@ -593,6 +593,40 @@ func apiProfileHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(profile)
 }
 
+// Поиск по моим трекам (фильтрация на сервере)
+func apiSearchMyTracksHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+	userIDCookie, _ := r.Cookie("vk_user_id")
+	userID, _ := strconv.Atoi(userIDCookie.Value)
+
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		json.NewEncoder(w).Encode([]Track{})
+		return
+	}
+
+	// Получаем все треки пользователя
+	allTracks, err := getAllTracks(tokenCookie.Value, userID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	// Фильтруем треки по запросу
+	queryLower := strings.ToLower(query)
+	filtered := []Track{}
+	for _, track := range allTracks {
+		if strings.Contains(strings.ToLower(track.Title), queryLower) ||
+			strings.Contains(strings.ToLower(track.Artist), queryLower) {
+			filtered = append(filtered, track)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(filtered)
+}
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	http.ServeFile(w, r, "index.html")
@@ -803,6 +837,7 @@ func main() {
 	http.HandleFunc("/get-track-url", authMiddleware(getTrackURLHandler))
 	http.HandleFunc("/api/tracks", authMiddleware(apiTracksHandler))
 	http.HandleFunc("/api/search", authMiddleware(apiSearchHandler))
+	http.HandleFunc("/api/search-my", authMiddleware(apiSearchMyTracksHandler)) // Новый эндпоинт для поиска по своим трекам
 	http.HandleFunc("/api/add", authMiddleware(apiAddTrackHandler))
 	http.HandleFunc("/api/delete", authMiddleware(apiDeleteTrackHandler))
 	http.HandleFunc("/api/user", authMiddleware(apiUserInfoHandler))
