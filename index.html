@@ -283,6 +283,53 @@
             opacity: 1;
         }
         
+        /* Поле поиска по своим трекам */
+        .my-tracks-search {
+            padding: 12px 16px;
+            background: var(--md-surface);
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+        }
+        
+        .my-tracks-search .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--md-surface-light);
+            border-radius: 28px;
+            padding: 4px 16px;
+            gap: 12px;
+        }
+        
+        .my-tracks-search .search-input-wrapper .material-symbols-outlined {
+            color: var(--md-on-surface-variant);
+            font-size: 20px;
+        }
+        
+        .my-tracks-search .search-input-wrapper input {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px 0;
+            color: var(--md-on-surface);
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .my-tracks-search .search-input-wrapper input::placeholder {
+            color: var(--md-on-surface-variant);
+        }
+        
+        .my-tracks-search .clear-my-search {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-surface-variant);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border-radius: 50%;
+        }
+        
         .stats {
             background: var(--md-surface);
             padding: 12px 20px;
@@ -811,14 +858,14 @@
             </div>
         </div>
         
-        <!-- Разворачиваемая строка поиска -->
+        <!-- Разворачиваемая строка поиска (глобальный поиск) -->
         <div class="search-bar-expanded" id="searchExpanded">
             <button class="back-icon" id="closeSearch">
                 <span class="material-symbols-outlined">arrow_back</span>
             </button>
             <div class="search-input-wrapper">
                 <span class="material-symbols-outlined">search</span>
-                <input type="text" id="globalSearchInput" placeholder="Поиск треков..." autocomplete="off">
+                <input type="text" id="globalSearchInput" placeholder="Глобальный поиск треков..." autocomplete="off">
                 <button class="clear-search" id="clearSearchInput">
                     <span class="material-symbols-outlined">close</span>
                 </button>
@@ -828,6 +875,16 @@
     
     <!-- Мои треки -->
     <div id="myTracksPage" class="page active">
+        <!-- Поле поиска по своим трекам -->
+        <div class="my-tracks-search">
+            <div class="search-input-wrapper">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" id="myTracksSearchInput" placeholder="Поиск в моих треках..." autocomplete="off">
+                <button class="clear-my-search" id="clearMyTracksSearch">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </div>
         <div class="stats">
             <div class="stats-item">
                 <div class="stats-value" id="totalCount">0</div>
@@ -850,7 +907,7 @@
         </div>
     </div>
     
-    <!-- Поиск (результаты) -->
+    <!-- Поиск (результаты глобального поиска) -->
     <div id="searchPage" class="page">
         <div class="track-list" id="searchResultsList">
             <div class="search-empty">
@@ -890,8 +947,8 @@
                 <div class="about-features">
                     <h4>Возможности:</h4>
                     <ul>
-                        <li>Мои аудиозаписи</li>
-                        <li>Поиск треков</li>
+                        <li>Мои аудиозаписи с поиском</li>
+                        <li>Глобальный поиск треков</li>
                         <li>Рекомендации ВК</li>
                         <li>Профиль пользователя</li>
                         <li>Скачивание треков</li>
@@ -959,6 +1016,7 @@
 
     <script>
     let myTracks = [];
+    let myTracksFiltered = [];
     let searchResults = [];
     let recommendations = [];
     let currentTrackIndex = 0;
@@ -966,6 +1024,7 @@
     let audioPlayer = new Audio();
     let isPlaying = false;
     let searchDebounceTimer = null;
+    let myTracksSearchDebounceTimer = null;
     
     // DOM элементы
     const myTracksPage = document.getElementById('myTracksPage');
@@ -986,6 +1045,8 @@
     const closeSearch = document.getElementById('closeSearch');
     const globalSearchInput = document.getElementById('globalSearchInput');
     const clearSearchInput = document.getElementById('clearSearchInput');
+    const myTracksSearchInput = document.getElementById('myTracksSearchInput');
+    const clearMyTracksSearch = document.getElementById('clearMyTracksSearch');
     
     // Тема
     const savedTheme = localStorage.getItem('theme');
@@ -1008,7 +1069,7 @@
         }
     });
     
-    // Открыть поиск
+    // Открыть глобальный поиск
     function openSearch() {
         searchExpanded.classList.add('active');
         appBarTitleBlock.style.opacity = '0';
@@ -1017,13 +1078,12 @@
         }, 100);
     }
     
-    // Закрыть поиск
+    // Закрыть глобальный поиск
     function closeSearchFn() {
         searchExpanded.classList.remove('active');
         appBarTitleBlock.style.opacity = '1';
         globalSearchInput.value = '';
         performGlobalSearch('');
-        // Возвращаемся на страницу "Мои треки" если поиск был активен
         if (currentTrackSource === 'search' && searchResults.length > 0) {
             switchPage('myTracks');
         }
@@ -1053,7 +1113,6 @@
         } else if (pageId === 'search') {
             searchPage.classList.add('active');
             appBarTitle.textContent = 'Поиск';
-            // Если есть активный поиск, показываем результаты
             if (globalSearchInput.value.trim()) {
                 performGlobalSearch(globalSearchInput.value);
             }
@@ -1132,6 +1191,48 @@
         icon.textContent = isPlaying ? 'pause' : 'play_arrow';
     }
     
+    // Поиск по моим трекам
+    async function searchMyTracks(query) {
+        if (!query.trim()) {
+            displayMyTracks(myTracks);
+            return;
+        }
+        
+        myTracksList.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div><p>Поиск...</p></div>';
+        
+        try {
+            const response = await fetch(`/api/search-my?q=${encodeURIComponent(query)}`);
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            const data = await response.json();
+            
+            if (data.error) {
+                myTracksList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
+                return;
+            }
+            
+            myTracksFiltered = data;
+            displayMyTracks(myTracksFiltered);
+        } catch (err) {
+            myTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    myTracksSearchInput.addEventListener('input', (e) => {
+        if (myTracksSearchDebounceTimer) clearTimeout(myTracksSearchDebounceTimer);
+        myTracksSearchDebounceTimer = setTimeout(() => {
+            searchMyTracks(e.target.value);
+        }, 300);
+    });
+    
+    clearMyTracksSearch.addEventListener('click', () => {
+        myTracksSearchInput.value = '';
+        searchMyTracks('');
+        myTracksSearchInput.focus();
+    });
+    
     // Загрузка моих треков
     async function loadMyTracks() {
         myTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>';
@@ -1150,7 +1251,8 @@
             }
             
             myTracks = data;
-            displayMyTracks(myTracks);
+            myTracksFiltered = data;
+            displayMyTracks(myTracksFiltered);
             updateStats(myTracks);
         } catch (err) {
             myTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
@@ -1371,7 +1473,11 @@
             const data = await response.json();
             if (!data.error) {
                 myTracks = data;
-                displayMyTracks(myTracks);
+                if (myTracksSearchInput.value.trim()) {
+                    searchMyTracks(myTracksSearchInput.value);
+                } else {
+                    displayMyTracks(myTracks);
+                }
                 updateStats(myTracks);
             }
         } catch (err) {
