@@ -102,7 +102,61 @@
             gap: 8px;
         }
         
-        /* Строка поиска в toolbar */
+        .about-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .about-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .search-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .search-icon:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--md-on-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        /* Разворачиваемая строка поиска */
         .search-bar-expanded {
             position: absolute;
             top: 0;
@@ -183,42 +237,6 @@
         }
         
         .search-bar-expanded .clear-search:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .search-icon {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-primary);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        
-        .search-icon:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .theme-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-primary);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        
-        .theme-toggle:hover {
             background: rgba(255,255,255,0.1);
         }
         
@@ -328,6 +346,10 @@
             justify-content: center;
             padding: 4px;
             border-radius: 50%;
+        }
+        
+        .my-tracks-search .clear-my-search:hover {
+            background: rgba(0,0,0,0.1);
         }
         
         .stats {
@@ -772,17 +794,72 @@
             transform: translateY(-2px);
         }
         
-        .about-section {
-            background: var(--md-surface);
-            border-radius: 24px;
-            padding: 20px;
-            width: 100%;
-            max-width: 350px;
-            margin-top: 0;
-            box-shadow: var(--shadow);
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
         }
         
-        .about-icon {
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--md-surface);
+            border-radius: 28px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+        }
+        
+        .modal-header h2 {
+            font-size: 20px;
+            color: var(--md-on-surface);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--md-on-surface-variant);
+        }
+        
+        .modal-body {
+            padding: 24px;
+            text-align: center;
+        }
+        
+        .modal-body .about-icon {
             background: var(--md-primary);
             width: 64px;
             height: 64px;
@@ -793,51 +870,76 @@
             margin: 0 auto 16px;
         }
         
-        .about-icon .material-symbols-outlined {
+        .modal-body .about-icon .material-symbols-outlined {
             font-size: 36px;
             color: white;
         }
         
-        .about-section h3 {
+        .modal-body h3 {
             font-size: 18px;
             color: var(--md-on-surface);
             margin-bottom: 4px;
-            text-align: center;
         }
         
-        .about-section p {
+        .modal-body p {
             color: var(--md-on-surface-variant);
             font-size: 13px;
             margin-bottom: 16px;
-            text-align: center;
         }
         
-        .about-features, .about-developer {
+        .modal-body .about-features {
             text-align: left;
             margin-top: 16px;
         }
         
-        .about-features h4, .about-developer h4 {
+        .modal-body .about-developer {
+            text-align: left;
+            margin-top: 16px;
+        }
+        
+        .modal-body .about-features h4 {
             font-size: 14px;
             color: var(--md-primary);
             margin-bottom: 8px;
         }
         
-        .about-features ul {
+        .modal-body .about-developer h4 {
+            font-size: 14px;
+            color: var(--md-primary);
+            margin-bottom: 8px;
+        }
+        
+        .modal-body .about-features ul {
             list-style: none;
             padding-left: 0;
         }
         
-        .about-features li {
+        .modal-body .about-features li {
             font-size: 13px;
             color: var(--md-on-surface);
             padding: 4px 0;
         }
         
-        .about-developer p {
+        .modal-body .about-developer p {
             font-size: 13px;
             margin: 4px 0;
             color: var(--md-on-surface);
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(128,128,128,0.2);
+            text-align: center;
+        }
+        
+        .modal-ok {
+            background: var(--md-primary);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 28px;
+            font-size: 14px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -849,6 +951,9 @@
                 <h1 id="appBarTitle">Мои треки</h1>
             </div>
             <div class="app-bar-actions">
+                <button class="about-btn" id="aboutBtn" title="О приложении">
+                    <span class="material-symbols-outlined">info</span>
+                </button>
                 <button class="search-icon" id="searchIcon">
                     <span class="material-symbols-outlined">search</span>
                 </button>
@@ -880,7 +985,7 @@
             <div class="search-input-wrapper">
                 <span class="material-symbols-outlined">search</span>
                 <input type="text" id="myTracksSearchInput" placeholder="Поиск в моих треках..." autocomplete="off">
-                <button class="clear-my-search" id="clearMyTracksSearch">
+                <button class="clear-my-search" id="clearMyTracksSearch" style="display: none;">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
@@ -927,39 +1032,12 @@
         </div>
     </div>
     
-    <!-- Профиль + О приложении -->
+    <!-- Профиль -->
     <div id="profilePage" class="page">
         <div class="profile-container" id="profileContainer">
             <div class="loading">
                 <div class="loading-spinner"></div>
                 <p>Загрузка профиля...</p>
-            </div>
-        </div>
-        
-        <div class="profile-container" style="padding-top: 0;">
-            <div class="about-section">
-                <div class="about-icon">
-                    <span class="material-symbols-outlined">info</span>
-                </div>
-                <h3>VK Moosic Web Player</h3>
-                <p>Версия 0.0.7</p>
-                <p>Удобный плеер для прослушивания музыки из ВКонтакте</p>
-                <div class="about-features">
-                    <h4>Возможности:</h4>
-                    <ul>
-                        <li>Мои аудиозаписи с поиском</li>
-                        <li>Глобальный поиск треков</li>
-                        <li>Рекомендации ВК</li>
-                        <li>Профиль пользователя</li>
-                        <li>Скачивание треков</li>
-                        <li>Светлая/тёмная тема</li>
-                    </ul>
-                </div>
-                <div class="about-developer">
-                    <h4>Разработчик:</h4>
-                    <p>TG: @LisDevs</p>
-                    <p>GitHub: github.com/VKMP</p>
-                </div>
             </div>
         </div>
     </div>
@@ -1013,6 +1091,43 @@
     </div>
     
     <div class="toast" id="toast">Действие выполнено</div>
+    
+    <!-- Модальное окно "О приложении" -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>О приложении</h2>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="about-icon">
+                    <span class="material-symbols-outlined">music_note</span>
+                </div>
+                <h3>VK Moosic Web Player</h3>
+                <p>Версия 0.0.8</p>
+                <p>Удобный плеер для прослушивания музыки из ВКонтакте</p>
+                <div class="about-features">
+                    <h4>Возможности:</h4>
+                    <ul>
+                        <li>Мои аудиозаписи с поиском</li>
+                        <li>Глобальный поиск треков</li>
+                        <li>Рекомендации ВК</li>
+                        <li>Профиль пользователя</li>
+                        <li>Скачивание треков</li>
+                        <li>Светлая/тёмная тема</li>
+                    </ul>
+                </div>
+                <div class="about-developer">
+                    <h4>Разработчик:</h4>
+                    <p>TG: @LisDevs</p>
+                    <p>GitHub: github.com/VKMP</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-ok" id="closeModalOkBtn">Закрыть</button>
+            </div>
+        </div>
+    </div>
 
     <script>
     let myTracks = [];
@@ -1048,6 +1163,12 @@
     const myTracksSearchInput = document.getElementById('myTracksSearchInput');
     const clearMyTracksSearch = document.getElementById('clearMyTracksSearch');
     
+    // Кнопка "О приложении" и модальное окно
+    const aboutBtn = document.getElementById('aboutBtn');
+    const aboutModal = document.getElementById('aboutModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const closeModalOkBtn = document.getElementById('closeModalOkBtn');
+    
     // Тема
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
@@ -1068,6 +1189,33 @@
             localStorage.setItem('theme', 'light');
         }
     });
+    
+    // Открыть модальное окно
+    if (aboutBtn) {
+        aboutBtn.addEventListener('click', () => {
+            aboutModal.classList.add('active');
+        });
+    }
+    
+    // Закрыть модальное окно
+    function closeModal() {
+        aboutModal.classList.remove('active');
+    }
+    
+    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    if (closeModalOkBtn) closeModalOkBtn.addEventListener('click', closeModal);
+    if (aboutModal) {
+        aboutModal.addEventListener('click', (e) => {
+            if (e.target === aboutModal) closeModal();
+        });
+    }
+    
+    // Скрытие кнопки очистки поиска по своим трекам
+    function updateClearButtonVisibility() {
+        if (clearMyTracksSearch) {
+            clearMyTracksSearch.style.display = myTracksSearchInput.value.trim() ? 'flex' : 'none';
+        }
+    }
     
     // Открыть глобальный поиск
     function openSearch() {
@@ -1220,18 +1368,26 @@
         }
     }
     
-    myTracksSearchInput.addEventListener('input', (e) => {
-        if (myTracksSearchDebounceTimer) clearTimeout(myTracksSearchDebounceTimer);
-        myTracksSearchDebounceTimer = setTimeout(() => {
-            searchMyTracks(e.target.value);
-        }, 300);
-    });
+    if (myTracksSearchInput) {
+        myTracksSearchInput.addEventListener('input', (e) => {
+            if (myTracksSearchDebounceTimer) clearTimeout(myTracksSearchDebounceTimer);
+            myTracksSearchDebounceTimer = setTimeout(() => {
+                searchMyTracks(e.target.value);
+            }, 300);
+        });
+        
+        myTracksSearchInput.addEventListener('input', updateClearButtonVisibility);
+        updateClearButtonVisibility();
+    }
     
-    clearMyTracksSearch.addEventListener('click', () => {
-        myTracksSearchInput.value = '';
-        searchMyTracks('');
-        myTracksSearchInput.focus();
-    });
+    if (clearMyTracksSearch) {
+        clearMyTracksSearch.addEventListener('click', () => {
+            myTracksSearchInput.value = '';
+            searchMyTracks('');
+            updateClearButtonVisibility();
+            myTracksSearchInput.focus();
+        });
+    }
     
     // Загрузка моих треков
     async function loadMyTracks() {
@@ -1834,6 +1990,61 @@
         isPlaying = !isPlaying;
         updatePlayPauseButton();
     });
+    
+    document.getElementById('prevBtn').addEventListener('click', () => {
+        if (currentTrackSource === 'myTracks') {
+            if (currentTrackIndex > 0) {
+                playTrackFromIndex(currentTrackIndex - 1, 'myTracks');
+            }
+        } else if (currentTrackSource === 'search') {
+            if (currentTrackIndex > 0) {
+                playTrackFromIndex(currentTrackIndex - 1, 'search');
+            }
+        } else if (currentTrackSource === 'recommendations') {
+            if (currentTrackIndex > 0) {
+                playTrackFromIndex(currentTrackIndex - 1, 'recommendations');
+            }
+        }
+    });
+    
+    document.getElementById('nextBtn').addEventListener('click', () => {
+        if (currentTrackSource === 'myTracks') {
+            if (currentTrackIndex < myTracks.length - 1) {
+                playTrackFromIndex(currentTrackIndex + 1, 'myTracks');
+            }
+        } else if (currentTrackSource === 'search') {
+            if (currentTrackIndex < searchResults.length - 1) {
+                playTrackFromIndex(currentTrackIndex + 1, 'search');
+            }
+        } else if (currentTrackSource === 'recommendations') {
+            if (currentTrackIndex < recommendations.length - 1) {
+                playTrackFromIndex(currentTrackIndex + 1, 'recommendations');
+            }
+        }
+    });
+    
+    function playTrackFromIndex(index, source) {
+        let track;
+        if (source === 'myTracks') {
+            track = myTracks[index];
+            currentTrackSource = 'myTracks';
+            currentTrackIndex = index;
+        } else if (source === 'search') {
+            track = searchResults[index];
+            currentTrackSource = 'search';
+            currentTrackIndex = index;
+        } else if (source === 'recommendations') {
+            track = recommendations[index];
+            currentTrackSource = 'recommendations';
+            currentTrackIndex = index;
+        } else {
+            return;
+        }
+        
+        if (track) {
+            playTrack(track, source);
+        }
+    }
     
     audioPlayer.addEventListener('timeupdate', () => {
         if (audioPlayer.duration) {
