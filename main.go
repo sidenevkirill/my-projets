@@ -362,45 +362,40 @@ func getUserInfo(token string) (*VKUserInfo, error) {
 	return &result.Response[0], nil
 }
 
-// Обмен кода VK ID на токен
-func exchangeCodeHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"})
+// Обработчик колбэка от VK OAuth
+func vkCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	if code == "" {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	var req struct {
-		Code     string `json:"code"`
-		DeviceId string `json:"device_id"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request"})
+	errorMsg := r.URL.Query().Get("error")
+	if errorMsg != "" {
+		fmt.Printf("VK Callback error: %s\n", errorMsg)
+		http.Redirect(w, r, "/login?error="+errorMsg, http.StatusSeeOther)
 		return
 	}
 
-	client := &http.Client{Timeout: 15 * time.Second}
-
-	apiURL := fmt.Sprintf("https://oauth.vk.com/access_token?client_id=54533272&client_secret=tPyNb8rQNMXaTHRNp4NZ&code=%s&device_id=%s&grant_type=authorization_code",
-		req.Code, req.DeviceId)
+	// Обмениваем код на токен
+	client := &http.Client{Timeout: 10 * time.Second}
+	apiURL := fmt.Sprintf("https://oauth.vk.com/access_token?client_id=54533272&client_secret=tPyNb8rQNMXaTHRNp4NZ&code=%s&redirect_uri=%s/auth/vk-callback&grant_type=authorization_code",
+		code, getBaseURL(r))
 
 	resp, err := client.Get(apiURL)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		http.Redirect(w, r, "/login?error=network", http.StatusSeeOther)
 		return
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		http.Redirect(w, r, "/login?error=read", http.StatusSeeOther)
 		return
 	}
 
-	fmt.Printf("Exchange code response: %s\n", string(body))
+	fmt.Printf("OAuth response: %s\n", string(body))
 
 	var result struct {
 		AccessToken string `json:"access_token"`
@@ -410,28 +405,24 @@ func exchangeCodeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.Unmarshal(body, &result); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		http.Redirect(w, r, "/login?error=parse", http.StatusSeeOther)
 		return
 	}
 
 	if result.Error != "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": result.Error, "description": result.ErrorDesc})
+		http.Redirect(w, r, "/login?error="+result.Error, http.StatusSeeOther)
 		return
 	}
 
 	if result.AccessToken == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "No access token received"})
+		http.Redirect(w, r, "/login?error=no_token", http.StatusSeeOther)
 		return
 	}
 
 	// Проверяем токен
 	userInfo, err := getUserInfo(result.AccessToken)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid token: " + err.Error()})
+		http.Redirect(w, r, "/login?error=invalid_token", http.StatusSeeOther)
 		return
 	}
 
@@ -459,26 +450,15 @@ func exchangeCodeHandler(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   86400 * 30,
 	})
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"success": "true"})
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-// Обработчик колбэка от VK ID
-func vkCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	code := r.URL.Query().Get("code")
-	if code == "" {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+func getBaseURL(r *http.Request) string {
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
 	}
-
-	errorMsg := r.URL.Query().Get("error")
-	if errorMsg != "" {
-		fmt.Printf("VK Callback error: %s\n", errorMsg)
-		http.Redirect(w, r, "/login?error="+errorMsg, http.StatusSeeOther)
-		return
-	}
-
-	http.Redirect(w, r, "/login?code="+code, http.StatusSeeOther)
+	return scheme + "://" + r.Host
 }
 
 func getTrackURLHandler(w http.ResponseWriter, r *http.Request) {
@@ -754,8 +734,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func setTokenHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("setTokenHandler called, method: %s\n", r.Method)
-
 	if r.Method != http.MethodPost {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -763,27 +741,12 @@ func setTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.FormValue("token")
 	if token == "" {
-		if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Token is empty"})
-			return
-		}
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	fmt.Printf("Token received: %s...\n", token[:min(20, len(token))])
-
 	userInfo, err := getUserInfo(token)
 	if err != nil {
-		fmt.Printf("getUserInfo error: %v\n", err)
-		if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-			return
-		}
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, `
 			<!DOCTYPE html>
@@ -818,16 +781,9 @@ func setTokenHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "vk_user_name",
 		Value:    userInfo.FirstName + " " + userInfo.LastName,
-		HttpOnly: false,
 		Path:     "/",
 		MaxAge:   86400 * 30,
 	})
-
-	if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"success": "true", "redirect": "/"})
-		return
-	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -964,18 +920,10 @@ func apiUserInfoHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"name": name})
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func main() {
 	http.HandleFunc("/", authMiddleware(indexHandler))
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/auth/set-token", setTokenHandler)
-	http.HandleFunc("/auth/exchange-code", exchangeCodeHandler)
 	http.HandleFunc("/auth/vk-callback", vkCallbackHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/download", authMiddleware(downloadTrackHandler))
@@ -995,7 +943,7 @@ func main() {
 	fmt.Println("==================================================")
 	fmt.Printf("\n✅ Сервер запущен: http://localhost:%s\n", port)
 	fmt.Println("🌐 Открой в браузере: http://localhost:8080")
-	fmt.Println("🔐 Доступен вход через VK ID или по токену")
+	fmt.Println("🔐 Доступен вход через ВКонтакте или по токену")
 	fmt.Println("📥 Треки можно скачать через кнопку меню (три точки)")
 	fmt.Println("⚠️ Удаление треков реально удаляет их из ВКонтакте!")
 	fmt.Println("📌 Нажми Ctrl+C для остановки")
