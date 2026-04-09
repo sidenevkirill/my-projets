@@ -204,6 +204,17 @@
             text-decoration: underline;
         }
         
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+        
         @media (max-width: 480px) {
             .login-card {
                 padding: 24px;
@@ -224,6 +235,8 @@
                 <h1>VK Moosic</h1>
                 <p>Слушайте музыку ВКонтакте</p>
             </div>
+            
+            <div class="error-message" id="errorMessage"></div>
             
             <div class="vk-login-container">
                 <div id="vkIdOneTap"></div>
@@ -256,6 +269,15 @@
     <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
     <script>
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        
+        function showError(msg) {
+            errorMessageDiv.textContent = msg;
+            errorMessageDiv.style.display = 'block';
+            setTimeout(() => {
+                errorMessageDiv.style.display = 'none';
+            }, 5000);
+        }
         
         function showInstructions() {
             alert("Как получить токен ВКонтакте:\n\n1. Перейдите на сайт: vkhost.github.io\n2. Выберите приложение 'Kate Mobile' или 'VK Music'\n3. Отметьте права доступа: Аудиозаписи (audio)\n4. Нажмите 'Получить токен'\n5. Скопируйте access_token (начинается с vk1.a.)\n6. Вставьте его в поле выше");
@@ -269,20 +291,6 @@
             loadingOverlay.classList.remove('active');
         }
         
-        function vkidOnSuccess(data) {
-            console.log('VK ID Success:', data);
-            // После успешного получения токена, отправляем его на сервер
-            if (data.access_token) {
-                sendTokenToServer(data.access_token);
-            }
-        }
-        
-        function vkidOnError(error) {
-            console.error('VK ID Error:', error);
-            hideLoading();
-            alert('Ошибка авторизации VK ID: ' + (error.message || 'Неизвестная ошибка'));
-        }
-        
         async function sendTokenToServer(token) {
             showLoading();
             try {
@@ -292,18 +300,49 @@
                     body: 'token=' + encodeURIComponent(token)
                 });
                 
-                if (response.redirected || response.ok) {
-                    window.location.href = '/';
-                } else {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else if (response.ok) {
                     const data = await response.text();
-                    console.error('Ошибка:', data);
-                    alert('Ошибка авторизации на сервере');
+                    if (data.includes('success') || data.includes('redirect')) {
+                        window.location.href = '/';
+                    } else {
+                        hideLoading();
+                        showError('Ошибка авторизации на сервере');
+                    }
+                } else {
                     hideLoading();
+                    const error = await response.text();
+                    showError('Ошибка: ' + error);
                 }
             } catch (err) {
                 console.error('Ошибка:', err);
-                alert('Ошибка соединения: ' + err.message);
                 hideLoading();
+                showError('Ошибка соединения: ' + err.message);
+            }
+        }
+        
+        async function exchangeCodeAndLogin(code, deviceId) {
+            showLoading();
+            try {
+                const response = await fetch('/auth/exchange-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, device_id: deviceId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    hideLoading();
+                    showError('Ошибка авторизации: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (err) {
+                console.error('Ошибка:', err);
+                hideLoading();
+                showError('Ошибка соединения: ' + err.message);
             }
         }
         
@@ -312,7 +351,7 @@
             
             VKID.Config.init({
                 app: 54533272,
-                redirectUrl: window.location.origin + '/',
+                redirectUrl: window.location.origin + '/auth/vk-callback',
                 responseMode: VKID.ConfigResponseMode.Callback,
                 source: VKID.ConfigSource.LOWCODE,
                 scope: 'audio,offline',
@@ -324,23 +363,42 @@
                 appName: 'VKMoosic',
                 showAlternativeLogin: true
             })
-            .on(VKID.WidgetEvents.ERROR, vkidOnError)
+            .on(VKID.WidgetEvents.ERROR, function(error) {
+                console.error('VK ID Error:', error);
+                showError('Ошибка VK ID: ' + (error.message || 'Неизвестная ошибка'));
+            })
             .on(VKID.FloatingOneTapInternalEvents.LOGIN_SUCCESS, function(payload) {
                 const code = payload.code;
                 const deviceId = payload.device_id;
                 
-                // Обмениваем код на токен
                 VKID.Auth.exchangeCode(code, deviceId)
-                    .then(vkidOnSuccess)
-                    .catch(vkidOnError);
+                    .then(function(data) {
+                        if (data.access_token) {
+                            sendTokenToServer(data.access_token);
+                        } else if (data.email) {
+                            sendTokenToServer(data.access_token);
+                        } else {
+                            exchangeCodeAndLogin(code, deviceId);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Exchange error:', error);
+                        exchangeCodeAndLogin(code, deviceId);
+                    });
             });
         } else {
             console.error('VKIDSDK not loaded');
             document.getElementById('vkIdOneTap').innerHTML = '<p style="color: red;">Ошибка загрузки VK ID</p>';
         }
         
-        document.getElementById('tokenForm').addEventListener('submit', function() {
-            showLoading();
+        document.getElementById('tokenForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const token = document.querySelector('input[name="token"]').value.trim();
+            if (token) {
+                sendTokenToServer(token);
+            } else {
+                showError('Введите токен');
+            }
         });
     </script>
 </body>
