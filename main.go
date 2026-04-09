@@ -457,6 +457,91 @@ func exchangeCodeHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"success": "true"})
 }
 
+// Обработчик колбэка от VK ID
+func vkCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	if code == "" {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// Определяем схему (http/https)
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	redirectURI := scheme + "://" + r.Host + "/auth/vk-callback"
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	params := url.Values{}
+	params.Set("client_id", "54533272")
+	params.Set("client_secret", "tPyNb8rQNMXaTHRNp4NZ")
+	params.Set("code", code)
+	params.Set("redirect_uri", redirectURI)
+	params.Set("grant_type", "authorization_code")
+
+	apiURL := "https://oauth.vk.com/access_token?" + params.Encode()
+
+	resp, err := client.Get(apiURL)
+	if err != nil {
+		http.Redirect(w, r, "/login?error=network", http.StatusSeeOther)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Redirect(w, r, "/login?error=read", http.StatusSeeOther)
+		return
+	}
+
+	var result struct {
+		AccessToken string `json:"access_token"`
+		UserId      int    `json:"user_id"`
+		Error       string `json:"error"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		http.Redirect(w, r, "/login?error=parse", http.StatusSeeOther)
+		return
+	}
+
+	if result.Error != "" || result.AccessToken == "" {
+		http.Redirect(w, r, "/login?error=auth", http.StatusSeeOther)
+		return
+	}
+
+	// Сохраняем токен
+	http.SetCookie(w, &http.Cookie{
+		Name:     "vk_token",
+		Value:    result.AccessToken,
+		HttpOnly: true,
+		Path:     "/",
+		MaxAge:   86400 * 30,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "vk_user_id",
+		Value:    strconv.Itoa(result.UserId),
+		HttpOnly: true,
+		Path:     "/",
+		MaxAge:   86400 * 30,
+	})
+
+	// Получаем имя пользователя
+	userInfo, err := getUserInfo(result.AccessToken)
+	if err == nil {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "vk_user_name",
+			Value:    userInfo.FirstName + " " + userInfo.LastName,
+			Path:     "/",
+			MaxAge:   86400 * 30,
+		})
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func getTrackURLHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, err := r.Cookie("vk_token")
 	if err != nil || tokenCookie.Value == "" {
@@ -740,12 +825,25 @@ func setTokenHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.FormValue("token")
 	if token == "" {
+		// Проверяем, AJAX ли запрос
+		if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Token is empty"})
+			return
+		}
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
 	userInfo, err := getUserInfo(token)
 	if err != nil {
+		if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w, `
 			<!DOCTYPE html>
@@ -787,6 +885,13 @@ func setTokenHandler(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		MaxAge:   86400 * 30,
 	})
+
+	// Проверяем, AJAX ли запрос
+	if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"success": "true", "redirect": "/"})
+		return
+	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -928,6 +1033,7 @@ func main() {
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/auth/set-token", setTokenHandler)
 	http.HandleFunc("/auth/exchange-code", exchangeCodeHandler)
+	http.HandleFunc("/auth/vk-callback", vkCallbackHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/download", authMiddleware(downloadTrackHandler))
 	http.HandleFunc("/get-track-url", authMiddleware(getTrackURLHandler))
