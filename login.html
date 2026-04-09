@@ -23,7 +23,6 @@
             padding: 20px;
         }
         
-        /* VK стили */
         .login-container {
             max-width: 480px;
             width: 100%;
@@ -70,24 +69,11 @@
             color: #6c6c6c;
         }
         
-        /* VK кнопка */
         .vk-login-container {
             display: flex;
             justify-content: center;
             margin-bottom: 24px;
-        }
-        
-        #vkIdOneTap {
             min-height: 48px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-        }
-        
-        /* VK ID кнопка будет встроена, но добавим кастомные стили на всякий случай */
-        .vkuiButton {
-            width: 100% !important;
         }
         
         .divider {
@@ -114,7 +100,6 @@
             color: #6c6c6c;
         }
         
-        /* Форма */
         .token-input {
             width: 100%;
             padding: 12px 16px;
@@ -172,7 +157,6 @@
             vertical-align: middle;
         }
         
-        /* Loading overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -203,7 +187,6 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Хинт */
         .token-hint {
             font-size: 12px;
             color: #6c6c6c;
@@ -286,26 +269,36 @@
             loadingOverlay.classList.remove('active');
         }
         
-        async function exchangeCodeForToken(code, deviceId) {
+        function vkidOnSuccess(data) {
+            console.log('VK ID Success:', data);
+            // После успешного получения токена, отправляем его на сервер
+            if (data.access_token) {
+                sendTokenToServer(data.access_token);
+            }
+        }
+        
+        function vkidOnError(error) {
+            console.error('VK ID Error:', error);
+            hideLoading();
+            alert('Ошибка авторизации VK ID: ' + (error.message || 'Неизвестная ошибка'));
+        }
+        
+        async function sendTokenToServer(token) {
             showLoading();
             try {
-                const response = await fetch('/auth/exchange-code', {
+                const response = await fetch('/auth/set-token', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: code, device_id: deviceId })
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'token=' + encodeURIComponent(token)
                 });
                 
-                const data = await response.json();
-                
-                if (data.error) {
-                    console.error('Ошибка:', data.error);
-                    alert('Ошибка авторизации: ' + data.error);
-                    hideLoading();
-                    return;
-                }
-                
-                if (data.success) {
+                if (response.redirected || response.ok) {
                     window.location.href = '/';
+                } else {
+                    const data = await response.text();
+                    console.error('Ошибка:', data);
+                    alert('Ошибка авторизации на сервере');
+                    hideLoading();
                 }
             } catch (err) {
                 console.error('Ошибка:', err);
@@ -325,19 +318,21 @@
                 scope: 'audio,offline',
             });
             
-            const oneTap = new VKID.OneTap();
+            const floatingOneTap = new VKID.FloatingOneTap();
             
-            oneTap.render({
-                container: document.getElementById('vkIdOneTap'),
+            floatingOneTap.render({
+                appName: 'VKMoosic',
                 showAlternativeLogin: true
             })
-            .on(VKID.WidgetEvents.ERROR, function(error) {
-                console.error('VK ID Error:', error);
-            })
-            .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, function(payload) {
+            .on(VKID.WidgetEvents.ERROR, vkidOnError)
+            .on(VKID.FloatingOneTapInternalEvents.LOGIN_SUCCESS, function(payload) {
                 const code = payload.code;
                 const deviceId = payload.device_id;
-                exchangeCodeForToken(code, deviceId);
+                
+                // Обмениваем код на токен
+                VKID.Auth.exchangeCode(code, deviceId)
+                    .then(vkidOnSuccess)
+                    .catch(vkidOnError);
             });
         } else {
             console.error('VKIDSDK not loaded');
