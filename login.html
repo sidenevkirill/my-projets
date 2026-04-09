@@ -33,7 +33,6 @@
             border-radius: 12px;
             padding: 32px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: all 0.2s;
         }
         
         .logo {
@@ -119,11 +118,6 @@
             box-shadow: 0 0 0 2px rgba(39, 135, 245, 0.2);
         }
         
-        .token-input::placeholder {
-            color: #9ca3af;
-            font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-        }
-        
         .btn-token {
             width: 100%;
             background: #2787f5;
@@ -139,10 +133,6 @@
         
         .btn-token:hover {
             background: #1e6fd4;
-        }
-        
-        .btn-token:active {
-            transform: scale(0.98);
         }
         
         .footer {
@@ -190,18 +180,13 @@
         .token-hint {
             font-size: 12px;
             color: #6c6c6c;
-            margin-top: -12px;
-            margin-bottom: 16px;
+            margin-top: 12px;
             text-align: center;
         }
         
         .token-hint a {
             color: #2787f5;
             text-decoration: none;
-        }
-        
-        .token-hint a:hover {
-            text-decoration: underline;
         }
         
         .error-message {
@@ -215,13 +200,15 @@
             display: none;
         }
         
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 24px;
-            }
-            .logo h1 {
-                font-size: 22px;
-            }
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
         }
     </style>
 </head>
@@ -237,17 +224,18 @@
             </div>
             
             <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
             
             <div class="vk-login-container">
                 <div id="vkIdOneTap"></div>
             </div>
             
             <div class="divider">
-                <span>или войдите по токену</span>
+                <span>или введите токен вручную</span>
             </div>
             
-            <form method="POST" action="/auth/set-token" id="tokenForm">
-                <input type="text" name="token" class="token-input" placeholder="vk1.a.xxxxxxxxxxx..." autocomplete="off">
+            <form id="tokenForm">
+                <input type="text" name="token" class="token-input" id="tokenInput" placeholder="vk1.a.xxxxxxxxxxx..." autocomplete="off">
                 <button type="submit" class="btn-token">Войти</button>
             </form>
             
@@ -270,6 +258,7 @@
     <script>
         const loadingOverlay = document.getElementById('loadingOverlay');
         const errorMessageDiv = document.getElementById('errorMessage');
+        const successMessageDiv = document.getElementById('successMessage');
         
         function showError(msg) {
             errorMessageDiv.textContent = msg;
@@ -277,6 +266,14 @@
             setTimeout(() => {
                 errorMessageDiv.style.display = 'none';
             }, 5000);
+        }
+        
+        function showSuccess(msg) {
+            successMessageDiv.textContent = msg;
+            successMessageDiv.style.display = 'block';
+            setTimeout(() => {
+                successMessageDiv.style.display = 'none';
+            }, 3000);
         }
         
         function showInstructions() {
@@ -303,8 +300,8 @@
                 if (response.redirected) {
                     window.location.href = response.url;
                 } else if (response.ok) {
-                    const data = await response.text();
-                    if (data.includes('success') || data.includes('redirect')) {
+                    const text = await response.text();
+                    if (text.includes('success') || text.includes('redirect') || response.url) {
                         window.location.href = '/';
                     } else {
                         hideLoading();
@@ -322,30 +319,7 @@
             }
         }
         
-        async function exchangeCodeAndLogin(code, deviceId) {
-            showLoading();
-            try {
-                const response = await fetch('/auth/exchange-code', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: code, device_id: deviceId })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    window.location.href = '/';
-                } else {
-                    hideLoading();
-                    showError('Ошибка авторизации: ' + (data.error || 'Неизвестная ошибка'));
-                }
-            } catch (err) {
-                console.error('Ошибка:', err);
-                hideLoading();
-                showError('Ошибка соединения: ' + err.message);
-            }
-        }
-        
+        // Обработка VK ID
         if (window.VKIDSDK) {
             const VKID = window.VKIDSDK;
             
@@ -368,32 +342,42 @@
                 showError('Ошибка VK ID: ' + (error.message || 'Неизвестная ошибка'));
             })
             .on(VKID.FloatingOneTapInternalEvents.LOGIN_SUCCESS, function(payload) {
+                console.log('Login success payload:', payload);
                 const code = payload.code;
                 const deviceId = payload.device_id;
                 
-                VKID.Auth.exchangeCode(code, deviceId)
-                    .then(function(data) {
-                        if (data.access_token) {
-                            sendTokenToServer(data.access_token);
-                        } else if (data.email) {
-                            sendTokenToServer(data.access_token);
-                        } else {
-                            exchangeCodeAndLogin(code, deviceId);
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error('Exchange error:', error);
-                        exchangeCodeAndLogin(code, deviceId);
-                    });
+                showLoading();
+                
+                // Обмениваем код на токен через наш сервер
+                fetch('/auth/exchange-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, device_id: deviceId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/';
+                    } else {
+                        hideLoading();
+                        showError('Ошибка авторизации: ' + (data.error || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Exchange error:', err);
+                    hideLoading();
+                    showError('Ошибка обмена кода: ' + err.message);
+                });
             });
         } else {
             console.error('VKIDSDK not loaded');
             document.getElementById('vkIdOneTap').innerHTML = '<p style="color: red;">Ошибка загрузки VK ID</p>';
         }
         
+        // Обработка формы токена
         document.getElementById('tokenForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const token = document.querySelector('input[name="token"]').value.trim();
+            const token = document.getElementById('tokenInput').value.trim();
             if (token) {
                 sendTokenToServer(token);
             } else {
