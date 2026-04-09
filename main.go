@@ -362,6 +362,101 @@ func getUserInfo(token string) (*VKUserInfo, error) {
 	return &result.Response[0], nil
 }
 
+// Обмен кода VK ID на токен
+func exchangeCodeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"})
+		return
+	}
+
+	var req struct {
+		Code     string `json:"code"`
+		DeviceId string `json:"device_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request"})
+		return
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	params := url.Values{}
+	params.Set("client_id", "54533272")
+	params.Set("client_secret", "tPyNb8rQNMXaTHRNp4NZ")
+	params.Set("code", req.Code)
+	params.Set("device_id", req.DeviceId)
+	params.Set("grant_type", "authorization_code")
+
+	apiURL := "https://oauth.vk.com/access_token?" + params.Encode()
+
+	resp, err := client.Get(apiURL)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	var result struct {
+		AccessToken string `json:"access_token"`
+		UserId      int    `json:"user_id"`
+		Error       string `json:"error"`
+		ErrorDesc   string `json:"error_description"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	if result.Error != "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": result.Error, "description": result.ErrorDesc})
+		return
+	}
+
+	// Сохраняем токен в сессию
+	http.SetCookie(w, &http.Cookie{
+		Name:     "vk_token",
+		Value:    result.AccessToken,
+		HttpOnly: true,
+		Path:     "/",
+		MaxAge:   86400 * 30,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "vk_user_id",
+		Value:    strconv.Itoa(result.UserId),
+		HttpOnly: true,
+		Path:     "/",
+		MaxAge:   86400 * 30,
+	})
+
+	// Получаем имя пользователя
+	userInfo, err := getUserInfo(result.AccessToken)
+	if err == nil {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "vk_user_name",
+			Value:    userInfo.FirstName + " " + userInfo.LastName,
+			Path:     "/",
+			MaxAge:   86400 * 30,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"success": "true"})
+}
+
 func getTrackURLHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, err := r.Cookie("vk_token")
 	if err != nil || tokenCookie.Value == "" {
@@ -832,12 +927,13 @@ func main() {
 	http.HandleFunc("/", authMiddleware(indexHandler))
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/auth/set-token", setTokenHandler)
+	http.HandleFunc("/auth/exchange-code", exchangeCodeHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/download", authMiddleware(downloadTrackHandler))
 	http.HandleFunc("/get-track-url", authMiddleware(getTrackURLHandler))
 	http.HandleFunc("/api/tracks", authMiddleware(apiTracksHandler))
 	http.HandleFunc("/api/search", authMiddleware(apiSearchHandler))
-	http.HandleFunc("/api/search-my", authMiddleware(apiSearchMyTracksHandler)) // Новый эндпоинт для поиска по своим трекам
+	http.HandleFunc("/api/search-my", authMiddleware(apiSearchMyTracksHandler))
 	http.HandleFunc("/api/add", authMiddleware(apiAddTrackHandler))
 	http.HandleFunc("/api/delete", authMiddleware(apiDeleteTrackHandler))
 	http.HandleFunc("/api/user", authMiddleware(apiUserInfoHandler))
@@ -848,12 +944,12 @@ func main() {
 	fmt.Println("==================================================")
 	fmt.Println("VK MOOSIC WEB PLAYER")
 	fmt.Println("==================================================")
-	fmt.Printf("\nСервер запущен: http://localhost:%s\n", port)
-	fmt.Println("Открой в браузере: http://localhost:8080")
-	fmt.Println("Потребуется ввести токен ВК при первом входе")
-	fmt.Println("Треки можно скачать через кнопку меню (три точки)")
-	fmt.Println("Удаление треков реально удаляет их из ВКонтакте!")
-	fmt.Println("Нажми Ctrl+C для остановки")
+	fmt.Printf("\n✅ Сервер запущен: http://localhost:%s\n", port)
+	fmt.Println("🌐 Открой в браузере: http://localhost:8080")
+	fmt.Println("🔐 Доступен вход через VK ID или по токену")
+	fmt.Println("📥 Треки можно скачать через кнопку меню (три точки)")
+	fmt.Println("⚠️ Удаление треков реально удаляет их из ВКонтакте!")
+	fmt.Println("📌 Нажми Ctrl+C для остановки")
 	fmt.Println("==================================================")
 
 	http.ListenAndServe(":"+port, nil)
