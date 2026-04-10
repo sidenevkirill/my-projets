@@ -205,10 +205,6 @@ func addTrack(token string, ownerID int, trackID int) error {
 }
 
 func getAllTracks(token string, ownerID int) ([]Track, error) {
-	// Демо-режим
-	if DEMO_MODE {
-		return getDemoTracks(), nil
-	}
 	
 	var allTracks []Track
 	offset := 0
@@ -378,20 +374,6 @@ func getUserInfo(token string) (*VKUserInfo, error) {
 	}
 
 	return &result.Response[0], nil
-}
-
-// Демо-треки
-func getDemoTracks() []Track {
-	return []Track{
-		{ID: 1, OwnerID: 1, Artist: "VK Moosic", Title: "Добро пожаловать!", Duration: 180, URL: ""},
-		{ID: 2, OwnerID: 1, Artist: "Imagine Dragons", Title: "Believer", Duration: 204, URL: "https://example.com/track1.mp3"},
-		{ID: 3, OwnerID: 1, Artist: "Billie Eilish", Title: "bad guy", Duration: 194, URL: "https://example.com/track2.mp3"},
-		{ID: 4, OwnerID: 1, Artist: "The Weeknd", Title: "Blinding Lights", Duration: 200, URL: "https://example.com/track3.mp3"},
-		{ID: 5, OwnerID: 1, Artist: "Dua Lipa", Title: "Levitating", Duration: 203, URL: "https://example.com/track4.mp3"},
-		{ID: 6, OwnerID: 1, Artist: "Glass Animals", Title: "Heat Waves", Duration: 238, URL: "https://example.com/track5.mp3"},
-		{ID: 7, OwnerID: 1, Artist: "Doja Cat", Title: "Say So", Duration: 208, URL: "https://example.com/track6.mp3"},
-		{ID: 8, OwnerID: 1, Artist: "Post Malone", Title: "Circles", Duration: 215, URL: "https://example.com/track7.mp3"},
-	}
 }
 
 // Обработчик колбэка от VK OAuth
