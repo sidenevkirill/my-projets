@@ -313,16 +313,6 @@ func deleteTrack(token string, ownerID int, trackID int) error {
 }
 
 func getUserInfo(token string) (*VKUserInfo, error) {
-	// Если это демо-токен, возвращаем фейковые данные
-	if token == "vk1.a.hX7_0uL__hMBZptgMhfF25wAwZcQBKPSxGzerxaGb3PNpxxLIf6Dt8uffq-lePry0R7COllYA8uyOHdSN87AaW-zFeO8YMc1r7LhyDBUIazx7yAmOVajIHKehEfx6HzwoQ57lPQwmLlOlNKZ2EcpTkslhdjxmrtbMX2y6BqBmhT24OHZeoPzDBRzAZEV2Z1kA_EpgcnAxsW8sL4Yq5lcMg" {
-		return &VKUserInfo{
-			ID:        1,
-			FirstName: "VK",
-			LastName:  "Moosic",
-			Photo50:   "",
-		}, nil
-	}
-	
 	client := &http.Client{Timeout: 10 * time.Second}
 
 	params := url.Values{}
