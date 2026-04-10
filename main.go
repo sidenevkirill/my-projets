@@ -62,6 +62,9 @@ var trackURLCache = struct {
 	data map[string]string
 }{data: make(map[string]string)}
 
+// Демо-режим
+const DEMO_MODE = true
+
 func getTrackURL(token string, ownerID int, trackID int) string {
 	cacheKey := fmt.Sprintf("%d_%d", ownerID, trackID)
 
@@ -202,6 +205,11 @@ func addTrack(token string, ownerID int, trackID int) error {
 }
 
 func getAllTracks(token string, ownerID int) ([]Track, error) {
+	// Демо-режим
+	if DEMO_MODE {
+		return getDemoTracks(), nil
+	}
+	
 	var allTracks []Track
 	offset := 0
 	count := 100
@@ -313,6 +321,16 @@ func deleteTrack(token string, ownerID int, trackID int) error {
 }
 
 func getUserInfo(token string) (*VKUserInfo, error) {
+	// Демо-режим
+	if DEMO_MODE {
+		return &VKUserInfo{
+			ID:        1,
+			FirstName: "VK",
+			LastName:  "Moosic",
+			Photo50:   "",
+		}, nil
+	}
+	
 	client := &http.Client{Timeout: 10 * time.Second}
 
 	params := url.Values{}
@@ -362,103 +380,60 @@ func getUserInfo(token string) (*VKUserInfo, error) {
 	return &result.Response[0], nil
 }
 
-// Обработчик колбэка от VK OAuth
-func vkCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	code := r.URL.Query().Get("code")
-	if code == "" {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+// Демо-треки
+func getDemoTracks() []Track {
+	return []Track{
+		{ID: 1, OwnerID: 1, Artist: "VK Moosic", Title: "Добро пожаловать в VK Mini App!", Duration: 180, URL: ""},
+		{ID: 2, OwnerID: 1, Artist: "Imagine Dragons", Title: "Believer", Duration: 204, URL: "https://example.com/track1.mp3"},
+		{ID: 3, OwnerID: 1, Artist: "Billie Eilish", Title: "bad guy", Duration: 194, URL: "https://example.com/track2.mp3"},
+		{ID: 4, OwnerID: 1, Artist: "The Weeknd", Title: "Blinding Lights", Duration: 200, URL: "https://example.com/track3.mp3"},
+		{ID: 5, OwnerID: 1, Artist: "Dua Lipa", Title: "Levitating", Duration: 203, URL: "https://example.com/track4.mp3"},
 	}
-
-	errorMsg := r.URL.Query().Get("error")
-	if errorMsg != "" {
-		fmt.Printf("VK Callback error: %s\n", errorMsg)
-		http.Redirect(w, r, "/login?error="+errorMsg, http.StatusSeeOther)
-		return
-	}
-
-	// Обмениваем код на токен
-	client := &http.Client{Timeout: 10 * time.Second}
-	apiURL := fmt.Sprintf("https://oauth.vk.com/access_token?client_id=54533272&client_secret=tPyNb8rQNMXaTHRNp4NZ&code=%s&redirect_uri=%s/auth/vk-callback&grant_type=authorization_code",
-		code, getBaseURL(r))
-
-	resp, err := client.Get(apiURL)
-	if err != nil {
-		http.Redirect(w, r, "/login?error=network", http.StatusSeeOther)
-		return
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		http.Redirect(w, r, "/login?error=read", http.StatusSeeOther)
-		return
-	}
-
-	fmt.Printf("OAuth response: %s\n", string(body))
-
-	var result struct {
-		AccessToken string `json:"access_token"`
-		UserId      int    `json:"user_id"`
-		Error       string `json:"error"`
-		ErrorDesc   string `json:"error_description"`
-	}
-
-	if err := json.Unmarshal(body, &result); err != nil {
-		http.Redirect(w, r, "/login?error=parse", http.StatusSeeOther)
-		return
-	}
-
-	if result.Error != "" {
-		http.Redirect(w, r, "/login?error="+result.Error, http.StatusSeeOther)
-		return
-	}
-
-	if result.AccessToken == "" {
-		http.Redirect(w, r, "/login?error=no_token", http.StatusSeeOther)
-		return
-	}
-
-	// Проверяем токен
-	userInfo, err := getUserInfo(result.AccessToken)
-	if err != nil {
-		http.Redirect(w, r, "/login?error=invalid_token", http.StatusSeeOther)
-		return
-	}
-
-	// Сохраняем токен
-	http.SetCookie(w, &http.Cookie{
-		Name:     "vk_token",
-		Value:    result.AccessToken,
-		HttpOnly: true,
-		Path:     "/",
-		MaxAge:   86400 * 30,
-	})
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "vk_user_id",
-		Value:    strconv.Itoa(result.UserId),
-		HttpOnly: true,
-		Path:     "/",
-		MaxAge:   86400 * 30,
-	})
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "vk_user_name",
-		Value:    userInfo.FirstName + " " + userInfo.LastName,
-		Path:     "/",
-		MaxAge:   86400 * 30,
-	})
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func getBaseURL(r *http.Request) string {
-	scheme := "http"
-	if r.TLS != nil {
-		scheme = "https"
+// Обработчик для VK Mini App (получение данных о пользователе из VK)
+func vkMiniAppHandler(w http.ResponseWriter, r *http.Request) {
+	// В VK Mini App токен передаётся в заголовке или параметре
+	vkToken := r.URL.Query().Get("vk_access_token")
+	if vkToken == "" {
+		vkToken = r.Header.Get("Authorization")
+		if strings.HasPrefix(vkToken, "Bearer ") {
+			vkToken = strings.TrimPrefix(vkToken, "Bearer ")
+		}
 	}
-	return scheme + "://" + r.Host
+	
+	if vkToken != "" {
+		// Сохраняем токен в сессию
+		http.SetCookie(w, &http.Cookie{
+			Name:     "vk_token",
+			Value:    vkToken,
+			HttpOnly: true,
+			Path:     "/",
+			MaxAge:   86400 * 30,
+		})
+		
+		// Получаем информацию о пользователе
+		userInfo, err := getUserInfo(vkToken)
+		if err == nil {
+			http.SetCookie(w, &http.Cookie{
+				Name:     "vk_user_id",
+				Value:    strconv.Itoa(userInfo.ID),
+				HttpOnly: true,
+				Path:     "/",
+				MaxAge:   86400 * 30,
+			})
+			
+			http.SetCookie(w, &http.Cookie{
+				Name:     "vk_user_name",
+				Value:    userInfo.FirstName + " " + userInfo.LastName,
+				Path:     "/",
+				MaxAge:   86400 * 30,
+			})
+		}
+	}
+	
+	// Отдаём главную страницу
+	http.ServeFile(w, r, "index.html")
 }
 
 func getTrackURLHandler(w http.ResponseWriter, r *http.Request) {
@@ -723,8 +698,14 @@ func apiSearchMyTracksHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(filtered)
 }
 
-// Получение списка плейлистов пользователя
 func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
+	// Демо-режим
+	if DEMO_MODE {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode([]map[string]interface{}{})
+		return
+	}
+	
 	tokenCookie, _ := r.Cookie("vk_token")
 	userIDCookie, _ := r.Cookie("vk_user_id")
 	userID, _ := strconv.Atoi(userIDCookie.Value)
@@ -817,11 +798,16 @@ func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(playlists)
 }
 
-// Получение треков плейлиста
 func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
+	// Демо-режим
+	if DEMO_MODE {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode([]Track{})
+		return
+	}
+	
 	tokenCookie, _ := r.Cookie("vk_token")
 
-	// Извлекаем параметры из URL
 	path := r.URL.Path
 	parts := strings.Split(path, "/")
 	if len(parts) < 5 {
@@ -898,7 +884,6 @@ func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
 
 	tracks := make([]Track, 0)
 	for _, item := range result.Response.Audios {
-		// Нормализуем URL если есть
 		url := strings.ReplaceAll(item.URL, "\\/", "/")
 		tracks = append(tracks, Track{
 			ID:       item.ID,
@@ -988,6 +973,12 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Для демо-режима пропускаем авторизацию
+		if DEMO_MODE && !strings.HasPrefix(r.URL.Path, "/api/") {
+			next(w, r)
+			return
+		}
+		
 		tokenCookie, err := r.Cookie("vk_token")
 		if err != nil || tokenCookie.Value == "" {
 			if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/download" || r.URL.Path == "/get-track-url" {
@@ -1116,6 +1107,7 @@ func main() {
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/auth/set-token", setTokenHandler)
 	http.HandleFunc("/auth/vk-callback", vkCallbackHandler)
+	http.HandleFunc("/auth/vk-mini-app", vkMiniAppHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/download", authMiddleware(downloadTrackHandler))
 	http.HandleFunc("/get-track-url", authMiddleware(getTrackURLHandler))
@@ -1136,10 +1128,9 @@ func main() {
 	fmt.Println("==================================================")
 	fmt.Printf("\n✅ Сервер запущен: http://localhost:%s\n", port)
 	fmt.Println("🌐 Открой в браузере: http://localhost:8080")
-	fmt.Println("🔐 Доступен вход через ВКонтакте или по токену")
-	fmt.Println("📀 Доступны плейлисты пользователя")
+	fmt.Println("📱 Поддержка VK Mini App")
+	fmt.Println("🔐 Демо-режим включен (без авторизации)")
 	fmt.Println("📥 Треки можно скачать через кнопку меню (три точки)")
-	fmt.Println("⚠️ Удаление треков реально удаляет их из ВКонтакте!")
 	fmt.Println("📌 Нажми Ctrl+C для остановки")
 	fmt.Println("==================================================")
 
