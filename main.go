@@ -62,9 +62,6 @@ var trackURLCache = struct {
 	data map[string]string
 }{data: make(map[string]string)}
 
-// Демо-режим (включен)
-const DEMO_MODE = true
-
 func getTrackURL(token string, ownerID int, trackID int) string {
 	cacheKey := fmt.Sprintf("%d_%d", ownerID, trackID)
 
@@ -205,7 +202,6 @@ func addTrack(token string, ownerID int, trackID int) error {
 }
 
 func getAllTracks(token string, ownerID int) ([]Track, error) {
-	
 	var allTracks []Track
 	offset := 0
 	count := 100
@@ -317,16 +313,6 @@ func deleteTrack(token string, ownerID int, trackID int) error {
 }
 
 func getUserInfo(token string) (*VKUserInfo, error) {
-	// Демо-режим
-	if DEMO_MODE {
-		return &VKUserInfo{
-			ID:        1,
-			FirstName: "VK",
-			LastName:  "Moosic",
-			Photo50:   "",
-		}, nil
-	}
-	
 	client := &http.Client{Timeout: 10 * time.Second}
 
 	params := url.Values{}
@@ -737,14 +723,8 @@ func apiSearchMyTracksHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(filtered)
 }
 
+// Получение списка плейлистов пользователя
 func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
-	// Демо-режим
-	if DEMO_MODE {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]map[string]interface{}{})
-		return
-	}
-	
 	tokenCookie, _ := r.Cookie("vk_token")
 	userIDCookie, _ := r.Cookie("vk_user_id")
 	userID, _ := strconv.Atoi(userIDCookie.Value)
@@ -837,16 +817,11 @@ func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(playlists)
 }
 
+// Получение треков плейлиста
 func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
-	// Демо-режим
-	if DEMO_MODE {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]Track{})
-		return
-	}
-	
 	tokenCookie, _ := r.Cookie("vk_token")
 
+	// Извлекаем параметры из URL
 	path := r.URL.Path
 	parts := strings.Split(path, "/")
 	if len(parts) < 5 {
@@ -923,6 +898,7 @@ func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
 
 	tracks := make([]Track, 0)
 	for _, item := range result.Response.Audios {
+		// Нормализуем URL если есть
 		url := strings.ReplaceAll(item.URL, "\\/", "/")
 		tracks = append(tracks, Track{
 			ID:       item.ID,
@@ -1012,12 +988,6 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Для демо-режима пропускаем авторизацию для главной страницы
-		if DEMO_MODE && r.URL.Path == "/" {
-			next(w, r)
-			return
-		}
-		
 		tokenCookie, err := r.Cookie("vk_token")
 		if err != nil || tokenCookie.Value == "" {
 			if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/download" || r.URL.Path == "/get-track-url" {
@@ -1166,8 +1136,10 @@ func main() {
 	fmt.Println("==================================================")
 	fmt.Printf("\n✅ Сервер запущен: http://localhost:%s\n", port)
 	fmt.Println("🌐 Открой в браузере: http://localhost:8080")
-	fmt.Println("🔐 Демо-режим включен (без авторизации)")
+	fmt.Println("🔐 Доступен вход через ВКонтакте или по токену")
+	fmt.Println("📀 Доступны плейлисты пользователя")
 	fmt.Println("📥 Треки можно скачать через кнопку меню (три точки)")
+	fmt.Println("⚠️ Удаление треков реально удаляет их из ВКонтакте!")
 	fmt.Println("📌 Нажми Ctrl+C для остановки")
 	fmt.Println("==================================================")
 
