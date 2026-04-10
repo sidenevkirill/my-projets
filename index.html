@@ -156,7 +156,6 @@
             background: rgba(255,255,255,0.1);
         }
         
-        /* Разворачиваемая строка поиска */
         .search-bar-expanded {
             position: absolute;
             top: 0;
@@ -236,10 +235,6 @@
             justify-content: center;
         }
         
-        .search-bar-expanded .clear-search:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -301,7 +296,56 @@
             opacity: 1;
         }
         
-        /* Поле поиска по своим трекам */
+        /* Tabs для главной страницы */
+        .tabs-container {
+            background: var(--md-surface);
+            border-bottom: 1px solid rgba(128,128,128,0.2);
+            padding: 0 16px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--md-on-surface-variant);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .tab-btn.active {
+            color: var(--md-primary);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--md-primary);
+            border-radius: 1px;
+        }
+        
+        .tab-content {
+            display: none;
+            height: calc(100% - 56px);
+            overflow-y: auto;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
         .my-tracks-search {
             padding: 12px 16px;
             background: var(--md-surface);
@@ -346,10 +390,6 @@
             justify-content: center;
             padding: 4px;
             border-radius: 50%;
-        }
-        
-        .my-tracks-search .clear-my-search:hover {
-            background: rgba(0,0,0,0.1);
         }
         
         .stats {
@@ -710,7 +750,6 @@
             color: var(--md-on-surface-variant);
         }
         
-        /* Профиль */
         .profile-container {
             display: flex;
             flex-direction: column;
@@ -789,12 +828,6 @@
             transition: all 0.2s;
         }
         
-        .profile-logout-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-        
-        /* Модальное окно */
         .modal {
             display: none;
             position: fixed;
@@ -823,14 +856,8 @@
         }
         
         @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
         
         .modal-header {
@@ -948,7 +975,7 @@
         <div class="app-bar-content">
             <div class="app-bar-title" id="appBarTitleBlock">
                 <span class="material-symbols-outlined">music_note</span>
-                <h1 id="appBarTitle">Мои треки</h1>
+                <h1 id="appBarTitle">Аудиозаписи</h1>
             </div>
             <div class="app-bar-actions">
                 <button class="about-btn" id="aboutBtn" title="О приложении">
@@ -963,14 +990,13 @@
             </div>
         </div>
         
-        <!-- Разворачиваемая строка поиска (глобальный поиск) -->
         <div class="search-bar-expanded" id="searchExpanded">
             <button class="back-icon" id="closeSearch">
                 <span class="material-symbols-outlined">arrow_back</span>
             </button>
             <div class="search-input-wrapper">
                 <span class="material-symbols-outlined">search</span>
-                <input type="text" id="globalSearchInput" placeholder="Глобальный поиск треков..." autocomplete="off">
+                <input type="text" id="globalSearchInput" placeholder="Глобальный поиск" autocomplete="off">
                 <button class="clear-search" id="clearSearchInput">
                     <span class="material-symbols-outlined">close</span>
                 </button>
@@ -978,41 +1004,61 @@
         </div>
     </div>
     
-    <!-- Мои треки -->
-    <div id="myTracksPage" class="page active">
-        <!-- Поле поиска по своим трекам -->
-        <div class="my-tracks-search">
-            <div class="search-input-wrapper">
-                <span class="material-symbols-outlined">search</span>
-                <input type="text" id="myTracksSearchInput" placeholder="Поиск в моих треках..." autocomplete="off">
-                <button class="clear-my-search" id="clearMyTracksSearch" style="display: none;">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
+    <!-- Главная страница с табами -->
+    <div id="mainPage" class="page active">
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="myTracksTab">Мои треки</button>
+                <button class="tab-btn" data-tab="recommendationsTab">Рекомендации</button>
             </div>
         </div>
-        <div class="stats">
-            <div class="stats-item">
-                <div class="stats-value" id="totalCount">0</div>
-                <div class="stats-label">Треков</div>
+        
+        <!-- Контент Мои треки -->
+        <div class="tab-content active" id="myTracksTab">
+            <div class="my-tracks-search">
+                <div class="search-input-wrapper">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" id="myTracksSearchInput" placeholder="Поиск по моей музыке" autocomplete="off">
+                    <button class="clear-my-search" id="clearMyTracksSearch" style="display: none;">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
             </div>
-            <div class="stats-item">
-                <div class="stats-value" id="totalDuration">0ч 0м</div>
-                <div class="stats-label">Длительность</div>
+            <div class="stats">
+                <div class="stats-item">
+                    <div class="stats-value" id="totalCount">0</div>
+                    <div class="stats-label">Треков</div>
+                </div>
+                <div class="stats-item">
+                    <div class="stats-value" id="totalDuration">0ч 0м</div>
+                    <div class="stats-label">Длительность</div>
+                </div>
+                <div class="stats-item">
+                    <div class="stats-value" id="totalArtists">0</div>
+                    <div class="stats-label">Исполнителей</div>
+                </div>
             </div>
-            <div class="stats-item">
-                <div class="stats-value" id="totalArtists">0</div>
-                <div class="stats-label">Исполнителей</div>
+            <div class="track-list" id="myTracksList">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка</p>
+                </div>
             </div>
         </div>
-        <div class="track-list" id="myTracksList">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p>Загрузка треков</p>
+        
+        <!-- Контент Рекомендации -->
+        <div class="tab-content" id="recommendationsTab">
+            <div class="track-list" id="recommendationsList">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка</p>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- Поиск (результаты глобального поиска) -->
+    <!-- Поиск -->
     <div id="searchPage" class="page">
         <div class="track-list" id="searchResultsList">
             <div class="search-empty">
@@ -1022,38 +1068,24 @@
         </div>
     </div>
     
-    <!-- Рекомендации -->
-    <div id="recommendationsPage" class="page">
-        <div class="track-list" id="recommendationsList">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p>Загрузка рекомендаций...</p>
-            </div>
-        </div>
-    </div>
-    
     <!-- Профиль -->
     <div id="profilePage" class="page">
         <div class="profile-container" id="profileContainer">
             <div class="loading">
                 <div class="loading-spinner"></div>
-                <p>Загрузка профиля...</p>
+                <p>Загрузка профиля</p>
             </div>
         </div>
     </div>
     
     <div class="bottom-nav">
-        <button class="nav-item active" data-page="myTracks">
-            <span class="material-symbols-outlined">library_music</span>
-            <span>Мои треки</span>
+        <button class="nav-item active" data-page="main">
+            <span class="material-symbols-outlined">music_note</span>
+            <span>Главная</span>
         </button>
         <button class="nav-item" data-page="search">
             <span class="material-symbols-outlined">search</span>
             <span>Поиск</span>
-        </button>
-        <button class="nav-item" data-page="recommendations">
-            <span class="material-symbols-outlined">recommend</span>
-            <span>Рекомендации</span>
         </button>
         <button class="nav-item" data-page="profile">
             <span class="material-symbols-outlined">account_circle</span>
@@ -1092,7 +1124,6 @@
     
     <div class="toast" id="toast">Действие выполнено</div>
     
-    <!-- Модальное окно "О приложении" -->
     <div class="modal" id="aboutModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1104,14 +1135,14 @@
                     <span class="material-symbols-outlined">music_note</span>
                 </div>
                 <h3>VK Moosic Web Player</h3>
-                <p>Версия 0.0.8</p>
+                <p>Версия 0.0.9</p>
                 <p>Удобный плеер для прослушивания музыки из ВКонтакте</p>
                 <div class="about-features">
                     <h4>Возможности:</h4>
                     <ul>
-                        <li>Мои аудиозаписи с поиском</li>
-                        <li>Глобальный поиск треков</li>
+                        <li>Мои аудиозаписи</li>
                         <li>Рекомендации ВК</li>
+                        <li>Глобальный поиск треков</li>
                         <li>Профиль пользователя</li>
                         <li>Скачивание треков</li>
                         <li>Светлая/тёмная тема</li>
@@ -1142,9 +1173,8 @@
     let myTracksSearchDebounceTimer = null;
     
     // DOM элементы
-    const myTracksPage = document.getElementById('myTracksPage');
+    const mainPage = document.getElementById('mainPage');
     const searchPage = document.getElementById('searchPage');
-    const recommendationsPage = document.getElementById('recommendationsPage');
     const profilePage = document.getElementById('profilePage');
     const myTracksList = document.getElementById('myTracksList');
     const searchResultsList = document.getElementById('searchResultsList');
@@ -1153,6 +1183,8 @@
     const appBarTitle = document.getElementById('appBarTitle');
     const appBarTitleBlock = document.getElementById('appBarTitleBlock');
     const navItems = document.querySelectorAll('.nav-item');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = themeToggle.querySelector('.material-symbols-outlined');
     const searchIcon = document.getElementById('searchIcon');
@@ -1162,12 +1194,36 @@
     const clearSearchInput = document.getElementById('clearSearchInput');
     const myTracksSearchInput = document.getElementById('myTracksSearchInput');
     const clearMyTracksSearch = document.getElementById('clearMyTracksSearch');
-    
-    // Кнопка "О приложении" и модальное окно
     const aboutBtn = document.getElementById('aboutBtn');
     const aboutModal = document.getElementById('aboutModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const closeModalOkBtn = document.getElementById('closeModalOkBtn');
+    
+    // Переключение табов
+    function switchTab(tabId) {
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+        });
+        tabBtns.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        document.getElementById(tabId).classList.add('active');
+        const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        // Загружаем рекомендации при переключении на них
+        if (tabId === 'recommendationsTab' && recommendations.length === 0) {
+            loadRecommendations();
+        }
+    }
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
     
     // Тема
     const savedTheme = localStorage.getItem('theme');
@@ -1190,34 +1246,21 @@
         }
     });
     
-    // Открыть модальное окно
-    if (aboutBtn) {
-        aboutBtn.addEventListener('click', () => {
-            aboutModal.classList.add('active');
-        });
-    }
+    // Модальное окно
+    aboutBtn.addEventListener('click', () => {
+        aboutModal.classList.add('active');
+    });
     
-    // Закрыть модальное окно
-    function closeModal() {
+    function closeModalFn() {
         aboutModal.classList.remove('active');
     }
     
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-    if (closeModalOkBtn) closeModalOkBtn.addEventListener('click', closeModal);
-    if (aboutModal) {
-        aboutModal.addEventListener('click', (e) => {
-            if (e.target === aboutModal) closeModal();
-        });
-    }
+    closeModalBtn.addEventListener('click', closeModalFn);
+    closeModalOkBtn.addEventListener('click', closeModalFn);
+    aboutModal.addEventListener('click', (e) => {
+        if (e.target === aboutModal) closeModalFn();
+    });
     
-    // Скрытие кнопки очистки поиска по своим трекам
-    function updateClearButtonVisibility() {
-        if (clearMyTracksSearch) {
-            clearMyTracksSearch.style.display = myTracksSearchInput.value.trim() ? 'flex' : 'none';
-        }
-    }
-    
-    // Открыть глобальный поиск
     function openSearch() {
         searchExpanded.classList.add('active');
         appBarTitleBlock.style.opacity = '0';
@@ -1226,14 +1269,13 @@
         }, 100);
     }
     
-    // Закрыть глобальный поиск
     function closeSearchFn() {
         searchExpanded.classList.remove('active');
         appBarTitleBlock.style.opacity = '1';
         globalSearchInput.value = '';
         performGlobalSearch('');
         if (currentTrackSource === 'search' && searchResults.length > 0) {
-            switchPage('myTracks');
+            switchPage('main');
         }
     }
     
@@ -1246,14 +1288,13 @@
     });
     
     function switchPage(pageId) {
-        myTracksPage.classList.remove('active');
+        mainPage.classList.remove('active');
         searchPage.classList.remove('active');
-        recommendationsPage.classList.remove('active');
         profilePage.classList.remove('active');
         
-        if (pageId === 'myTracks') {
-            myTracksPage.classList.add('active');
-            appBarTitle.textContent = 'Мои треки';
+        if (pageId === 'main') {
+            mainPage.classList.add('active');
+            appBarTitle.textContent = 'Музыка';
             if (myTracks.length === 0) {
                 loadMyTracks();
             }
@@ -1264,13 +1305,6 @@
             if (globalSearchInput.value.trim()) {
                 performGlobalSearch(globalSearchInput.value);
             }
-        } else if (pageId === 'recommendations') {
-            recommendationsPage.classList.add('active');
-            appBarTitle.textContent = 'Рекомендации';
-            if (recommendations.length === 0) {
-                loadRecommendations();
-            }
-            closeSearchFn();
         } else if (pageId === 'profile') {
             profilePage.classList.add('active');
             appBarTitle.textContent = 'Профиль';
@@ -1339,6 +1373,12 @@
         icon.textContent = isPlaying ? 'pause' : 'play_arrow';
     }
     
+    function updateClearButtonVisibility() {
+        if (clearMyTracksSearch) {
+            clearMyTracksSearch.style.display = myTracksSearchInput.value.trim() ? 'flex' : 'none';
+        }
+    }
+    
     // Поиск по моим трекам
     async function searchMyTracks(query) {
         if (!query.trim()) {
@@ -1389,7 +1429,6 @@
         });
     }
     
-    // Загрузка моих треков
     async function loadMyTracks() {
         myTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>';
         
@@ -1415,9 +1454,8 @@
         }
     }
     
-    // Загрузка рекомендаций
     async function loadRecommendations() {
-        recommendationsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка рекомендаций...</p></div>';
+        recommendationsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка рекомендаций</p></div>';
         
         try {
             const response = await fetch('/api/recommendations');
@@ -1439,9 +1477,8 @@
         }
     }
     
-    // Загрузка профиля
     async function loadProfile() {
-        profileContainer.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка профиля...</p></div>';
+        profileContainer.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка профиля</p></div>';
         
         try {
             const response = await fetch('/api/profile');
@@ -1497,7 +1534,6 @@
         });
     }
     
-    // Отображение моих треков
     function displayMyTracks(tracksList) {
         myTracksList.innerHTML = '';
         
@@ -1641,7 +1677,6 @@
         }
     }
     
-    // Отображение результатов глобального поиска
     function displaySearchResults(tracksList) {
         searchResultsList.innerHTML = '';
         
@@ -1711,7 +1746,7 @@
             menu.innerHTML = `
                 <div class="context-menu-item delete" data-action="delete">
                     <span class="material-symbols-outlined">delete_forever</span>
-                    <span>Удалить из моих треков</span>
+                    <span>Удалить</span>
                 </div>
                 <div class="context-menu-item download" data-action="download">
                     <span class="material-symbols-outlined">download</span>
@@ -1857,7 +1892,7 @@
             menu.innerHTML = `
                 <div class="context-menu-item delete" data-action="delete">
                     <span class="material-symbols-outlined">delete_forever</span>
-                    <span>Удалить из моих треков</span>
+                    <span>Удалить</span>
                 </div>
                 <div class="context-menu-item download" data-action="download">
                     <span class="material-symbols-outlined">download</span>
@@ -1878,7 +1913,7 @@
             menu.innerHTML = `
                 <div class="context-menu-item add" data-action="add">
                     <span class="material-symbols-outlined">add_circle</span>
-                    <span>Добавить в мои треки</span>
+                    <span>Добавить</span>
                 </div>
                 <div class="context-menu-item download" data-action="download">
                     <span class="material-symbols-outlined">download</span>
