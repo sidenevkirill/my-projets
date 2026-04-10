@@ -23,7 +23,6 @@
             padding: 20px;
         }
         
-        /* VK стили */
         .login-container {
             max-width: 480px;
             width: 100%;
@@ -70,24 +69,82 @@
             color: #6c6c6c;
         }
         
-        /* VK кнопка */
-        .vk-login-container {
-            display: flex;
-            justify-content: center;
+        .info-box {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 16px;
             margin-bottom: 24px;
-        }
-        
-        #vkIdOneTap {
-            min-height: 48px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            width: 100%;
+            gap: 12px;
         }
         
-        /* VK ID кнопка будет встроена, но добавим кастомные стили на всякий случай */
-        .vkuiButton {
-            width: 100% !important;
+        .info-box .material-symbols-outlined {
+            color: #2787f5;
+            font-size: 24px;
+        }
+        
+        .info-box-text {
+            flex: 1;
+            font-size: 13px;
+            color: #4b5563;
+            line-height: 1.4;
+        }
+        
+        .info-box-text a {
+            color: #2787f5;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .demo-box {
+            background: #e8f5e9;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .demo-box .material-symbols-outlined {
+            color: #2e7d32;
+            font-size: 24px;
+        }
+        
+        .demo-box-text {
+            flex: 1;
+            font-size: 13px;
+            color: #2e7d32;
+            line-height: 1.4;
+        }
+        
+        .demo-box-text strong {
+            font-weight: 600;
+        }
+        
+        .btn-demo {
+            width: 100%;
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+        
+        .btn-demo:hover {
+            background: #43a047;
+            transform: translateY(-1px);
         }
         
         .divider {
@@ -114,7 +171,6 @@
             color: #6c6c6c;
         }
         
-        /* Форма */
         .token-input {
             width: 100%;
             padding: 12px 16px;
@@ -172,7 +228,6 @@
             vertical-align: middle;
         }
         
-        /* Loading overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -203,13 +258,11 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Хинт */
         .token-hint {
             font-size: 12px;
             color: #6c6c6c;
+            margin-top: 12px;
             text-align: center;
-            margin-top: 20px;
-            margin-bottom: 8px;
         }
         
         .token-hint a {
@@ -221,101 +274,14 @@
             text-decoration: underline;
         }
         
-        /* Модальное окно с инструкцией */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1001;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            max-width: 400px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid #e1e3e6;
-        }
-        
-        .modal-header h2 {
-            font-size: 20px;
-            color: #1e1e1e;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: #6c6c6c;
-        }
-        
-        .modal-body {
-            padding: 24px;
-        }
-        
-        .modal-body ol {
-            padding-left: 20px;
-            margin: 16px 0;
-        }
-        
-        .modal-body li {
-            margin: 12px 0;
-            font-size: 14px;
-            color: #1e1e1e;
-        }
-        
-        .modal-body code {
-            background: #f3f4f6;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 12px;
-            word-break: break-all;
-        }
-        
-        .modal-body .note {
-            background: #e8f5e9;
+        .error-message {
+            background: #fee;
+            color: #c33;
             padding: 12px;
             border-radius: 8px;
-            margin-top: 16px;
-            font-size: 13px;
-            color: #2e7d32;
-        }
-        
-        .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid #e1e3e6;
+            margin-bottom: 16px;
             text-align: center;
-        }
-        
-        .modal-ok {
-            background: #2787f5;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 28px;
-            font-size: 14px;
-            cursor: pointer;
+            display: none;
         }
         
         @media (max-width: 480px) {
@@ -339,12 +305,27 @@
                 <p>Слушайте музыку ВКонтакте</p>
             </div>
             
-            <div class="divider">
-                <span>или введите токен вручную</span>
+            <div class="error-message" id="errorMessage"></div>
+            
+            <!-- Демо-режим -->
+            <div class="demo-box">
+                <span class="material-symbols-outlined">verified</span>
+                <div class="demo-box-text">
+                    Можно продолжить без авторизации
+                </div>
             </div>
             
-            <form method="POST" action="/auth/set-token" id="tokenForm">
-                <input type="text" name="token" class="token-input" id="tokenInput" placeholder="Вставьте ваш токен" autocomplete="off">
+            <button class="btn-demo" id="demoBtn">
+                <span class="material-symbols-outlined">play_circle</span>
+                <span>Продолжить без авторизации</span>
+            </button>
+            
+            <div class="divider">
+                <span>или войдите со своим токеном</span>
+            </div>
+            
+            <form id="tokenForm">
+                <input type="text" name="token" class="token-input" id="tokenInput" placeholder="vk1.a.xxxxxxxxxxx..." autocomplete="off">
                 <button type="submit" class="btn-token">Войти</button>
             </form>
             
@@ -364,62 +345,48 @@
     </div>
     
     <!-- Модальное окно с инструкцией -->
-    <div class="modal" id="instructionsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Как получить токен ВКонтакте</h2>
-                <button class="modal-close" id="closeModalBtn">&times;</button>
+    <div class="modal" id="instructionsModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1001; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 16px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #e1e3e6;">
+                <h2 style="font-size: 20px;">Как получить токен</h2>
+                <button class="modal-close" style="background: none; border: none; font-size: 28px; cursor: pointer;">&times;</button>
             </div>
-            <div class="modal-body">
-                <ol>
-                    <li>Перейдите на сайт <strong><a href="https://vkhost.github.io" target="_blank">vkhost.github.io</a></strong></li>
-                    <li>Выберите приложение <strong>"Kate Mobile"</strong> или <strong>"VK Music"</strong></li>
-                    <li>Отметьте права доступа: <strong>Аудиозаписи (audio)</strong> и <strong>Доступ в любое время (offline)</strong></li>
-                    <li>Нажмите кнопку <strong>"Получить токен"</strong></li>
-                    <li>Скопируйте полученный <strong>access_token</strong> (начинается с <code>vk1.a.</code>)</li>
-                    <li>Вставьте токен в поле выше и нажмите <strong>"Войти"</strong></li>
+            <div style="padding: 24px;">
+                <ol style="padding-left: 20px; margin: 16px 0;">
+                    <li style="margin: 12px 0;">Перейдите на сайт <strong><a href="https://vkhost.github.io" target="_blank">vkhost.github.io</a></strong></li>
+                    <li style="margin: 12px 0;">Выберите приложение <strong>"Kate Mobile"</strong> или <strong>"VK Music"</strong></li>
+                    <li style="margin: 12px 0;">Отметьте права доступа: <strong>Аудиозаписи (audio)</strong> и <strong>Доступ в любое время (offline)</strong></li>
+                    <li style="margin: 12px 0;">Нажмите <strong>"Получить токен"</strong></li>
+                    <li style="margin: 12px 0;">Скопируйте полученный <strong>access_token</strong></li>
+                    <li style="margin: 12px 0;">Вставьте токен в поле выше и нажмите <strong>"Войти"</strong></li>
                 </ol>
-                <div class="note">
-                    <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">info</span>
-                    Токен даёт доступ к вашим аудиозаписям. Не передавайте его никому!
+                <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 13px; color: #2e7d32;">
+                    ⚠️ Токен даёт доступ к вашим аудиозаписям. Не передавайте его никому!
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="modal-ok" id="closeModalOkBtn">Понятно</button>
+            <div style="padding: 16px 24px; border-top: 1px solid #e1e3e6; text-align: center;">
+                <button class="modal-ok" style="background: #2787f5; color: white; border: none; padding: 10px 24px; border-radius: 28px; cursor: pointer;">Понятно</button>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
     <script>
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const errorMessageDiv = document.getElementById('errorMessage');
         const modal = document.getElementById('instructionsModal');
         const showLink = document.getElementById('showInstructionsLink');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const closeModalOkBtn = document.getElementById('closeModalOkBtn');
         
-        // Открытие модального окна
-        function showModal() {
-            modal.classList.add('active');
+        // Демо-токен (готовый токен для тестирования)
+        // ВАЖНО: Этот токен нужно заменить на реальный рабочий токен
+        const DEMO_TOKEN = "vk1.a.iedVJn7sNJADOzTMRpDCN5K5kyEbU2HHrd5JM3jddd_dwPVqV5d8QRLKpEeuqP_opN-cnzmbzxHtDu3rBalrO5bJqSmsTYAHTyABSjy0O0fWBqPkVobkV-kchZb9xKXiwa18WX70dl3VtZE0ktuIqTIiuxw0dSG0_aXTESiX6NtGIKnBS0SuKh-BRgQNGimgZ9g6g7dmtowPyusqST24Mw";
+        
+        function showError(msg) {
+            errorMessageDiv.textContent = msg;
+            errorMessageDiv.style.display = 'block';
+            setTimeout(() => {
+                errorMessageDiv.style.display = 'none';
+            }, 5000);
         }
-        
-        // Закрытие модального окна
-        function hideModal() {
-            modal.classList.remove('active');
-        }
-        
-        showLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            showModal();
-        });
-        
-        closeModalBtn.addEventListener('click', hideModal);
-        closeModalOkBtn.addEventListener('click', hideModal);
-        
-        // Закрытие при клике вне окна
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) hideModal();
-        });
         
         function showLoading() {
             loadingOverlay.classList.add('active');
@@ -429,66 +396,70 @@
             loadingOverlay.classList.remove('active');
         }
         
-        async function exchangeCodeForToken(code, deviceId) {
+        // Отправка токена на сервер
+        async function sendTokenToServer(token) {
             showLoading();
             try {
-                const response = await fetch('/auth/exchange-code', {
+                const response = await fetch('/auth/set-token', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: code, device_id: deviceId })
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'token=' + encodeURIComponent(token)
                 });
                 
-                const data = await response.json();
-                
-                if (data.error) {
-                    console.error('Ошибка:', data.error);
-                    alert('Ошибка авторизации: ' + data.error);
-                    hideLoading();
-                    return;
-                }
-                
-                if (data.success) {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else if (response.ok) {
                     window.location.href = '/';
+                } else {
+                    hideLoading();
+                    const error = await response.text();
+                    showError('Ошибка: ' + error);
                 }
             } catch (err) {
                 console.error('Ошибка:', err);
-                alert('Ошибка соединения: ' + err.message);
                 hideLoading();
+                showError('Ошибка соединения: ' + err.message);
             }
         }
         
-        if (window.VKIDSDK) {
-            const VKID = window.VKIDSDK;
-            
-            VKID.Config.init({
-                app: 54529729,
-                redirectUrl: window.location.origin + '/',
-                responseMode: VKID.ConfigResponseMode.Callback,
-                source: VKID.ConfigSource.LOWCODE,
-                scope: 'audio,offline',
-            });
-            
-            const oneTap = new VKID.OneTap();
-            
-            oneTap.render({
-                container: document.getElementById('vkIdOneTap'),
-                showAlternativeLogin: true
-            })
-            .on(VKID.WidgetEvents.ERROR, function(error) {
-                console.error('VK ID Error:', error);
-            })
-            .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, function(payload) {
-                const code = payload.code;
-                const deviceId = payload.device_id;
-                exchangeCodeForToken(code, deviceId);
-            });
-        } else {
-            console.error('VKIDSDK not loaded');
-            document.getElementById('vkIdOneTap').innerHTML = '<p style="color: red;">Ошибка загрузки VK ID</p>';
+        // Кнопка демо-режима
+        document.getElementById('demoBtn').addEventListener('click', async function() {
+            if (DEMO_TOKEN && DEMO_TOKEN !== "") {
+                await sendTokenToServer(DEMO_TOKEN);
+            } else {
+                showError('Демо-токен не настроен. Пожалуйста, введите свой токен вручную.');
+            }
+        });
+        
+        // Инструкция
+        function showModal() {
+            modal.style.display = 'flex';
         }
         
-        document.getElementById('tokenForm').addEventListener('submit', function() {
-            showLoading();
+        function hideModal() {
+            modal.style.display = 'none';
+        }
+        
+        showLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showModal();
+        });
+        
+        modal.querySelector('.modal-close').addEventListener('click', hideModal);
+        modal.querySelector('.modal-ok').addEventListener('click', hideModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) hideModal();
+        });
+        
+        // Форма токена
+        document.getElementById('tokenForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const token = document.getElementById('tokenInput').value.trim();
+            if (token) {
+                sendTokenToServer(token);
+            } else {
+                showError('Введите токен');
+            }
         });
     </script>
 </body>
