@@ -58,39 +58,6 @@
             background: var(--md-background);
         }
         
-        /* Pull-to-refresh индикатор */
-        .ptr-indicator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transform: translateY(-60px);
-            transition: transform 0.2s ease;
-            color: var(--md-on-surface-variant);
-            font-size: 14px;
-            z-index: 10;
-            background: var(--md-surface);
-        }
-        
-        .ptr-indicator.active {
-            transform: translateY(0);
-        }
-        
-        .ptr-indicator .material-symbols-outlined {
-            font-size: 24px;
-            animation: ptr-spin 1s linear infinite;
-        }
-        
-        @keyframes ptr-spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
         .app-bar {
             position: fixed;
             top: 0;
@@ -322,7 +289,6 @@
             visibility: hidden;
             opacity: 0;
             transition: visibility 0.2s, opacity 0.2s;
-            position: relative;
         }
         
         .page.active {
@@ -335,9 +301,6 @@
             background: var(--md-surface);
             border-bottom: 1px solid rgba(128,128,128,0.2);
             padding: 0 16px;
-            position: sticky;
-            top: 0;
-            z-index: 5;
         }
         
         .tabs {
@@ -375,6 +338,8 @@
         
         .tab-content {
             display: none;
+            height: calc(100% - 56px);
+            overflow-y: auto;
         }
         
         .tab-content.active {
@@ -385,9 +350,6 @@
             padding: 12px 16px;
             background: var(--md-surface);
             border-bottom: 1px solid rgba(128,128,128,0.2);
-            position: sticky;
-            top: 44px;
-            z-index: 5;
         }
         
         .my-tracks-search .search-input-wrapper {
@@ -436,9 +398,7 @@
             display: flex;
             justify-content: space-around;
             border-bottom: 1px solid rgba(128,128,128,0.2);
-            position: sticky;
-            top: 44px;
-            z-index: 5;
+            margin-bottom: 8px;
         }
         
         .stats-item {
@@ -1046,12 +1006,6 @@
     
     <!-- Главная страница с табами -->
     <div id="mainPage" class="page active">
-        <!-- Pull-to-refresh индикатор -->
-        <div class="ptr-indicator" id="ptrIndicator">
-            <span class="material-symbols-outlined">refresh</span>
-            <span>Обновление...</span>
-        </div>
-        
         <!-- Tabs -->
         <div class="tabs-container">
             <div class="tabs">
@@ -1192,7 +1146,6 @@
                         <li>Профиль пользователя</li>
                         <li>Скачивание треков</li>
                         <li>Светлая/тёмная тема</li>
-                        <li>Обновление свайпом вниз</li>
                     </ul>
                 </div>
                 <div class="about-developer">
@@ -1219,13 +1172,8 @@
     let searchDebounceTimer = null;
     let myTracksSearchDebounceTimer = null;
     
-    // Pull-to-refresh переменные
-    let touchStartY = 0;
-    let isRefreshing = false;
-    const ptrIndicator = document.getElementById('ptrIndicator');
-    const mainPage = document.getElementById('mainPage');
-    
     // DOM элементы
+    const mainPage = document.getElementById('mainPage');
     const searchPage = document.getElementById('searchPage');
     const profilePage = document.getElementById('profilePage');
     const myTracksList = document.getElementById('myTracksList');
@@ -1250,81 +1198,6 @@
     const aboutModal = document.getElementById('aboutModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const closeModalOkBtn = document.getElementById('closeModalOkBtn');
-    
-    // Pull-to-refresh функция
-    function initPullToRefresh() {
-        let startY = 0;
-        let currentY = 0;
-        let isDragging = false;
-        
-        mainPage.addEventListener('touchstart', (e) => {
-            if (mainPage.scrollTop === 0) {
-                startY = e.touches[0].clientY;
-                isDragging = true;
-            }
-        });
-        
-        mainPage.addEventListener('touchmove', (e) => {
-            if (!isDragging || isRefreshing) return;
-            
-            currentY = e.touches[0].clientY;
-            const diff = currentY - startY;
-            
-            if (diff > 0 && mainPage.scrollTop === 0) {
-                e.preventDefault();
-                const pullDistance = Math.min(diff, 80);
-                ptrIndicator.style.transform = `translateY(${pullDistance - 60}px)`;
-                
-                if (pullDistance > 60 && !isRefreshing) {
-                    ptrIndicator.classList.add('active');
-                }
-            }
-        });
-        
-        mainPage.addEventListener('touchend', async (e) => {
-            if (!isDragging || isRefreshing) return;
-            isDragging = false;
-            
-            const diff = currentY - startY;
-            
-            if (diff > 60 && mainPage.scrollTop === 0) {
-                await refreshAllData();
-            }
-            
-            ptrIndicator.style.transform = 'translateY(-60px)';
-            ptrIndicator.classList.remove('active');
-        });
-    }
-    
-    // Функция обновления всех данных
-    async function refreshAllData() {
-        if (isRefreshing) return;
-        isRefreshing = true;
-        
-        showToast('Обновление...', false);
-        
-        try {
-            // Обновляем мои треки
-            await loadMyTracks(true);
-            
-            // Обновляем рекомендации, если они были загружены
-            if (recommendations.length > 0) {
-                await loadRecommendations(true);
-            }
-            
-            // Обновляем поиск, если был активен
-            if (globalSearchInput.value.trim()) {
-                await performGlobalSearch(globalSearchInput.value);
-            }
-            
-            showToast('Обновлено!', false);
-        } catch (err) {
-            console.error('Ошибка обновления:', err);
-            showToast('Ошибка обновления', true);
-        } finally {
-            isRefreshing = false;
-        }
-    }
     
     // Переключение табов
     function switchTab(tabId) {
@@ -1556,10 +1429,8 @@
         });
     }
     
-    async function loadMyTracks(silent = false) {
-        if (!silent) {
-            myTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>';
-        }
+    async function loadMyTracks() {
+        myTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>';
         
         try {
             const response = await fetch('/api/tracks');
@@ -1570,7 +1441,7 @@
             const data = await response.json();
             
             if (data.error) {
-                if (!silent) myTracksList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
+                myTracksList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
                 return;
             }
             
@@ -1579,14 +1450,12 @@
             displayMyTracks(myTracksFiltered);
             updateStats(myTracks);
         } catch (err) {
-            if (!silent) myTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+            myTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
         }
     }
     
-    async function loadRecommendations(silent = false) {
-        if (!silent) {
-            recommendationsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка рекомендаций</p></div>';
-        }
+    async function loadRecommendations() {
+        recommendationsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка рекомендаций</p></div>';
         
         try {
             const response = await fetch('/api/recommendations');
@@ -1597,14 +1466,14 @@
             const data = await response.json();
             
             if (data.error) {
-                if (!silent) recommendationsList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
+                recommendationsList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
                 return;
             }
             
             recommendations = data;
             displayRecommendations(recommendations);
         } catch (err) {
-            if (!silent) recommendationsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+            recommendationsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
         }
     }
     
@@ -2242,46 +2111,8 @@
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
     
-    // Инициализация Pull-to-refresh
-    initPullToRefresh();
-    
     // Загрузка данных
     loadMyTracks();
     </script>
-
-    <!-- VK Mini App поддержка -->
-<script src="https://vk.com/js/api/xd_connection.js?2"></script>
-<script>
-// Инициализация VK Mini App
-if (typeof VK !== 'undefined') {
-    VK.init(function() {
-        console.log('VK Mini App initialized');
-        
-        // Получаем информацию о пользователе
-        VK.api('users.get', {fields: 'photo_100'}, function(data) {
-            if (data.response) {
-                const user = data.response[0];
-                // Обновляем профиль, если есть элемент
-                const userNameElem = document.getElementById('userName');
-                if (userNameElem) {
-                    userNameElem.textContent = user.first_name + ' ' + user.last_name;
-                }
-            }
-        });
-        
-        // Получаем токен доступа
-        VK.Auth.getLoginStatus(function(response) {
-            if (response.session) {
-                const token = response.session.mid;
-                // Отправляем токен на сервер
-                fetch('/auth/vk-mini-app?vk_access_token=' + token)
-                    .catch(err => console.error('Token send error:', err));
-            }
-        });
-    });
-} else {
-    console.log('VK SDK not loaded (not in VK Mini App)');
-}
-</script>
 </body>
 </html>
