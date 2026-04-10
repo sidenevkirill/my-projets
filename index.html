@@ -2248,5 +2248,40 @@
     // Загрузка данных
     loadMyTracks();
     </script>
+
+    <!-- VK Mini App поддержка -->
+<script src="https://vk.com/js/api/xd_connection.js?2"></script>
+<script>
+// Инициализация VK Mini App
+if (typeof VK !== 'undefined') {
+    VK.init(function() {
+        console.log('VK Mini App initialized');
+        
+        // Получаем информацию о пользователе
+        VK.api('users.get', {fields: 'photo_100'}, function(data) {
+            if (data.response) {
+                const user = data.response[0];
+                // Обновляем профиль, если есть элемент
+                const userNameElem = document.getElementById('userName');
+                if (userNameElem) {
+                    userNameElem.textContent = user.first_name + ' ' + user.last_name;
+                }
+            }
+        });
+        
+        // Получаем токен доступа
+        VK.Auth.getLoginStatus(function(response) {
+            if (response.session) {
+                const token = response.session.mid;
+                // Отправляем токен на сервер
+                fetch('/auth/vk-mini-app?vk_access_token=' + token)
+                    .catch(err => console.error('Token send error:', err));
+            }
+        });
+    });
+} else {
+    console.log('VK SDK not loaded (not in VK Mini App)');
+}
+</script>
 </body>
 </html>
