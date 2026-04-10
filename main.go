@@ -723,6 +723,197 @@ func apiSearchMyTracksHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(filtered)
 }
 
+// Получение списка плейлистов пользователя
+func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+	userIDCookie, _ := r.Cookie("vk_user_id")
+	userID, _ := strconv.Atoi(userIDCookie.Value)
+
+	client := &http.Client{Timeout: 15 * time.Second}
+	params := url.Values{}
+	params.Set("access_token", tokenCookie.Value)
+	params.Set("v", "5.131")
+	params.Set("owner_id", strconv.Itoa(userID))
+	params.Set("count", "100")
+	params.Set("extended", "1")
+
+	apiURL := "https://api.vk.com/method/audio.getPlaylists?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	var result struct {
+		Response struct {
+			Count int `json:"count"`
+			Items []struct {
+				ID        int    `json:"id"`
+				OwnerID   int    `json:"owner_id"`
+				Title     string `json:"title"`
+				Count     int    `json:"count"`
+				AccessKey string `json:"access_key"`
+				Photo     struct {
+					Photo1280 string `json:"photo_1280"`
+					Photo640  string `json:"photo_640"`
+					Photo320  string `json:"photo_320"`
+				} `json:"photo"`
+			} `json:"items"`
+		} `json:"response"`
+		Error *struct {
+			ErrorCode int    `json:"error_code"`
+			ErrorMsg  string `json:"error_msg"`
+		} `json:"error"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("Ошибка парсинга: %v", err)})
+		return
+	}
+
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)})
+		return
+	}
+
+	playlists := make([]map[string]interface{}, 0)
+	for _, item := range result.Response.Items {
+		playlist := map[string]interface{}{
+			"id":         item.ID,
+			"owner_id":   item.OwnerID,
+			"title":      item.Title,
+			"count":      item.Count,
+			"access_key": item.AccessKey,
+		}
+		if item.Photo.Photo320 != "" {
+			playlist["cover"] = item.Photo.Photo320
+		} else if item.Photo.Photo640 != "" {
+			playlist["cover"] = item.Photo.Photo640
+		}
+		playlists = append(playlists, playlist)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(playlists)
+}
+
+// Получение треков плейлиста
+func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+
+	// Извлекаем параметры из URL
+	path := r.URL.Path
+	parts := strings.Split(path, "/")
+	if len(parts) < 5 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid playlist ID"})
+		return
+	}
+
+	playlistID := parts[3]
+	ownerID := parts[4]
+
+	client := &http.Client{Timeout: 15 * time.Second}
+	params := url.Values{}
+	params.Set("access_token", tokenCookie.Value)
+	params.Set("v", "5.131")
+	params.Set("owner_id", ownerID)
+	params.Set("playlist_id", playlistID)
+
+	apiURL := "https://api.vk.com/method/audio.getPlaylistById?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	var result struct {
+		Response struct {
+			ID     int    `json:"id"`
+			Title  string `json:"title"`
+			Audios []struct {
+				ID       int    `json:"id"`
+				OwnerID  int    `json:"owner_id"`
+				Artist   string `json:"artist"`
+				Title    string `json:"title"`
+				Duration int    `json:"duration"`
+				URL      string `json:"url"`
+			} `json:"audios"`
+		} `json:"response"`
+		Error *struct {
+			ErrorCode int    `json:"error_code"`
+			ErrorMsg  string `json:"error_msg"`
+		} `json:"error"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("Ошибка парсинга: %v", err)})
+		return
+	}
+
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)})
+		return
+	}
+
+	tracks := make([]Track, 0)
+	for _, item := range result.Response.Audios {
+		// Нормализуем URL если есть
+		url := strings.ReplaceAll(item.URL, "\\/", "/")
+		tracks = append(tracks, Track{
+			ID:       item.ID,
+			OwnerID:  item.OwnerID,
+			Artist:   item.Artist,
+			Title:    item.Title,
+			Duration: item.Duration,
+			URL:      url,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tracks)
+}
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	http.ServeFile(w, r, "index.html")
@@ -936,6 +1127,8 @@ func main() {
 	http.HandleFunc("/api/user", authMiddleware(apiUserInfoHandler))
 	http.HandleFunc("/api/recommendations", authMiddleware(apiRecommendationsHandler))
 	http.HandleFunc("/api/profile", authMiddleware(apiProfileHandler))
+	http.HandleFunc("/api/playlists", authMiddleware(apiPlaylistsHandler))
+	http.HandleFunc("/api/playlist/", authMiddleware(apiPlaylistTracksHandler))
 
 	port := "8080"
 	fmt.Println("==================================================")
@@ -944,6 +1137,7 @@ func main() {
 	fmt.Printf("\n✅ Сервер запущен: http://localhost:%s\n", port)
 	fmt.Println("🌐 Открой в браузере: http://localhost:8080")
 	fmt.Println("🔐 Доступен вход через ВКонтакте или по токену")
+	fmt.Println("📀 Доступны плейлисты пользователя")
 	fmt.Println("📥 Треки можно скачать через кнопку меню (три точки)")
 	fmt.Println("⚠️ Удаление треков реально удаляет их из ВКонтакте!")
 	fmt.Println("📌 Нажми Ctrl+C для остановки")
