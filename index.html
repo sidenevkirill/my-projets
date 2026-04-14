@@ -7,966 +7,201 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            transition: background-color 0.3s ease;
-        }
-        
-        body.light {
-            --md-primary: #4b7cad;
-            --md-primary-dark: #3a6288;
-            --md-primary-light: #6b9bc4;
-            --md-secondary: #4b7cad;
-            --md-background: #f5f5f5;
-            --md-surface: #ffffff;
-            --md-surface-light: #f0f0f0;
-            --md-error: #cf6679;
-            --md-success: #4caf50;
-            --md-on-primary: #ffffff;
-            --md-on-background: #1e1e1e;
-            --md-on-surface: #1e1e1e;
-            --md-on-surface-variant: #6b6b6b;
-            --shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        body.dark {
-            --md-primary: #4b7cad;
-            --md-primary-dark: #3a6288;
-            --md-primary-light: #6b9bc4;
-            --md-secondary: #4b7cad;
-            --md-background: #121212;
-            --md-surface: #1e1e1e;
-            --md-surface-light: #2d2d2d;
-            --md-error: #cf6679;
-            --md-success: #4caf50;
-            --md-on-primary: #ffffff;
-            --md-on-background: #ffffff;
-            --md-on-surface: #ffffff;
-            --md-on-surface-variant: #a0a0a0;
-            --shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        body {
-            background: var(--md-background);
-        }
-        
-        .app-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: var(--md-primary);
-            box-shadow: var(--shadow);
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
-        
-        .app-bar-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 20px;
-            height: 64px;
-        }
-        
-        .app-bar-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: opacity 0.2s ease;
-        }
-        
-        .app-bar-title .material-symbols-outlined {
-            font-size: 28px;
-            color: var(--md-on-primary);
-        }
-        
-        .app-bar-title h1 {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--md-on-primary);
-            letter-spacing: 0.5px;
-        }
-        
-        .app-bar-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .about-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-primary);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        
-        .about-btn:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .search-icon {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-primary);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        
-        .search-icon:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .theme-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-primary);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        
-        .theme-toggle:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .search-bar-expanded {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 64px;
-            background: var(--md-primary);
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transform: translateY(-100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 101;
-        }
-        
-        .search-bar-expanded.active {
-            transform: translateY(0);
-        }
-        
-        .search-bar-expanded .back-icon {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-primary);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .search-bar-expanded .back-icon:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .search-bar-expanded .search-input-wrapper {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            background: rgba(255,255,255,0.2);
-            border-radius: 28px;
-            padding: 4px 16px;
-            gap: 12px;
-        }
-        
-        .search-bar-expanded .search-input-wrapper .material-symbols-outlined {
-            color: rgba(255,255,255,0.7);
-            font-size: 20px;
-        }
-        
-        .search-bar-expanded .search-input-wrapper input {
-            flex: 1;
-            background: none;
-            border: none;
-            padding: 10px 0;
-            color: var(--md-on-primary);
-            font-size: 16px;
-            outline: none;
-        }
-        
-        .search-bar-expanded .search-input-wrapper input::placeholder {
-            color: rgba(255,255,255,0.7);
-        }
-        
-        .search-bar-expanded .clear-search {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-primary);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 72px;
-            background: var(--md-surface);
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
-            border-top: 1px solid rgba(128,128,128,0.2);
-            padding-bottom: env(safe-area-inset-bottom, 0);
-        }
-        
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-surface-variant);
-            transition: all 0.2s;
-            padding: 8px 0;
-        }
-        
-        .nav-item.active {
-            color: var(--md-primary);
-        }
-        
-        .nav-item .material-symbols-outlined {
-            font-size: 24px;
-        }
-        
-        .nav-item span:last-child {
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .page {
-            position: fixed;
-            top: 64px;
-            left: 0;
-            right: 0;
-            bottom: 72px;
-            overflow-y: auto;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0.2s, opacity 0.2s;
-        }
-        
-        .page.active {
-            visibility: visible;
-            opacity: 1;
-        }
-        
-        /* Tabs для главной страницы */
-        .tabs-container {
-            background: var(--md-surface);
-            border-bottom: 1px solid rgba(128,128,128,0.2);
-            padding: 0 16px;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .tab-btn {
-            flex: 1;
-            background: none;
-            border: none;
-            padding: 12px 0;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--md-on-surface-variant);
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-        
-        .tab-btn.active {
-            color: var(--md-primary);
-        }
-        
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--md-primary);
-            border-radius: 1px;
-        }
-        
-        .tab-content {
-            display: none;
-            height: calc(100% - 56px);
-            overflow-y: auto;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .my-tracks-search {
-            padding: 12px 16px;
-            background: var(--md-surface);
-            border-bottom: 1px solid rgba(128,128,128,0.2);
-        }
-        
-        .my-tracks-search .search-input-wrapper {
-            display: flex;
-            align-items: center;
-            background: var(--md-surface-light);
-            border-radius: 28px;
-            padding: 4px 16px;
-            gap: 12px;
-        }
-        
-        .my-tracks-search .search-input-wrapper .material-symbols-outlined {
-            color: var(--md-on-surface-variant);
-            font-size: 20px;
-        }
-        
-        .my-tracks-search .search-input-wrapper input {
-            flex: 1;
-            background: none;
-            border: none;
-            padding: 10px 0;
-            color: var(--md-on-surface);
-            font-size: 14px;
-            outline: none;
-        }
-        
-        .my-tracks-search .search-input-wrapper input::placeholder {
-            color: var(--md-on-surface-variant);
-        }
-        
-        .my-tracks-search .clear-my-search {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-surface-variant);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-            border-radius: 50%;
-        }
-        
-        .stats {
-            background: var(--md-surface);
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-around;
-            border-bottom: 1px solid rgba(128,128,128,0.2);
-            margin-bottom: 8px;
-        }
-        
-        .stats-item {
-            text-align: center;
-        }
-        
-        .stats-value {
-            font-size: 18px;
-            font-weight: 500;
-            color: var(--md-primary);
-        }
-        
-        .stats-label {
-            font-size: 11px;
-            color: var(--md-on-surface-variant);
-            margin-top: 4px;
-        }
-        
-        .track-list {
-            padding: 8px 12px 20px 12px;
-        }
-        
-        .track-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            background: var(--md-surface);
-            margin-bottom: 8px;
-            border-radius: 12px;
-            transition: all 0.2s;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            position: relative;
-        }
-        
-        .track-item:hover {
-            background: var(--md-surface-light);
-            transform: translateX(4px);
-        }
-        
-        .track-item.active {
-            background: var(--md-primary-light);
-            border-left: 4px solid var(--md-primary);
-        }
-        
-        .track-item.active .track-title,
-        .track-item.active .track-artist {
-            color: white;
-        }
-        
-        .track-number {
-            width: 36px;
-            color: var(--md-on-surface-variant);
-            font-size: 13px;
-            font-weight: 500;
-        }
-        
-        .track-item.active .track-number {
-            color: white;
-        }
-        
-        .track-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .track-title {
-            font-weight: 500;
-            color: var(--md-on-surface);
-            font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .track-artist {
-            font-size: 12px;
-            color: var(--md-on-surface-variant);
-            margin-top: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .track-duration {
-            width: 55px;
-            color: var(--md-on-surface-variant);
-            font-size: 12px;
-            text-align: right;
-        }
-        
-        .menu-btn {
-            width: 36px;
-            height: 36px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 8px;
-            transition: all 0.2s;
-            border-radius: 50%;
-            color: var(--md-on-surface-variant);
-            position: relative;
-            z-index: 2;
-        }
-        
-        .menu-btn:hover {
-            background: var(--md-surface-light);
-            color: var(--md-on-surface);
-        }
-        
-        .track-item.active .menu-btn {
-            color: white;
-        }
-        
-        .menu-btn .material-symbols-outlined {
-            font-size: 20px;
-        }
-        
-        .search-empty {
-            text-align: center;
-            padding: 40px;
-            color: var(--md-on-surface-variant);
-        }
-        
-        .context-menu {
-            position: fixed;
-            background: var(--md-surface);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            z-index: 200;
-            min-width: 200px;
-            overflow: hidden;
-            animation: fadeIn 0.15s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .context-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-            color: var(--md-on-surface);
-            font-size: 14px;
-        }
-        
-        .context-menu-item:hover {
-            background: var(--md-surface-light);
-        }
-        
-        .context-menu-item.delete {
-            color: var(--md-error);
-        }
-        
-        .context-menu-item.add {
-            color: var(--md-success);
-        }
-        
-        .context-menu-item.download {
-            color: var(--md-primary);
-        }
-        
-        .mini-player {
-            position: fixed;
-            bottom: 72px;
-            left: 0;
-            right: 0;
-            background: var(--md-surface);
-            border-top: 1px solid rgba(128,128,128,0.2);
-            padding: 10px 16px;
-            z-index: 99;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .now-playing {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-        
-        .track-info-mini {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .track-title-mini {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--md-on-surface);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .track-artist-mini {
-            font-size: 11px;
-            color: var(--md-on-surface-variant);
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .player-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .player-controls button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--md-on-surface);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        
-        .player-controls button:hover {
-            background: var(--md-surface-light);
-        }
-        
-        .player-controls button .material-symbols-outlined {
-            font-size: 22px;
-        }
-        
-        .play-pause-btn {
-            background: var(--md-primary) !important;
-        }
-        
-        .play-pause-btn:hover {
-            background: var(--md-primary-dark) !important;
-        }
-        
-        .play-pause-btn .material-symbols-outlined {
-            color: white !important;
-        }
-        
-        .progress-container {
-            margin-top: 8px;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 3px;
-            background: var(--md-surface-light);
-            border-radius: 2px;
-            cursor: pointer;
-            position: relative;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: var(--md-primary);
-            border-radius: 2px;
-            width: 0%;
-            transition: width 0.1s linear;
-        }
-        
-        .time-info {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-            font-size: 10px;
-            color: var(--md-on-surface-variant);
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: var(--md-on-surface-variant);
-        }
-        
-        .error {
-            background: rgba(207, 102, 121, 0.2);
-            color: var(--md-error);
-            padding: 16px;
-            margin: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 160px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--md-surface);
-            color: var(--md-on-surface);
-            padding: 10px 20px;
-            border-radius: 28px;
-            box-shadow: var(--shadow);
-            z-index: 150;
-            opacity: 0;
-            transition: all 0.3s ease;
-            font-size: 13px;
-            white-space: nowrap;
-        }
-        
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-        
-        .track-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .track-list::-webkit-scrollbar-track {
-            background: var(--md-surface);
-        }
-        
-        .track-list::-webkit-scrollbar-thumb {
-            background: var(--md-primary);
-            border-radius: 2px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--md-surface-light);
-            border-top-color: var(--md-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        
-        .search-loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--md-on-surface-variant);
-        }
-        
-        .profile-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 32px 20px;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; height: 100vh; overflow: hidden; transition: background-color 0.3s ease; }
+        body.light { --md-primary: #4b7cad; --md-primary-dark: #3a6288; --md-primary-light: #6b9bc4; --md-background: #f5f5f5; --md-surface: #ffffff; --md-surface-light: #f0f0f0; --md-error: #cf6679; --md-on-primary: #ffffff; --md-on-surface: #1e1e1e; --md-on-surface-variant: #6b6b6b; --shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        body.dark { --md-primary: #4b7cad; --md-primary-dark: #3a6288; --md-primary-light: #6b9bc4; --md-background: #121212; --md-surface: #1e1e1e; --md-surface-light: #2d2d2d; --md-error: #cf6679; --md-on-primary: #ffffff; --md-on-surface: #ffffff; --md-on-surface-variant: #a0a0a0; --shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        body { background: var(--md-background); }
+        .app-bar { position: fixed; top: 0; left: 0; right: 0; background: var(--md-primary); box-shadow: var(--shadow); z-index: 100; }
+        .app-bar-content { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; height: 64px; }
+        .app-bar-title { display: flex; align-items: center; gap: 12px; }
+        .app-bar-title .material-symbols-outlined { font-size: 28px; color: var(--md-on-primary); }
+        .app-bar-title h1 { font-size: 20px; font-weight: 500; color: var(--md-on-primary); }
+        .app-bar-actions { display: flex; align-items: center; gap: 8px; }
+        .search-icon, .theme-toggle { background: none; border: none; cursor: pointer; color: var(--md-on-primary); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .search-icon:hover, .theme-toggle:hover { background: rgba(255,255,255,0.1); }
+        .search-bar-expanded { position: absolute; top: 0; left: 0; right: 0; height: 64px; background: var(--md-primary); padding: 0 16px; display: flex; align-items: center; gap: 12px; transform: translateY(-100%); transition: transform 0.3s; z-index: 101; }
+        .search-bar-expanded.active { transform: translateY(0); }
+        .search-bar-expanded .back-icon { background: none; border: none; cursor: pointer; color: var(--md-on-primary); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .search-bar-expanded .search-input-wrapper { flex: 1; display: flex; align-items: center; background: rgba(255,255,255,0.2); border-radius: 28px; padding: 4px 16px; gap: 12px; }
+        .search-bar-expanded .search-input-wrapper .material-symbols-outlined { color: rgba(255,255,255,0.7); font-size: 20px; }
+        .search-bar-expanded .search-input-wrapper input { flex: 1; background: none; border: none; padding: 10px 0; color: var(--md-on-primary); font-size: 16px; outline: none; }
+        .search-bar-expanded .clear-search { background: none; border: none; cursor: pointer; color: var(--md-on-primary); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 72px; background: var(--md-surface); display: flex; align-items: center; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; border-top: 1px solid rgba(128,128,128,0.2); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; cursor: pointer; color: var(--md-on-surface-variant); transition: all 0.2s; padding: 8px 0; }
+        .nav-item.active { color: var(--md-primary); }
+        .nav-item .material-symbols-outlined { font-size: 24px; }
+        .nav-item span:last-child { font-size: 12px; font-weight: 500; }
+        .page { position: fixed; top: 64px; left: 0; right: 0; bottom: 72px; overflow-y: auto; visibility: hidden; opacity: 0; transition: visibility 0.2s, opacity 0.2s; }
+        .page.active { visibility: visible; opacity: 1; }
+        .tabs-container { background: var(--md-surface); border-bottom: 1px solid rgba(128,128,128,0.2); padding: 0 16px; }
+        .tabs { display: flex; gap: 8px; }
+        .tab-btn { flex: 1; background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; color: var(--md-on-surface-variant); cursor: pointer; position: relative; }
+        .tab-btn.active { color: var(--md-primary); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--md-primary); }
+        .tab-content { display: none; height: calc(100% - 56px); overflow-y: auto; }
+        .tab-content.active { display: block; }
+        .profile-card { background: var(--md-primary); margin: 16px; border-radius: 24px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow); }
+        .vk-icon-placeholder { width: 56px; height: 56px; background: rgba(255,255,255,0.2); border-radius: 28px; display: flex; align-items: center; justify-content: center; }
+        .profile-info { flex: 1; }
+        .profile-name { font-size: 18px; font-weight: 600; color: white; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .logout-icon-btn { background: none; border: none; cursor: pointer; color: white; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .logout-icon-btn:hover { background: rgba(255,255,255,0.2); }
+        .logout-icon-btn .material-symbols-outlined { font-size: 22px; }
+        .profile-id { font-size: 12px; color: rgba(255,255,255,0.8); }
+        .menu-list { padding: 8px 16px; }
+        .menu-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--md-surface); margin-bottom: 8px; border-radius: 16px; cursor: pointer; box-shadow: var(--shadow); }
+        .menu-item:hover { background: var(--md-surface-light); transform: translateX(4px); }
+        .menu-item-icon { width: 48px; height: 48px; background: var(--md-primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+        .menu-item-info { flex: 1; }
+        .menu-item-title { font-weight: 500; color: var(--md-on-surface); font-size: 16px; margin-bottom: 4px; }
+        .menu-item-desc { font-size: 12px; color: var(--md-on-surface-variant); }
+        .conversation-list, .friends-list, .groups-list { padding: 8px 12px; }
+        .conversation-item { display: flex; align-items: center; padding: 14px 16px; background: var(--md-surface); margin-bottom: 8px; border-radius: 12px; cursor: pointer; box-shadow: var(--shadow); }
+        .conversation-item:hover { background: var(--md-surface-light); transform: translateX(4px); }
+        .conv-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--md-primary-light); display: flex; align-items: center; justify-content: center; margin-right: 12px; color: white; overflow: hidden; flex-shrink: 0; }
+        .conv-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .conv-avatar .avatar-letter { font-size: 20px; font-weight: 500; text-transform: uppercase; }
+        .conv-info { flex: 1; min-width: 0; }
+        .conv-title { font-weight: 500; color: var(--md-on-surface); font-size: 15px; }
+        .conv-last { font-size: 12px; color: var(--md-on-surface-variant); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .unread-badge { background: var(--md-primary); color: white; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 12px; }
+        .chat-header, .friend-tracks-header, .group-tracks-header { display: flex; align-items: center; padding: 12px 16px; background: var(--md-surface); border-bottom: 1px solid rgba(128,128,128,0.2); gap: 12px; }
+        .back-to-conversations, .back-to-friends, .back-to-groups { background: none; border: none; cursor: pointer; color: var(--md-on-surface); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .chat-title { flex: 1; font-weight: 500; font-size: 18px; color: var(--md-on-surface); }
+        .message-input-container { position: fixed; bottom: 72px; left: 0; right: 0; background: var(--md-surface); padding: 12px 16px; display: flex; gap: 8px; border-top: 1px solid rgba(128,128,128,0.2); }
+        .message-input { flex: 1; background: var(--md-surface-light); border: none; border-radius: 24px; padding: 12px 16px; color: var(--md-on-surface); font-size: 14px; outline: none; }
+        .send-message-btn { background: var(--md-primary); border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
+        .messages-container { padding: 16px; padding-bottom: 80px; height: calc(100vh - 200px); overflow-y: auto; }
+        .message-item { display: flex; flex-direction: column; margin-bottom: 12px; max-width: 80%; }
+        .message-item.out { align-items: flex-end; margin-left: auto; }
+        .message-item.in { align-items: flex-start; }
+        .message-bubble { padding: 10px 14px; border-radius: 18px; word-wrap: break-word; }
+        .message-item.out .message-bubble { background: var(--md-primary); color: white; border-bottom-right-radius: 4px; }
+        .message-item.in .message-bubble { background: var(--md-surface-light); color: var(--md-on-surface); border-bottom-left-radius: 4px; }
+        .message-sender { font-size: 11px; color: var(--md-on-surface-variant); margin-bottom: 4px; margin-left: 8px; }
+        .message-date { font-size: 10px; color: var(--md-on-surface-variant); margin-top: 4px; margin-left: 8px; }
+        .my-tracks-search, .search-page-search { padding: 12px 16px; background: var(--md-surface); border-bottom: 1px solid rgba(128,128,128,0.2); }
+        .my-tracks-search .search-input-wrapper, .search-page-search .search-input-wrapper { display: flex; align-items: center; background: var(--md-surface-light); border-radius: 28px; padding: 4px 16px; gap: 12px; }
+        .my-tracks-search .search-input-wrapper input, .search-page-search .search-input-wrapper input { flex: 1; background: none; border: none; padding: 10px 0; color: var(--md-on-surface); font-size: 14px; outline: none; }
+        .stats { background: var(--md-surface); padding: 12px 20px; display: flex; justify-content: space-around; border-bottom: 1px solid rgba(128,128,128,0.2); margin-bottom: 8px; }
+        .stats-value { font-size: 18px; font-weight: 500; color: var(--md-primary); }
+        .stats-label { font-size: 11px; color: var(--md-on-surface-variant); margin-top: 4px; }
+        .track-list { padding: 8px 12px 20px 12px; }
+        .track-item { display: flex; align-items: center; padding: 12px 16px; background: var(--md-surface); margin-bottom: 8px; border-radius: 12px; cursor: pointer; box-shadow: var(--shadow); }
+        .track-item:hover { background: var(--md-surface-light); transform: translateX(4px); }
+        .track-number { width: 36px; color: var(--md-on-surface-variant); font-size: 13px; }
+        .track-info { flex: 1; min-width: 0; }
+        .track-title { font-weight: 500; color: var(--md-on-surface); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist { font-size: 12px; color: var(--md-on-surface-variant); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 60px;
-            object-fit: cover;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            border: 4px solid var(--md-primary);
-        }
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vk-icon-placeholder {
+    width: 56px;
+    height: 56px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+        .track-duration { width: 55px; color: var(--md-on-surface-variant); font-size: 12px; text-align: right; }
+        .menu-btn { width: 36px; height: 36px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--md-on-surface-variant); }
+        .context-menu { position: fixed; background: var(--md-surface); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 200; min-width: 200px; overflow: hidden; animation: fadeIn 0.15s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .context-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; transition: background 0.2s; color: var(--md-on-surface); font-size: 14px; }
+        .context-menu-item:hover { background: var(--md-surface-light); }
+        .context-menu-item.delete { color: var(--md-error); }
+        .mini-player { position: fixed; bottom: 72px; left: 0; right: 0; background: var(--md-surface); border-top: 1px solid rgba(128,128,128,0.2); padding: 10px 16px; z-index: 99; }
+        .now-playing { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .track-info-mini { flex: 1; min-width: 0; }
+        .track-title-mini { font-size: 13px; font-weight: 500; color: var(--md-on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist-mini { font-size: 11px; color: var(--md-on-surface-variant); margin-top: 2px; }
+        .player-controls { display: flex; align-items: center; gap: 8px; }
+        .player-controls button { background: none; border: none; cursor: pointer; color: var(--md-on-surface); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .play-pause-btn { background: var(--md-primary) !important; }
+        .play-pause-btn .material-symbols-outlined { color: white !important; }
+        .progress-container { margin-top: 8px; }
+        .progress-bar { width: 100%; height: 3px; background: var(--md-surface-light); border-radius: 2px; cursor: pointer; }
+        .progress-fill { height: 100%; background: var(--md-primary); border-radius: 2px; width: 0%; transition: width 0.1s linear; }
+        .time-info { display: flex; justify-content: space-between; margin-top: 5px; font-size: 10px; color: var(--md-on-surface-variant); }
+        .loading { text-align: center; padding: 50px; color: var(--md-on-surface-variant); }
+        .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--md-surface-light); border-top-color: var(--md-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error { background: rgba(207, 102, 121, 0.2); color: var(--md-error); padding: 16px; margin: 20px; border-radius: 12px; text-align: center; }
+        .toast { position: fixed; bottom: 160px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--md-surface); color: var(--md-on-surface); padding: 10px 20px; border-radius: 28px; z-index: 150; opacity: 0; transition: all 0.3s ease; font-size: 13px; white-space: nowrap; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 300; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--md-surface); border-radius: 28px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid rgba(128,128,128,0.2); }
+        .modal-header h2 { font-size: 20px; color: var(--md-on-surface); }
+        .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--md-on-surface-variant); }
+        .modal-body { padding: 24px; text-align: center; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid rgba(128,128,128,0.2); text-align: center; }
+        .modal-ok { background: var(--md-primary); color: white; border: none; padding: 10px 24px; border-radius: 28px; font-size: 14px; cursor: pointer; }
         
-        .profile-name {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--md-on-surface);
-            margin-bottom: 8px;
-            text-align: center;
-        }
+        /* Settings page styles */
+        .settings-container { padding: 16px; }
+        .settings-section { background: var(--md-surface); border-radius: 16px; margin-bottom: 20px; overflow: hidden; box-shadow: var(--shadow); }
+        .settings-section-title { padding: 16px 20px; font-size: 16px; font-weight: 500; color: var(--md-on-surface); border-bottom: 1px solid rgba(128,128,128,0.2); background: var(--md-surface-light); }
+        .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(128,128,128,0.1); }
+        .settings-item:last-child { border-bottom: none; }
+        .settings-item-info { flex: 1; }
+        .settings-item-title { font-size: 15px; font-weight: 500; color: var(--md-on-surface); margin-bottom: 4px; }
+        .settings-item-desc { font-size: 12px; color: var(--md-on-surface-variant); }
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 28px; }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--md-primary); }
+        input:checked + .slider:before { transform: translateX(22px); }
         
-        .profile-id {
-            font-size: 14px;
-            color: var(--md-on-surface-variant);
-            margin-bottom: 24px;
-        }
-        
-        .profile-stats {
-            background: var(--md-surface);
-            border-radius: 24px;
-            padding: 20px;
-            width: 100%;
-            max-width: 350px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-        
-        .profile-stat-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(128,128,128,0.2);
-        }
-        
-        .profile-stat-item:last-child {
-            border-bottom: none;
-        }
-        
-        .profile-stat-label {
-            font-size: 14px;
-            color: var(--md-on-surface-variant);
-        }
-        
-        .profile-stat-value {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--md-primary);
-        }
-        
-        .profile-logout-btn {
-            background: var(--md-error);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 28px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 300;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: var(--md-surface);
-            border-radius: 28px;
-            max-width: 400px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: modalFadeIn 0.3s ease;
-        }
-        
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid rgba(128,128,128,0.2);
-        }
-        
-        .modal-header h2 {
-            font-size: 20px;
-            color: var(--md-on-surface);
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: var(--md-on-surface-variant);
-        }
-        
-        .modal-body {
-            padding: 24px;
-            text-align: center;
-        }
-        
-        .modal-body .about-icon {
-            background: var(--md-primary);
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-        }
-        
-        .modal-body .about-icon .material-symbols-outlined {
-            font-size: 36px;
-            color: white;
-        }
-        
-        .modal-body h3 {
-            font-size: 18px;
-            color: var(--md-on-surface);
-            margin-bottom: 4px;
-        }
-        
-        .modal-body p {
-            color: var(--md-on-surface-variant);
-            font-size: 13px;
-            margin-bottom: 16px;
-        }
-        
-        .modal-body .about-features {
-            text-align: left;
+        .developer-link { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            background: var(--md-primary-light); 
+            color: white; 
+            padding: 10px 20px; 
+            border-radius: 28px; 
+            text-decoration: none; 
+            font-size: 14px; 
+            font-weight: 500; 
             margin-top: 16px;
-        }
-        
-        .modal-body .about-developer {
-            text-align: left;
-            margin-top: 16px;
-        }
-        
-        .modal-body .about-features h4 {
-            font-size: 14px;
-            color: var(--md-primary);
-            margin-bottom: 8px;
-        }
-        
-        .modal-body .about-developer h4 {
-            font-size: 14px;
-            color: var(--md-primary);
-            margin-bottom: 8px;
-        }
-        
-        .modal-body .about-features ul {
-            list-style: none;
-            padding-left: 0;
-        }
-        
-        .modal-body .about-features li {
-            font-size: 13px;
-            color: var(--md-on-surface);
-            padding: 4px 0;
-        }
-        
-        .modal-body .about-developer p {
-            font-size: 13px;
-            margin: 4px 0;
-            color: var(--md-on-surface);
-        }
-        
-        .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid rgba(128,128,128,0.2);
-            text-align: center;
-        }
-        
-        .modal-ok {
-            background: var(--md-primary);
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 28px;
-            font-size: 14px;
+            transition: transform 0.2s, background 0.2s;
             cursor: pointer;
+        }
+        .developer-link:hover { 
+            background: var(--md-primary); 
+            transform: scale(1.02); 
+        }
+        .developer-link .material-symbols-outlined { 
+            font-size: 18px; 
+        }
+        .about-icon { 
+            font-size: 48px; 
+            color: var(--md-primary); 
+            margin-bottom: 16px; 
+        }
+        
+        .search-empty { 
+            text-align: center; 
+            padding: 60px 20px; 
+            color: var(--md-on-surface-variant); 
         }
     </style>
 </head>
@@ -974,151 +209,194 @@
     <div class="app-bar">
         <div class="app-bar-content">
             <div class="app-bar-title" id="appBarTitleBlock">
-                <span class="material-symbols-outlined">music_note</span>
-                <h1 id="appBarTitle">Аудиозаписи</h1>
+                <span class="material-symbols-outlined"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                        <path d="M21.579 6.855c.14-.465 0-.855-.6-.855h-1.98c-.5 0-.75.265-.88.555 0 0-1.035 2.515-2.5 4.15-.475.475-.69.625-.95.625-.13 0-.32-.15-.32-.6v-3.44c0-.53-.155-.755-.58-.755h-3.12c-.325 0-.52.24-.52.48 0 .5.74.62.815 2.03v3.05c0 .665-.12.785-.38.785-.69 0-2.37-2.5-3.36-5.36-.195-.56-.39-.78-.9-.78h-1.98c-.6 0-.72.265-.72.555 0 .52.7 3.1 3.26 6.51 1.71 2.41 4.12 3.72 6.3 3.72 1.32 0 1.48-.3 1.48-.81v-1.88c0-.6.13-.72.55-.72.31 0 .85.16 2.1 1.35 1.44 1.44 1.68 2.09 2.5 2.09h1.98c.6 0 .9-.3.73-.89-.19-.59-.87-1.45-1.77-2.47-.49-.62-1.22-1.28-1.44-1.62-.31-.4-.22-.58 0-.94 0 0 2.55-3.59 2.82-4.81z"></path>
+                    </svg></span>
+                <h1 id="appBarTitle">Moosic</h1>
             </div>
             <div class="app-bar-actions">
-                <button class="about-btn" id="aboutBtn" title="О приложении">
-                    <span class="material-symbols-outlined">info</span>
-                </button>
-                <button class="search-icon" id="searchIcon">
-                    <span class="material-symbols-outlined">search</span>
-                </button>
-                <button class="theme-toggle" id="themeToggle">
-                    <span class="material-symbols-outlined">dark_mode</span>
-                </button>
+                <button class="search-icon" id="searchIcon"><span class="material-symbols-outlined">search</span></button>
+                <button class="theme-toggle" id="themeToggle"><span class="material-symbols-outlined">dark_mode</span></button>
             </div>
         </div>
-        
         <div class="search-bar-expanded" id="searchExpanded">
-            <button class="back-icon" id="closeSearch">
-                <span class="material-symbols-outlined">arrow_back</span>
-            </button>
+            <button class="back-icon" id="closeSearch"><span class="material-symbols-outlined">arrow_back</span></button>
             <div class="search-input-wrapper">
                 <span class="material-symbols-outlined">search</span>
                 <input type="text" id="globalSearchInput" placeholder="Глобальный поиск" autocomplete="off">
-                <button class="clear-search" id="clearSearchInput">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
+                <button class="clear-search" id="clearSearchInput"><span class="material-symbols-outlined">close</span></button>
             </div>
         </div>
     </div>
     
-    <!-- Главная страница с табами -->
     <div id="mainPage" class="page active">
-        <!-- Tabs -->
         <div class="tabs-container">
             <div class="tabs">
                 <button class="tab-btn active" data-tab="myTracksTab">Мои треки</button>
                 <button class="tab-btn" data-tab="recommendationsTab">Рекомендации</button>
             </div>
         </div>
-        
-        <!-- Контент Мои треки -->
         <div class="tab-content active" id="myTracksTab">
             <div class="my-tracks-search">
                 <div class="search-input-wrapper">
                     <span class="material-symbols-outlined">search</span>
                     <input type="text" id="myTracksSearchInput" placeholder="Поиск по моей музыке" autocomplete="off">
-                    <button class="clear-my-search" id="clearMyTracksSearch" style="display: none;">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
+                    <button class="clear-my-search" id="clearMyTracksSearch" style="display: none;"><span class="material-symbols-outlined">close</span></button>
                 </div>
             </div>
             <div class="stats">
-                <div class="stats-item">
-                    <div class="stats-value" id="totalCount">0</div>
-                    <div class="stats-label">Треков</div>
-                </div>
-                <div class="stats-item">
-                    <div class="stats-value" id="totalDuration">0ч 0м</div>
-                    <div class="stats-label">Длительность</div>
-                </div>
-                <div class="stats-item">
-                    <div class="stats-value" id="totalArtists">0</div>
-                    <div class="stats-label">Исполнителей</div>
-                </div>
+                <div class="stats-item"><div class="stats-value" id="totalCount">0</div><div class="stats-label">Треков</div></div>
+                <div class="stats-item"><div class="stats-value" id="totalDuration">0ч 0м</div><div class="stats-label">Длительность</div></div>
+                <div class="stats-item"><div class="stats-value" id="totalArtists">0</div><div class="stats-label">Исполнителей</div></div>
             </div>
-            <div class="track-list" id="myTracksList">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>Загрузка</p>
-                </div>
-            </div>
+            <div class="track-list" id="myTracksList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка</p></div></div>
         </div>
-        
-        <!-- Контент Рекомендации -->
-        <div class="tab-content" id="recommendationsTab">
-            <div class="track-list" id="recommendationsList">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>Загрузка</p>
-                </div>
+        <div class="tab-content" id="recommendationsTab"><div class="track-list" id="recommendationsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка</p></div></div></div>
+    </div>
+    
+    <div id="messagesPage" class="page">
+        <div id="conversationsView">
+            <div class="conversation-list" id="conversationsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка диалогов</p></div></div>
+        </div>
+        <div id="chatView" style="display: none;">
+            <div class="chat-header">
+                <button class="back-to-conversations" id="backToConversations"><span class="material-symbols-outlined">arrow_back</span></button>
+                <div class="chat-title" id="chatTitle">Чат</div>
+            </div>
+            <div class="messages-container" id="messagesContainer"></div>
+            <div class="message-input-container">
+                <input type="text" class="message-input" id="messageInput" placeholder="Сообщение...">
+                <button class="send-message-btn" id="sendMessageBtn"><span class="material-symbols-outlined">send</span></button>
             </div>
         </div>
     </div>
     
-    <!-- Поиск -->
+    <div id="friendsPage" class="page">
+        <div class="friends-list" id="friendsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка друзей</p></div></div>
+    </div>
+    
+    <div id="friendTracksPage" class="page">
+        <div class="friend-tracks-header">
+            <button class="back-to-friends" id="backToFriendsBtn">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div class="chat-title" id="friendTracksTitle">Треки друга</div>
+        </div>
+        <div class="track-list" id="friendTracksList">
+            <div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>
+        </div>
+    </div>
+    
+    <div id="groupsPage" class="page">
+        <div class="groups-list" id="groupsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка сообществ</p></div></div>
+    </div>
+    
+    <div id="groupTracksPage" class="page">
+        <div class="group-tracks-header">
+            <button class="back-to-groups" id="backToGroupsBtn">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div class="chat-title" id="groupTracksTitle">Треки сообщества</div>
+        </div>
+        <div class="track-list" id="groupTracksList">
+            <div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>
+        </div>
+    </div>
+    
     <div id="searchPage" class="page">
+        <div class="search-page-search">
+            <div class="search-input-wrapper">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" id="searchPageInput" placeholder="Поиск треков" autocomplete="off">
+                <button class="clear-search-page" id="clearSearchPageInput" style="display: none;"><span class="material-symbols-outlined">close</span></button>
+            </div>
+        </div>
         <div class="track-list" id="searchResultsList">
             <div class="search-empty">
-                <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5;">search</span>
-                <p style="margin-top: 12px;">Введите название трека или исполнителя</p>
+                <span class="material-symbols-outlined" style="font-size:48px;opacity:0.5;">search</span>
+                <p style="margin-top:12px;">Введите название трека или исполнителя</p>
             </div>
         </div>
     </div>
     
-    <!-- Профиль -->
     <div id="profilePage" class="page">
-        <div class="profile-container" id="profileContainer">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p>Загрузка профиля</p>
+        <div id="profileContainer">
+            <div class="profile-card">
+                <div class="vk-icon-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                        <path d="M21.579 6.855c.14-.465 0-.855-.6-.855h-1.98c-.5 0-.75.265-.88.555 0 0-1.035 2.515-2.5 4.15-.475.475-.69.625-.95.625-.13 0-.32-.15-.32-.6v-3.44c0-.53-.155-.755-.58-.755h-3.12c-.325 0-.52.24-.52.48 0 .5.74.62.815 2.03v3.05c0 .665-.12.785-.38.785-.69 0-2.37-2.5-3.36-5.36-.195-.56-.39-.78-.9-.78h-1.98c-.6 0-.72.265-.72.555 0 .52.7 3.1 3.26 6.51 1.71 2.41 4.12 3.72 6.3 3.72 1.32 0 1.48-.3 1.48-.81v-1.88c0-.6.13-.72.55-.72.31 0 .85.16 2.1 1.35 1.44 1.44 1.68 2.09 2.5 2.09h1.98c.6 0 .9-.3.73-.89-.19-.59-.87-1.45-1.77-2.47-.49-.62-1.22-1.28-1.44-1.62-.31-.4-.22-.58 0-.94 0 0 2.55-3.59 2.82-4.81z"/>
+                    </svg>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name">
+                        <span id="profileFullName">Загрузка...</span>
+                        <button id="logoutIconBtn" class="logout-icon-btn" title="Выйти">
+                            <span class="material-symbols-outlined">logout</span>
+                        </button>
+                    </div>
+                    <div class="profile-id" id="profileId">ID: --</div>
+                </div>
+            </div>
+        </div>
+        <div class="menu-list">
+            <div class="menu-item" id="menuFriends"><div class="menu-item-icon"><span class="material-symbols-outlined">group</span></div><div class="menu-item-info"><div class="menu-item-title">Друзья</div><div class="menu-item-desc">Список друзей</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
+            <div class="menu-item" id="menuGroups"><div class="menu-item-icon"><span class="material-symbols-outlined">groups</span></div><div class="menu-item-info"><div class="menu-item-title">Сообщества</div><div class="menu-item-desc">Мои группы</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
+            <div class="menu-item" id="menuPlaylists"><div class="menu-item-icon"><span class="material-symbols-outlined">playlist_play</span></div><div class="menu-item-info"><div class="menu-item-title">Плейлисты</div><div class="menu-item-desc">Мои плейлисты</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
+            <div class="menu-item" id="menuSettings"><div class="menu-item-icon"><span class="material-symbols-outlined">settings</span></div><div class="menu-item-info"><div class="menu-item-title">Настройки</div><div class="menu-item-desc">Тема, невидимка и другое</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
+            <div class="menu-item" id="menuAbout"><div class="menu-item-icon"><span class="material-symbols-outlined">info</span></div><div class="menu-item-info"><div class="menu-item-title">О приложении</div><div class="menu-item-desc">Версия 0.2.0</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
+        </div>
+    </div>
+    
+    <div id="settingsPage" class="page">
+        <div class="settings-container">
+            <div class="settings-section">
+                <div class="settings-section-title">Внешний вид</div>
+                <div class="settings-item">
+                    <div class="settings-item-info">
+                        <div class="settings-item-title">Тёмная тема</div>
+                        <div class="settings-item-desc">Изменить цветовую схему</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="themeSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">Конфиденциальность</div>
+                <div class="settings-item">
+                    <div class="settings-item-info">
+                        <div class="settings-item-title">Невидимка</div>
+                        <div class="settings-item-desc">Друзья не увидят вас онлайн</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="invisibleSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
         </div>
     </div>
     
     <div class="bottom-nav">
-        <button class="nav-item active" data-page="main">
-            <span class="material-symbols-outlined">music_note</span>
-            <span>Главная</span>
-        </button>
-        <button class="nav-item" data-page="search">
-            <span class="material-symbols-outlined">search</span>
-            <span>Поиск</span>
-        </button>
-        <button class="nav-item" data-page="profile">
-            <span class="material-symbols-outlined">account_circle</span>
-            <span>Профиль</span>
-        </button>
+        <button class="nav-item active" data-page="main"><span class="material-symbols-outlined">music_note</span><span>Главная</span></button>
+        <button class="nav-item" data-page="messages"><span class="material-symbols-outlined">chat</span><span>Сообщения</span></button>
+        <button class="nav-item" data-page="search"><span class="material-symbols-outlined">search</span><span>Поиск</span></button>
+        <button class="nav-item" data-page="profile"><span class="material-symbols-outlined">menu</span><span>Меню</span></button>
     </div>
     
     <div class="mini-player">
         <div class="now-playing">
-            <div class="track-info-mini">
-                <div class="track-title-mini" id="nowPlayingTitle">Выберите трек</div>
-                <div class="track-artist-mini" id="nowPlayingArtist">-</div>
-            </div>
+            <div class="track-info-mini"><div class="track-title-mini" id="nowPlayingTitle">Выберите трек</div><div class="track-artist-mini" id="nowPlayingArtist">-</div></div>
             <div class="player-controls">
-                <button id="prevBtn">
-                    <span class="material-symbols-outlined">skip_previous</span>
-                </button>
-                <button id="playPauseBtn" class="play-pause-btn">
-                    <span class="material-symbols-outlined">play_arrow</span>
-                </button>
-                <button id="nextBtn">
-                    <span class="material-symbols-outlined">skip_next</span>
-                </button>
+                <button id="prevBtn"><span class="material-symbols-outlined">skip_previous</span></button>
+                <button id="playPauseBtn" class="play-pause-btn"><span class="material-symbols-outlined">play_arrow</span></button>
+                <button id="nextBtn"><span class="material-symbols-outlined">skip_next</span></button>
             </div>
         </div>
         <div class="progress-container">
-            <div class="progress-bar" id="progressBar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <div class="time-info">
-                <span id="currentTime">0:00</span>
-                <span id="totalTime">0:00</span>
-            </div>
+            <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="time-info"><span id="currentTime">0:00</span><span id="totalTime">0:00</span></div>
         </div>
     </div>
     
@@ -1126,59 +404,63 @@
     
     <div class="modal" id="aboutModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>О приложении</h2>
-                <button class="modal-close" id="closeModalBtn">&times;</button>
-            </div>
+            <div class="modal-header"><h2>О приложении</h2><button class="modal-close" id="closeModalBtn">&times;</button></div>
             <div class="modal-body">
-                <div class="about-icon">
-                    <span class="material-symbols-outlined">music_note</span>
-                </div>
+                <div class="about-icon"><span class="material-symbols-outlined">music_note</span></div>
                 <h3>VK Moosic Web Player</h3>
-                <p>Версия 0.0.9</p>
-                <p>Удобный плеер для прослушивания музыки из ВКонтакте</p>
-                <div class="about-features">
-                    <h4>Возможности:</h4>
-                    <ul>
-                        <li>Мои аудиозаписи</li>
-                        <li>Рекомендации ВК</li>
-                        <li>Глобальный поиск треков</li>
-                        <li>Профиль пользователя</li>
-                        <li>Скачивание треков</li>
-                        <li>Светлая/тёмная тема</li>
-                    </ul>
-                </div>
-                <div class="about-developer">
-                    <h4>Разработчик:</h4>
-                    <p>TG: @LisDevs</p>
-                    <p>GitHub: github.com/VKMP</p>
+                <p>Версия 0.2.0</p>
+                <p>Удобный плеер для прослушивания музыки и общения в ВКонтакте</p>
+                <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(128,128,128,0.2);">
+                    <div style="font-size: 13px; color: var(--md-on-surface-variant); margin-bottom: 12px;">Разработчик:</div>
+                    <a href="https://t.me/lisdevs" target="_blank" class="developer-link" id="developerLink">
+                        <span class="material-symbols-outlined">telegram</span>
+                        LisDevs
+                        <span class="material-symbols-outlined" style="font-size: 16px;">open_in_new</span>
+                    </a>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="modal-ok" id="closeModalOkBtn">Закрыть</button>
-            </div>
+            <div class="modal-footer"><button class="modal-ok" id="closeModalOkBtn">Закрыть</button></div>
         </div>
     </div>
 
     <script>
-    let myTracks = [];
-    let myTracksFiltered = [];
-    let searchResults = [];
-    let recommendations = [];
-    let currentTrackIndex = 0;
-    let currentTrackSource = 'myTracks';
-    let audioPlayer = new Audio();
-    let isPlaying = false;
-    let searchDebounceTimer = null;
-    let myTracksSearchDebounceTimer = null;
+    let myTracks = [], myTracksFiltered = [], searchResults = [], recommendations = [], conversations = [];
+    let currentChatPeerId = null, currentChatTitle = '';
+    let currentTrackIndex = 0, currentTrackSource = 'myTracks';
+    let currentFriendId = null, currentFriendName = '';
+    let currentGroupId = null, currentGroupName = '';
+    let audioPlayer = new Audio(), isPlaying = false;
+    let searchDebounceTimer = null, myTracksSearchDebounceTimer = null, searchPageDebounceTimer = null, activeContextMenu = null;
     
     // DOM элементы
     const mainPage = document.getElementById('mainPage');
+    const messagesPage = document.getElementById('messagesPage');
+    const friendsPage = document.getElementById('friendsPage');
+    const friendTracksPage = document.getElementById('friendTracksPage');
+    const groupsPage = document.getElementById('groupsPage');
+    const groupTracksPage = document.getElementById('groupTracksPage');
     const searchPage = document.getElementById('searchPage');
     const profilePage = document.getElementById('profilePage');
+    const settingsPage = document.getElementById('settingsPage');
+    const conversationsView = document.getElementById('conversationsView');
+    const chatView = document.getElementById('chatView');
+    const conversationsList = document.getElementById('conversationsList');
+    const messagesContainer = document.getElementById('messagesContainer');
+    const chatTitle = document.getElementById('chatTitle');
+    const messageInput = document.getElementById('messageInput');
+    const sendMessageBtn = document.getElementById('sendMessageBtn');
+    const backToConversations = document.getElementById('backToConversations');
     const myTracksList = document.getElementById('myTracksList');
     const searchResultsList = document.getElementById('searchResultsList');
     const recommendationsList = document.getElementById('recommendationsList');
+    const friendsList = document.getElementById('friendsList');
+    const friendTracksList = document.getElementById('friendTracksList');
+    const friendTracksTitle = document.getElementById('friendTracksTitle');
+    const backToFriendsBtn = document.getElementById('backToFriendsBtn');
+    const groupsList = document.getElementById('groupsList');
+    const groupTracksList = document.getElementById('groupTracksList');
+    const groupTracksTitle = document.getElementById('groupTracksTitle');
+    const backToGroupsBtn = document.getElementById('backToGroupsBtn');
     const profileContainer = document.getElementById('profileContainer');
     const appBarTitle = document.getElementById('appBarTitle');
     const appBarTitleBlock = document.getElementById('appBarTitleBlock');
@@ -1194,378 +476,277 @@
     const clearSearchInput = document.getElementById('clearSearchInput');
     const myTracksSearchInput = document.getElementById('myTracksSearchInput');
     const clearMyTracksSearch = document.getElementById('clearMyTracksSearch');
-    const aboutBtn = document.getElementById('aboutBtn');
-    const aboutModal = document.getElementById('aboutModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const closeModalOkBtn = document.getElementById('closeModalOkBtn');
+    const searchPageInput = document.getElementById('searchPageInput');
+    const clearSearchPageInput = document.getElementById('clearSearchPageInput');
+    const menuFriends = document.getElementById('menuFriends');
+    const menuGroups = document.getElementById('menuGroups');
+    const menuPlaylists = document.getElementById('menuPlaylists');
+    const menuSettings = document.getElementById('menuSettings');
+    const menuAbout = document.getElementById('menuAbout');
     
-    // Переключение табов
     function switchTab(tabId) {
-        tabContents.forEach(content => {
-            content.classList.remove('active');
-        });
-        tabBtns.forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
+        tabContents.forEach(c => c.classList.remove('active'));
+        tabBtns.forEach(b => b.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
         if (activeBtn) activeBtn.classList.add('active');
-        
-        // Загружаем рекомендации при переключении на них
-        if (tabId === 'recommendationsTab' && recommendations.length === 0) {
-            loadRecommendations();
-        }
+        if (tabId === 'recommendationsTab' && recommendations.length === 0) loadRecommendations();
     }
-    
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.getAttribute('data-tab');
-            switchTab(tabId);
-        });
-    });
+    tabBtns.forEach(btn => btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab'))));
     
     // Тема
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.remove('light');
-        document.body.classList.add('dark');
-        themeIcon.textContent = 'light_mode';
-    }
+    if (savedTheme === 'dark') { document.body.classList.remove('light'); document.body.classList.add('dark'); themeIcon.textContent = 'light_mode'; }
     themeToggle.addEventListener('click', () => {
         if (document.body.classList.contains('light')) {
-            document.body.classList.remove('light');
-            document.body.classList.add('dark');
-            themeIcon.textContent = 'light_mode';
-            localStorage.setItem('theme', 'dark');
+            document.body.classList.remove('light'); document.body.classList.add('dark');
+            themeIcon.textContent = 'light_mode'; localStorage.setItem('theme', 'dark');
+            if (document.getElementById('themeSwitch')) document.getElementById('themeSwitch').checked = true;
         } else {
-            document.body.classList.remove('dark');
-            document.body.classList.add('light');
-            themeIcon.textContent = 'dark_mode';
-            localStorage.setItem('theme', 'light');
+            document.body.classList.remove('dark'); document.body.classList.add('light');
+            themeIcon.textContent = 'dark_mode'; localStorage.setItem('theme', 'light');
+            if (document.getElementById('themeSwitch')) document.getElementById('themeSwitch').checked = false;
         }
     });
     
-    // Модальное окно
-    aboutBtn.addEventListener('click', () => {
-        aboutModal.classList.add('active');
-    });
-    
-    function closeModalFn() {
-        aboutModal.classList.remove('active');
-    }
-    
-    closeModalBtn.addEventListener('click', closeModalFn);
-    closeModalOkBtn.addEventListener('click', closeModalFn);
-    aboutModal.addEventListener('click', (e) => {
-        if (e.target === aboutModal) closeModalFn();
-    });
-    
-    function openSearch() {
-        searchExpanded.classList.add('active');
-        appBarTitleBlock.style.opacity = '0';
-        setTimeout(() => {
-            globalSearchInput.focus();
-        }, 100);
-    }
-    
-    function closeSearchFn() {
-        searchExpanded.classList.remove('active');
-        appBarTitleBlock.style.opacity = '1';
-        globalSearchInput.value = '';
-        performGlobalSearch('');
-        if (currentTrackSource === 'search' && searchResults.length > 0) {
-            switchPage('main');
-        }
-    }
-    
+    function openSearch() { searchExpanded.classList.add('active'); appBarTitleBlock.style.opacity = '0'; setTimeout(() => globalSearchInput.focus(), 100); }
+    function closeSearchFn() { searchExpanded.classList.remove('active'); appBarTitleBlock.style.opacity = '1'; globalSearchInput.value = ''; performGlobalSearch(''); }
     searchIcon.addEventListener('click', openSearch);
     closeSearch.addEventListener('click', closeSearchFn);
-    clearSearchInput.addEventListener('click', () => {
-        globalSearchInput.value = '';
-        performGlobalSearch('');
-        globalSearchInput.focus();
-    });
+    clearSearchInput.addEventListener('click', () => { globalSearchInput.value = ''; performGlobalSearch(''); globalSearchInput.focus(); });
     
     function switchPage(pageId) {
         mainPage.classList.remove('active');
+        messagesPage.classList.remove('active');
+        friendsPage.classList.remove('active');
+        friendTracksPage.classList.remove('active');
+        groupsPage.classList.remove('active');
+        groupTracksPage.classList.remove('active');
         searchPage.classList.remove('active');
         profilePage.classList.remove('active');
+        settingsPage.classList.remove('active');
         
         if (pageId === 'main') {
             mainPage.classList.add('active');
             appBarTitle.textContent = 'Музыка';
-            if (myTracks.length === 0) {
-                loadMyTracks();
-            }
-            closeSearchFn();
+            if (myTracks.length === 0) loadMyTracks(); closeSearchFn();
+        } else if (pageId === 'messages') {
+            messagesPage.classList.add('active');
+            appBarTitle.textContent = 'Сообщения';
+            showConversationsView(); loadConversations(); closeSearchFn();
+        } else if (pageId === 'friends') {
+            friendsPage.classList.add('active');
+            appBarTitle.textContent = 'Друзья';
+            loadFriends(); closeSearchFn();
+        } else if (pageId === 'groups') {
+            groupsPage.classList.add('active');
+            appBarTitle.textContent = 'Сообщества';
+            loadGroups(); closeSearchFn();
         } else if (pageId === 'search') {
             searchPage.classList.add('active');
             appBarTitle.textContent = 'Поиск';
-            if (globalSearchInput.value.trim()) {
-                performGlobalSearch(globalSearchInput.value);
-            }
+            if (searchPageInput && searchPageInput.value.trim()) performSearchPageSearch(searchPageInput.value);
+            closeSearchFn();
         } else if (pageId === 'profile') {
             profilePage.classList.add('active');
-            appBarTitle.textContent = 'Профиль';
-            loadProfile();
+            appBarTitle.textContent = 'Меню';
+            loadProfile(); closeSearchFn();
+        } else if (pageId === 'settings') {
+            settingsPage.classList.add('active');
+            appBarTitle.textContent = 'Настройки';
             closeSearchFn();
         }
         
         navItems.forEach(item => {
-            if (item.getAttribute('data-page') === pageId) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
+            if (item.getAttribute('data-page') === pageId) item.classList.add('active');
+            else item.classList.remove('active');
         });
     }
+    navItems.forEach(item => item.addEventListener('click', () => switchPage(item.getAttribute('data-page'))));
     
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            switchPage(item.getAttribute('data-page'));
-        });
-    });
+    menuFriends.addEventListener('click', () => switchPage('friends'));
+    menuGroups.addEventListener('click', () => switchPage('groups'));
+    menuPlaylists.addEventListener('click', () => showToast('В разработке'));
+    menuSettings.addEventListener('click', () => switchPage('settings'));
+    menuAbout.addEventListener('click', () => { document.getElementById('aboutModal').classList.add('active'); });
+    document.getElementById('closeModalBtn').onclick = () => document.getElementById('aboutModal').classList.remove('active');
+    document.getElementById('closeModalOkBtn').onclick = () => document.getElementById('aboutModal').classList.remove('active');
     
-    function downloadTrack(trackId, ownerId) {
-        window.location.href = `/download?id=${trackId}&owner_id=${ownerId}`;
+    function showConversationsView() { conversationsView.style.display = 'block'; chatView.style.display = 'none'; }
+    
+    function showChatView(peerId, title) {
+        if (!peerId) { showToast('Ошибка: идентификатор диалога не найден', true); return; }
+        currentChatPeerId = peerId;
+        currentChatTitle = title;
+        chatTitle.textContent = title;
+        conversationsView.style.display = 'none';
+        chatView.style.display = 'flex';
+        chatView.style.flexDirection = 'column';
+        chatView.style.height = '100%';
+        loadMessages(peerId);
     }
     
-    async function getTrackUrl(trackId, ownerId) {
-        const response = await fetch(`/get-track-url?id=${trackId}&owner_id=${ownerId}`);
-        const data = await response.json();
-        return data.url;
+    backToConversations.addEventListener('click', () => { showConversationsView(); loadConversations(); });
+    sendMessageBtn.addEventListener('click', () => sendMessage());
+    messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    
+    async function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text || !currentChatPeerId) return;
+        try {
+            const response = await fetch('/api/send-message', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ peer_id: currentChatPeerId, message: text }) });
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const result = await response.json();
+            if (result.success) { messageInput.value = ''; loadMessages(currentChatPeerId); }
+            else { showToast(result.error || 'Ошибка отправки', true); }
+        } catch (err) { showToast('Ошибка: ' + err.message, true); }
     }
     
-    async function playTrack(track, source) {
-        if (!track || !track.id) {
-            showToast('Информация о треке недоступна', true);
+    async function loadConversations() {
+        conversationsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка диалогов</p></div>';
+        try {
+            const response = await fetch('/api/conversations');
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const convs = await response.json();
+            displayConversations(convs);
+        } catch (err) {
+            conversationsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    function getAvatarText(name) {
+        if (!name) return '?';
+        const firstChar = name.trim().charAt(0).toUpperCase();
+        if (/[A-Za-zА-Яа-я]/.test(firstChar)) {
+            return firstChar;
+        }
+        return '?';
+    }
+    
+    function displayConversations(convs) {
+        conversationsList.innerHTML = '';
+        if (!convs || convs.length === 0) {
+            conversationsList.innerHTML = '<div class="loading"><p>Нет диалогов</p></div>';
             return;
         }
         
-        const url = await getTrackUrl(track.id, track.owner_id);
-        if (!url) {
-            showToast('Ссылка на трек недоступна', true);
-            return;
-        }
-        
-        let cleanUrl = url.replace(/\\\//g, '/');
-        audioPlayer.src = cleanUrl;
-        audioPlayer.load();
-        audioPlayer.play().then(() => {
-            isPlaying = true;
-            updatePlayPauseButton();
-            updateNowPlayingInfo(track);
-        }).catch(e => {
-            console.error('Ошибка:', e);
-            showToast('Ошибка воспроизведения', true);
-        });
-    }
-    
-    function updateNowPlayingInfo(track) {
-        document.getElementById('nowPlayingTitle').textContent = track.title || 'Без названия';
-        document.getElementById('nowPlayingArtist').textContent = track.artist || 'Неизвестный исполнитель';
-    }
-    
-    function updatePlayPauseButton() {
-        const btn = document.getElementById('playPauseBtn');
-        const icon = btn.querySelector('.material-symbols-outlined');
-        icon.textContent = isPlaying ? 'pause' : 'play_arrow';
-    }
-    
-    function updateClearButtonVisibility() {
-        if (clearMyTracksSearch) {
-            clearMyTracksSearch.style.display = myTracksSearchInput.value.trim() ? 'flex' : 'none';
-        }
-    }
-    
-    // Поиск по моим трекам
-    async function searchMyTracks(query) {
-        if (!query.trim()) {
-            displayMyTracks(myTracks);
-            return;
-        }
-        
-        myTracksList.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div><p>Поиск...</p></div>';
-        
-        try {
-            const response = await fetch(`/api/search-my?q=${encodeURIComponent(query)}`);
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            const data = await response.json();
+        for (const conv of convs) {
+            const div = document.createElement('div');
+            div.className = 'conversation-item';
+            const peerId = conv.peer_id;
+            const title = conv.title || 'Диалог';
+            const lastText = conv.last_text || 'Нет сообщений';
+            const unread = conv.unread || 0;
+            const avatarLetter = getAvatarText(title);
+            const hasPhoto = conv.photo && conv.photo !== '';
             
-            if (data.error) {
-                myTracksList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
-                return;
-            }
-            
-            myTracksFiltered = data;
-            displayMyTracks(myTracksFiltered);
-        } catch (err) {
-            myTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
-        }
-    }
-    
-    if (myTracksSearchInput) {
-        myTracksSearchInput.addEventListener('input', (e) => {
-            if (myTracksSearchDebounceTimer) clearTimeout(myTracksSearchDebounceTimer);
-            myTracksSearchDebounceTimer = setTimeout(() => {
-                searchMyTracks(e.target.value);
-            }, 300);
-        });
-        
-        myTracksSearchInput.addEventListener('input', updateClearButtonVisibility);
-        updateClearButtonVisibility();
-    }
-    
-    if (clearMyTracksSearch) {
-        clearMyTracksSearch.addEventListener('click', () => {
-            myTracksSearchInput.value = '';
-            searchMyTracks('');
-            updateClearButtonVisibility();
-            myTracksSearchInput.focus();
-        });
-    }
-    
-    async function loadMyTracks() {
-        myTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>';
-        
-        try {
-            const response = await fetch('/api/tracks');
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            const data = await response.json();
-            
-            if (data.error) {
-                myTracksList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
-                return;
-            }
-            
-            myTracks = data;
-            myTracksFiltered = data;
-            displayMyTracks(myTracksFiltered);
-            updateStats(myTracks);
-        } catch (err) {
-            myTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
-        }
-    }
-    
-    async function loadRecommendations() {
-        recommendationsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка рекомендаций</p></div>';
-        
-        try {
-            const response = await fetch('/api/recommendations');
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            const data = await response.json();
-            
-            if (data.error) {
-                recommendationsList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
-                return;
-            }
-            
-            recommendations = data;
-            displayRecommendations(recommendations);
-        } catch (err) {
-            recommendationsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
-        }
-    }
-    
-    async function loadProfile() {
-        profileContainer.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка профиля</p></div>';
-        
-        try {
-            const response = await fetch('/api/profile');
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            
-            const data = await response.json();
-            
-            if (data.error) {
-                profileContainer.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
-                return;
-            }
-            
-            displayProfile(data);
-        } catch (err) {
-            profileContainer.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
-        }
-    }
-    
-    function displayProfile(profile) {
-        profileContainer.innerHTML = `
-            <div class="profile-container">
-                <img class="profile-avatar" src="${profile.photo}" alt="Аватар">
-                <div class="profile-name">${escapeHtml(profile.full_name)}</div>
-                <div class="profile-id">ID: ${profile.id}</div>
-                
-                <div class="profile-stats">
-                    <div class="profile-stat-item">
-                        <span class="profile-stat-label">Имя</span>
-                        <span class="profile-stat-value">${escapeHtml(profile.first_name)}</span>
-                    </div>
-                    <div class="profile-stat-item">
-                        <span class="profile-stat-label">Фамилия</span>
-                        <span class="profile-stat-value">${escapeHtml(profile.last_name)}</span>
-                    </div>
-                    <div class="profile-stat-item">
-                        <span class="profile-stat-label">VK ID</span>
-                        <span class="profile-stat-value">${profile.id}</span>
-                    </div>
+            div.innerHTML = `
+                <div class="conv-avatar">
+                    ${hasPhoto ? `<img src="${conv.photo}" alt="${escapeHtml(title)}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : ''}
+                    <span class="avatar-letter" style="${hasPhoto ? 'display:none' : 'display:flex'}">${escapeHtml(avatarLetter)}</span>
                 </div>
-                
-                <button class="profile-logout-btn" id="profileLogoutBtn">
-                    <span class="material-symbols-outlined">logout</span>
-                    <span>Выйти из аккаунта</span>
-                </button>
-            </div>
-        `;
-        
-        document.getElementById('profileLogoutBtn').addEventListener('click', () => {
-            window.location.href = '/logout';
-        });
+                <div class="conv-info">
+                    <div class="conv-title">${escapeHtml(title)}</div>
+                    <div class="conv-last">${escapeHtml(lastText)}</div>
+                </div>
+                ${unread > 0 ? `<div class="unread-badge">${unread}</div>` : ''}
+            `;
+            
+            const img = div.querySelector('img');
+            const letterSpan = div.querySelector('.avatar-letter');
+            if (img && img.complete && img.naturalWidth === 0) {
+                img.style.display = 'none';
+                if (letterSpan) letterSpan.style.display = 'flex';
+            }
+            
+            div.onclick = () => showChatView(peerId, title);
+            conversationsList.appendChild(div);
+        }
     }
     
-    function displayMyTracks(tracksList) {
-        myTracksList.innerHTML = '';
+    async function loadMessages(peerId) {
+        messagesContainer.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка сообщений</p></div>';
+        try {
+            const response = await fetch(`/api/messages?peer_id=${peerId}`);
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const messages = await response.json();
+            displayMessages(messages);
+        } catch (err) {
+            messagesContainer.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    function displayMessages(messages) {
+        messagesContainer.innerHTML = '';
+        if (!messages || messages.length === 0) {
+            messagesContainer.innerHTML = '<div class="loading"><p>Нет сообщений</p></div>';
+            return;
+        }
         
-        if (tracksList.length === 0) {
-            myTracksList.innerHTML = '<div class="loading"><p>Нет треков</p></div>';
+        for (const msg of messages.reverse()) {
+            const div = document.createElement('div');
+            const isOutgoing = msg.out === 1;
+            div.className = `message-item ${isOutgoing ? 'out' : 'in'}`;
+            const senderName = isOutgoing ? 'Вы' : (msg.from_name || 'Пользователь');
+            const dateStr = msg.date ? new Date(msg.date * 1000).toLocaleString() : '';
+            div.innerHTML = `
+                <div class="message-sender">${escapeHtml(senderName)}</div>
+                <div class="message-bubble">${escapeHtml(msg.text || '')}</div>
+                <div class="message-date">${dateStr}</div>
+            `;
+            messagesContainer.appendChild(div);
+        }
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    async function openFriendTracks(friendId, friendName) {
+        currentFriendId = friendId;
+        currentFriendName = friendName;
+        friendTracksTitle.textContent = `Треки: ${escapeHtml(friendName)}`;
+        
+        friendsPage.classList.remove('active');
+        friendTracksPage.classList.add('active');
+        appBarTitle.textContent = `Треки ${escapeHtml(friendName)}`;
+        
+        friendTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков...</p></div>';
+        
+        try {
+            const response = await fetch(`/api/friend-tracks?user_id=${friendId}`);
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const tracks = await response.json();
+            displayFriendTracks(tracks);
+        } catch (err) {
+            friendTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    function displayFriendTracks(tracksList) {
+        friendTracksList.innerHTML = '';
+        if (!tracksList.length) {
+            friendTracksList.innerHTML = '<div class="loading"><p>У друга нет треков</p></div>';
             return;
         }
         
         tracksList.forEach((track, i) => {
-            const artist = track.artist || 'Неизвестный исполнитель';
-            const title = track.title || 'Без названия';
             const mins = Math.floor((track.duration || 0) / 60);
             const secs = (track.duration || 0) % 60;
-            const duration = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            
             const div = document.createElement('div');
             div.className = 'track-item';
             div.innerHTML = `
                 <div class="track-number">${i+1}</div>
                 <div class="track-info">
-                    <div class="track-title">${escapeHtml(title)}</div>
-                    <div class="track-artist">${escapeHtml(artist)}</div>
+                    <div class="track-title">${escapeHtml(track.title)}</div>
+                    <div class="track-artist">${escapeHtml(track.artist)}</div>
                 </div>
-                <div class="track-duration">${duration}</div>
-                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}" data-title="${escapeHtml(title)}">
+                <div class="track-duration">${mins}:${secs < 10 ? '0' : ''}${secs}</div>
+                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}">
                     <span class="material-symbols-outlined">more_vert</span>
                 </button>
             `;
             
             div.addEventListener('click', (e) => {
                 if (!e.target.closest('.menu-btn')) {
-                    playTrack(track, 'myTracks');
+                    playTrack(track, 'friend');
                 }
             });
             
@@ -1575,228 +756,46 @@
                 const rect = menuBtn.getBoundingClientRect();
                 const trackId = parseInt(menuBtn.getAttribute('data-id'));
                 const ownerId = parseInt(menuBtn.getAttribute('data-owner-id'));
-                const trackTitle = menuBtn.getAttribute('data-title');
-                showMyTrackMenu(rect.right - 200, rect.bottom + 5, trackId, ownerId, trackTitle);
+                const trackTitle = track.title;
+                showFriendTrackMenu(rect.right - 180, rect.bottom + 5, trackId, ownerId, trackTitle);
             });
             
-            myTracksList.appendChild(div);
+            friendTracksList.appendChild(div);
         });
     }
     
-    function showMyTrackMenu(x, y, trackId, ownerId, trackTitle) {
+    function showFriendTrackMenu(x, y, trackId, ownerId, trackTitle) {
         if (activeContextMenu) activeContextMenu.remove();
-        
         const menu = document.createElement('div');
         menu.className = 'context-menu';
         menu.style.left = x + 'px';
         menu.style.top = y + 'px';
         menu.innerHTML = `
-            <div class="context-menu-item download" data-action="download">
-                <span class="material-symbols-outlined">download</span>
-                <span>Скачать MP3</span>
-            </div>
-            <div class="context-menu-item delete" data-action="delete">
-                <span class="material-symbols-outlined">delete_forever</span>
-                <span>Удалить</span>
-            </div>
+            <div class="context-menu-item download"><span class="material-symbols-outlined">download</span><span>Скачать MP3</span></div>
+            <div class="context-menu-item add"><span class="material-symbols-outlined">add_circle</span><span>Добавить в мои треки</span></div>
         `;
         
-        menu.querySelector('[data-action="download"]').addEventListener('click', () => {
+        menu.querySelector('.download').addEventListener('click', () => {
             menu.remove();
             activeContextMenu = null;
             downloadTrack(trackId, ownerId);
         });
         
-        menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
+        menu.querySelector('.add').addEventListener('click', async () => {
             menu.remove();
             activeContextMenu = null;
-            await deleteTrackFromVK(trackId, trackTitle);
+            await addTrackToVK(trackId, ownerId, trackTitle);
         });
         
         document.body.appendChild(menu);
         activeContextMenu = menu;
-        
-        const closeMenu = (e) => {
+        setTimeout(() => document.addEventListener('click', function closeMenu(e) {
             if (!menu.contains(e.target)) {
                 menu.remove();
                 activeContextMenu = null;
                 document.removeEventListener('click', closeMenu);
             }
-        };
-        setTimeout(() => document.addEventListener('click', closeMenu), 10);
-    }
-    
-    async function deleteTrackFromVK(trackId, trackTitle) {
-        try {
-            const response = await fetch('/api/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ track_id: trackId })
-            });
-            
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return false;
-            }
-            
-            const result = await response.json();
-            
-            if (result.error) {
-                showToast(`Ошибка: ${result.error}`, true);
-                return false;
-            }
-            
-            await refreshMyTracks();
-            showToast(`Удалён: ${trackTitle}`);
-            return true;
-        } catch (error) {
-            showToast(`Ошибка: ${error.message}`, true);
-            return false;
-        }
-    }
-    
-    async function refreshMyTracks() {
-        try {
-            const response = await fetch('/api/tracks');
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            const data = await response.json();
-            if (!data.error) {
-                myTracks = data;
-                if (myTracksSearchInput.value.trim()) {
-                    searchMyTracks(myTracksSearchInput.value);
-                } else {
-                    displayMyTracks(myTracks);
-                }
-                updateStats(myTracks);
-            }
-        } catch (err) {
-            console.error('Ошибка обновления:', err);
-        }
-    }
-    
-    function displaySearchResults(tracksList) {
-        searchResultsList.innerHTML = '';
-        
-        if (!tracksList || tracksList.length === 0) {
-            searchResultsList.innerHTML = `
-                <div class="search-empty">
-                    <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5;">search</span>
-                    <p style="margin-top: 12px;">Ничего не найдено</p>
-                </div>
-            `;
-            return;
-        }
-        
-        tracksList.forEach((track, i) => {
-            const artist = track.artist || 'Неизвестный исполнитель';
-            const title = track.title || 'Без названия';
-            const mins = Math.floor((track.duration || 0) / 60);
-            const secs = (track.duration || 0) % 60;
-            const duration = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            
-            const isAlreadyInMyTracks = myTracks.some(t => t.id === track.id);
-            
-            const div = document.createElement('div');
-            div.className = 'track-item';
-            div.innerHTML = `
-                <div class="track-number">${i+1}</div>
-                <div class="track-info">
-                    <div class="track-title">${escapeHtml(title)}</div>
-                    <div class="track-artist">${escapeHtml(artist)}</div>
-                </div>
-                <div class="track-duration">${duration}</div>
-                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}" data-title="${escapeHtml(title)}" data-is-added="${isAlreadyInMyTracks}">
-                    <span class="material-symbols-outlined">more_vert</span>
-                </button>
-            `;
-            
-            div.addEventListener('click', (e) => {
-                if (!e.target.closest('.menu-btn')) {
-                    playTrack(track, 'search');
-                }
-            });
-            
-            const menuBtn = div.querySelector('.menu-btn');
-            menuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const rect = menuBtn.getBoundingClientRect();
-                const trackId = parseInt(menuBtn.getAttribute('data-id'));
-                const ownerId = parseInt(menuBtn.getAttribute('data-owner-id'));
-                const trackTitle = menuBtn.getAttribute('data-title');
-                const isAdded = menuBtn.getAttribute('data-is-added') === 'true';
-                showSearchTrackMenu(rect.right - 200, rect.bottom + 5, trackId, ownerId, trackTitle, isAdded);
-            });
-            
-            searchResultsList.appendChild(div);
-        });
-    }
-    
-    function showSearchTrackMenu(x, y, trackId, ownerId, trackTitle, isAdded) {
-        if (activeContextMenu) activeContextMenu.remove();
-        
-        const menu = document.createElement('div');
-        menu.className = 'context-menu';
-        menu.style.left = x + 'px';
-        menu.style.top = y + 'px';
-        
-        if (isAdded) {
-            menu.innerHTML = `
-                <div class="context-menu-item delete" data-action="delete">
-                    <span class="material-symbols-outlined">delete_forever</span>
-                    <span>Удалить</span>
-                </div>
-                <div class="context-menu-item download" data-action="download">
-                    <span class="material-symbols-outlined">download</span>
-                    <span>Скачать MP3</span>
-                </div>
-            `;
-            menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
-                menu.remove();
-                activeContextMenu = null;
-                await deleteTrackFromVK(trackId, trackTitle);
-            });
-            menu.querySelector('[data-action="download"]').addEventListener('click', () => {
-                menu.remove();
-                activeContextMenu = null;
-                downloadTrack(trackId, ownerId);
-            });
-        } else {
-            menu.innerHTML = `
-                <div class="context-menu-item add" data-action="add">
-                    <span class="material-symbols-outlined">add_circle</span>
-                    <span>Добавить в мои треки</span>
-                </div>
-                <div class="context-menu-item download" data-action="download">
-                    <span class="material-symbols-outlined">download</span>
-                    <span>Скачать MP3</span>
-                </div>
-            `;
-            menu.querySelector('[data-action="add"]').addEventListener('click', async () => {
-                menu.remove();
-                activeContextMenu = null;
-                await addTrackToVK(trackId, ownerId, trackTitle);
-            });
-            menu.querySelector('[data-action="download"]').addEventListener('click', () => {
-                menu.remove();
-                activeContextMenu = null;
-                downloadTrack(trackId, ownerId);
-            });
-        }
-        
-        document.body.appendChild(menu);
-        activeContextMenu = menu;
-        
-        const closeMenu = (e) => {
-            if (!menu.contains(e.target)) {
-                menu.remove();
-                activeContextMenu = null;
-                document.removeEventListener('click', closeMenu);
-            }
-        };
-        setTimeout(() => document.addEventListener('click', closeMenu), 10);
+        }), 10);
     }
     
     async function addTrackToVK(trackId, ownerId, trackTitle) {
@@ -1806,62 +805,77 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ track_id: trackId, owner_id: ownerId })
             });
-            
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return false;
-            }
-            
+            if (response.status === 401) { window.location.href = '/login'; return; }
             const result = await response.json();
-            
             if (result.error) {
                 showToast(`Ошибка: ${result.error}`, true);
-                return false;
+                return;
             }
-            
-            await refreshMyTracks();
+            await loadMyTracks();
             showToast(`Добавлен: ${trackTitle}`);
-            return true;
-        } catch (error) {
-            showToast(`Ошибка: ${error.message}`, true);
-            return false;
+        } catch (err) {
+            showToast(`Ошибка: ${err.message}`, true);
         }
     }
     
-    function displayRecommendations(tracksList) {
-        recommendationsList.innerHTML = '';
+    function backToFriends() {
+        friendTracksPage.classList.remove('active');
+        friendsPage.classList.add('active');
+        appBarTitle.textContent = 'Друзья';
+        currentFriendId = null;
+        currentFriendName = '';
+    }
+    
+    backToFriendsBtn.addEventListener('click', backToFriends);
+    
+    async function openGroupTracks(groupId, groupName) {
+        currentGroupId = groupId;
+        currentGroupName = groupName;
+        groupTracksTitle.textContent = `Треки: ${escapeHtml(groupName)}`;
         
-        if (tracksList.length === 0) {
-            recommendationsList.innerHTML = '<div class="loading"><p>Нет рекомендаций</p></div>';
+        groupsPage.classList.remove('active');
+        groupTracksPage.classList.add('active');
+        appBarTitle.textContent = `Треки ${escapeHtml(groupName)}`;
+        
+        groupTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков...</p></div>';
+        
+        try {
+            const response = await fetch(`/api/group-tracks?group_id=${groupId}`);
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const tracks = await response.json();
+            displayGroupTracks(tracks);
+        } catch (err) {
+            groupTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    function displayGroupTracks(tracksList) {
+        groupTracksList.innerHTML = '';
+        if (!tracksList.length) {
+            groupTracksList.innerHTML = '<div class="loading"><p>У сообщества нет треков</p></div>';
             return;
         }
         
         tracksList.forEach((track, i) => {
-            const artist = track.artist || 'Неизвестный исполнитель';
-            const title = track.title || 'Без названия';
             const mins = Math.floor((track.duration || 0) / 60);
             const secs = (track.duration || 0) % 60;
-            const duration = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            
-            const isAlreadyInMyTracks = myTracks.some(t => t.id === track.id);
-            
             const div = document.createElement('div');
             div.className = 'track-item';
             div.innerHTML = `
                 <div class="track-number">${i+1}</div>
                 <div class="track-info">
-                    <div class="track-title">${escapeHtml(title)}</div>
-                    <div class="track-artist">${escapeHtml(artist)}</div>
+                    <div class="track-title">${escapeHtml(track.title)}</div>
+                    <div class="track-artist">${escapeHtml(track.artist)}</div>
                 </div>
-                <div class="track-duration">${duration}</div>
-                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}" data-title="${escapeHtml(title)}" data-is-added="${isAlreadyInMyTracks}">
+                <div class="track-duration">${mins}:${secs < 10 ? '0' : ''}${secs}</div>
+                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}">
                     <span class="material-symbols-outlined">more_vert</span>
                 </button>
             `;
             
             div.addEventListener('click', (e) => {
                 if (!e.target.closest('.menu-btn')) {
-                    playTrack(track, 'recommendations');
+                    playTrack(track, 'group');
                 }
             });
             
@@ -1871,114 +885,407 @@
                 const rect = menuBtn.getBoundingClientRect();
                 const trackId = parseInt(menuBtn.getAttribute('data-id'));
                 const ownerId = parseInt(menuBtn.getAttribute('data-owner-id'));
-                const trackTitle = menuBtn.getAttribute('data-title');
-                const isAdded = menuBtn.getAttribute('data-is-added') === 'true';
-                showRecommendationMenu(rect.right - 200, rect.bottom + 5, trackId, ownerId, trackTitle, isAdded);
+                const trackTitle = track.title;
+                showGroupTrackMenu(rect.right - 180, rect.bottom + 5, trackId, ownerId, trackTitle);
             });
             
-            recommendationsList.appendChild(div);
+            groupTracksList.appendChild(div);
         });
     }
     
-    function showRecommendationMenu(x, y, trackId, ownerId, trackTitle, isAdded) {
+    function showGroupTrackMenu(x, y, trackId, ownerId, trackTitle) {
         if (activeContextMenu) activeContextMenu.remove();
-        
         const menu = document.createElement('div');
         menu.className = 'context-menu';
         menu.style.left = x + 'px';
         menu.style.top = y + 'px';
+        menu.innerHTML = `
+            <div class="context-menu-item download"><span class="material-symbols-outlined">download</span><span>Скачать MP3</span></div>
+            <div class="context-menu-item add"><span class="material-symbols-outlined">add_circle</span><span>Добавить в мои треки</span></div>
+        `;
         
-        if (isAdded) {
-            menu.innerHTML = `
-                <div class="context-menu-item delete" data-action="delete">
-                    <span class="material-symbols-outlined">delete_forever</span>
-                    <span>Удалить</span>
-                </div>
-                <div class="context-menu-item download" data-action="download">
-                    <span class="material-symbols-outlined">download</span>
-                    <span>Скачать MP3</span>
-                </div>
-            `;
-            menu.querySelector('[data-action="delete"]').addEventListener('click', async () => {
-                menu.remove();
-                activeContextMenu = null;
-                await deleteTrackFromVK(trackId, trackTitle);
-            });
-            menu.querySelector('[data-action="download"]').addEventListener('click', () => {
-                menu.remove();
-                activeContextMenu = null;
-                downloadTrack(trackId, ownerId);
-            });
-        } else {
-            menu.innerHTML = `
-                <div class="context-menu-item add" data-action="add">
-                    <span class="material-symbols-outlined">add_circle</span>
-                    <span>Добавить</span>
-                </div>
-                <div class="context-menu-item download" data-action="download">
-                    <span class="material-symbols-outlined">download</span>
-                    <span>Скачать MP3</span>
-                </div>
-            `;
-            menu.querySelector('[data-action="add"]').addEventListener('click', async () => {
-                menu.remove();
-                activeContextMenu = null;
-                await addTrackToVK(trackId, ownerId, trackTitle);
-            });
-            menu.querySelector('[data-action="download"]').addEventListener('click', () => {
-                menu.remove();
-                activeContextMenu = null;
-                downloadTrack(trackId, ownerId);
-            });
-        }
+        menu.querySelector('.download').addEventListener('click', () => {
+            menu.remove();
+            activeContextMenu = null;
+            downloadTrack(trackId, ownerId);
+        });
+        
+        menu.querySelector('.add').addEventListener('click', async () => {
+            menu.remove();
+            activeContextMenu = null;
+            await addTrackToVK(trackId, ownerId, trackTitle);
+        });
         
         document.body.appendChild(menu);
         activeContextMenu = menu;
-        
-        const closeMenu = (e) => {
+        setTimeout(() => document.addEventListener('click', function closeMenu(e) {
             if (!menu.contains(e.target)) {
                 menu.remove();
                 activeContextMenu = null;
                 document.removeEventListener('click', closeMenu);
             }
-        };
-        setTimeout(() => document.addEventListener('click', closeMenu), 10);
+        }), 10);
     }
     
-    async function performGlobalSearch(query) {
-        if (!query.trim()) {
-            displaySearchResults([]);
+    function backToGroups() {
+        groupTracksPage.classList.remove('active');
+        groupsPage.classList.add('active');
+        appBarTitle.textContent = 'Сообщества';
+        currentGroupId = null;
+        currentGroupName = '';
+    }
+    
+    if (backToGroupsBtn) backToGroupsBtn.addEventListener('click', backToGroups);
+    
+    async function loadFriends() {
+        friendsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка друзей</p></div>';
+        try {
+            const response = await fetch('/api/friends');
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const friends = await response.json();
+            displayFriends(friends);
+        } catch (err) {
+            friendsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    function displayFriends(friends) {
+        friendsList.innerHTML = '';
+        if (!friends || friends.length === 0) {
+            friendsList.innerHTML = '<div class="loading"><p>Нет друзей</p></div>';
             return;
         }
         
-        searchResultsList.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div><p>Поиск...</p></div>';
-        
-        try {
-            const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            const data = await response.json();
+        for (const friend of friends) {
+            const div = document.createElement('div');
+            div.className = 'conversation-item';
+            const avatarLetter = getAvatarText(friend.full_name);
+            const hasPhoto = friend.photo && friend.photo !== '';
             
-            if (data.error) {
-                searchResultsList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
-                return;
+            div.innerHTML = `
+                <div class="conv-avatar">
+                    ${hasPhoto ? `<img src="${friend.photo}" alt="${escapeHtml(friend.full_name)}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : ''}
+                    <span class="avatar-letter" style="${hasPhoto ? 'display:none' : 'display:flex'}">${escapeHtml(avatarLetter)}</span>
+                </div>
+                <div class="conv-info">
+                    <div class="conv-title">${escapeHtml(friend.full_name)}</div>
+                    <div class="conv-last">${friend.online ? '🟢 Онлайн' : '⚫ Офлайн'}</div>
+                </div>
+            `;
+            
+            div.onclick = () => openFriendTracks(friend.id, friend.full_name);
+            
+            const img = div.querySelector('img');
+            const letterSpan = div.querySelector('.avatar-letter');
+            if (img && img.complete && img.naturalWidth === 0) {
+                img.style.display = 'none';
+                if (letterSpan) letterSpan.style.display = 'flex';
             }
             
-            searchResults = data;
-            displaySearchResults(searchResults);
-        } catch (err) {
-            searchResultsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+            friendsList.appendChild(div);
         }
     }
     
-    globalSearchInput.addEventListener('input', (e) => {
-        if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
-        searchDebounceTimer = setTimeout(() => {
-            performGlobalSearch(e.target.value);
-        }, 500);
-    });
+    async function loadGroups() {
+        groupsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка сообществ</p></div>';
+        try {
+            const response = await fetch('/api/groups');
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const groups = await response.json();
+            displayGroups(groups);
+        } catch (err) {
+            groupsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    function displayGroups(groups) {
+        groupsList.innerHTML = '';
+        if (!groups || groups.length === 0) {
+            groupsList.innerHTML = '<div class="loading"><p>Нет сообществ</p></div>';
+            return;
+        }
+        
+        for (const group of groups) {
+            const div = document.createElement('div');
+            div.className = 'conversation-item';
+            const avatarLetter = getAvatarText(group.name);
+            const hasPhoto = group.photo && group.photo !== '';
+            
+            div.innerHTML = `
+                <div class="conv-avatar">
+                    ${hasPhoto ? `<img src="${group.photo}" alt="${escapeHtml(group.name)}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : ''}
+                    <span class="avatar-letter" style="${hasPhoto ? 'display:none' : 'display:flex'}">${escapeHtml(avatarLetter)}</span>
+                </div>
+                <div class="conv-info">
+                    <div class="conv-title">${escapeHtml(group.name)}</div>
+                    <div class="conv-last">${group.type === 'group' ? 'Группа' : 'Публичная страница'}</div>
+                </div>
+            `;
+            
+            div.onclick = () => openGroupTracks(group.id, group.name);
+            
+            const img = div.querySelector('img');
+            const letterSpan = div.querySelector('.avatar-letter');
+            if (img && img.complete && img.naturalWidth === 0) {
+                img.style.display = 'none';
+                if (letterSpan) letterSpan.style.display = 'flex';
+            }
+            
+            groupsList.appendChild(div);
+        }
+    }
+    
+    function downloadTrack(trackId, ownerId) { window.location.href = `/download?id=${trackId}&owner_id=${ownerId}`; }
+    async function getTrackUrl(trackId, ownerId) { const response = await fetch(`/get-track-url?id=${trackId}&owner_id=${ownerId}`); const data = await response.json(); return data.url; }
+    
+    async function playTrack(track, source) {
+        if (!track || !track.id) { showToast('Информация о треке недоступна', true); return; }
+        const url = await getTrackUrl(track.id, track.owner_id);
+        if (!url) { showToast('Ссылка на трек недоступна', true); return; }
+        audioPlayer.src = url.replace(/\\\//g, '/');
+        audioPlayer.load();
+        audioPlayer.play().then(() => { isPlaying = true; updatePlayPauseButton(); updateNowPlayingInfo(track); }).catch(e => { showToast('Ошибка воспроизведения', true); });
+    }
+    
+    function updateNowPlayingInfo(track) { document.getElementById('nowPlayingTitle').textContent = track.title || 'Без названия'; document.getElementById('nowPlayingArtist').textContent = track.artist || 'Неизвестный исполнитель'; }
+    function updatePlayPauseButton() { const btn = document.getElementById('playPauseBtn'); const icon = btn.querySelector('.material-symbols-outlined'); icon.textContent = isPlaying ? 'pause' : 'play_arrow'; }
+    
+    async function loadMyTracks() {
+        myTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>';
+        try {
+            const response = await fetch('/api/tracks');
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const data = await response.json();
+            if (data.error) { myTracksList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`; return; }
+            myTracks = data; myTracksFiltered = data;
+            displayMyTracks(myTracksFiltered);
+            updateStats(myTracks);
+        } catch (err) { myTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`; }
+    }
+    
+    async function loadRecommendations() {
+        recommendationsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка рекомендаций</p></div>';
+        try {
+            const response = await fetch('/api/recommendations');
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const data = await response.json();
+            if (data.error) { recommendationsList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`; return; }
+            recommendations = data;
+            displayRecommendations(recommendations);
+        } catch (err) { recommendationsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`; }
+    }
+    
+    async function loadProfile() {
+    const profileHtml = `
+        <div class="profile-card">
+            <div class="profile-avatar" id="profileAvatar">
+                <div class="vk-icon-placeholder" id="avatarPlaceholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                        <path d="M21.579 6.855c.14-.465 0-.855-.6-.855h-1.98c-.5 0-.75.265-.88.555 0 0-1.035 2.515-2.5 4.15-.475.475-.69.625-.95.625-.13 0-.32-.15-.32-.6v-3.44c0-.53-.155-.755-.58-.755h-3.12c-.325 0-.52.24-.52.48 0 .5.74.62.815 2.03v3.05c0 .665-.12.785-.38.785-.69 0-2.37-2.5-3.36-5.36-.195-.56-.39-.78-.9-.78h-1.98c-.6 0-.72.265-.72.555 0 .52.7 3.1 3.26 6.51 1.71 2.41 4.12 3.72 6.3 3.72 1.32 0 1.48-.3 1.48-.81v-1.88c0-.6.13-.72.55-.72.31 0 .85.16 2.1 1.35 1.44 1.44 1.68 2.09 2.5 2.09h1.98c.6 0 .9-.3.73-.89-.19-.59-.87-1.45-1.77-2.47-.49-.62-1.22-1.28-1.44-1.62-.31-.4-.22-.58 0-.94 0 0 2.55-3.59 2.82-4.81z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="profile-info">
+                <div class="profile-name">
+                    <span id="profileFullName">Загрузка...</span>
+                    <button id="logoutIconBtn" class="logout-icon-btn" title="Выйти">
+                        <span class="material-symbols-outlined">logout</span>
+                    </button>
+                </div>
+                <div class="profile-id" id="profileId">ID: --</div>
+            </div>
+        </div>
+    `;
+    profileContainer.innerHTML = profileHtml;
+    
+    try {
+        const response = await fetch('/api/profile');
+        if (response.status === 401) { window.location.href = '/login'; return; }
+        const data = await response.json();
+        if (data.error) { return; }
+        
+        const nameSpan = document.getElementById('profileFullName');
+        if (nameSpan) nameSpan.textContent = data.full_name;
+        const idDiv = document.getElementById('profileId');
+        if (idDiv) idDiv.textContent = `ID: ${data.id}`;
+        
+        // Обновляем аватарку
+        const avatarContainer = document.getElementById('profileAvatar');
+        const placeholder = document.getElementById('avatarPlaceholder');
+        
+        if (data.photo && data.photo !== '') {
+            // Если есть фото, показываем его
+            const img = document.createElement('img');
+            img.src = data.photo;
+            img.alt = data.full_name;
+            img.style.width = '56px';
+            img.style.height = '56px';
+            img.style.borderRadius = '28px';
+            img.style.objectFit = 'cover';
+            img.onerror = () => {
+                // Если фото не загрузилось, показываем плейсхолдер
+                img.style.display = 'none';
+                if (placeholder) placeholder.style.display = 'flex';
+            };
+            img.onload = () => {
+                if (placeholder) placeholder.style.display = 'none';
+            };
+            avatarContainer.innerHTML = '';
+            avatarContainer.appendChild(img);
+        }
+        
+        const logoutBtn = document.getElementById('logoutIconBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => { window.location.href = '/logout'; });
+        }
+    } catch (err) {
+        console.error('Ошибка загрузки профиля:', err);
+    }
+}
+    
+    function displayMyTracks(tracksList) {
+        myTracksList.innerHTML = '';
+        if (!tracksList.length) { myTracksList.innerHTML = '<div class="loading"><p>Нет треков</p></div>'; return; }
+        tracksList.forEach((track, i) => {
+            const mins = Math.floor((track.duration || 0) / 60), secs = (track.duration || 0) % 60;
+            const div = document.createElement('div');
+            div.className = 'track-item';
+            div.innerHTML = `<div class="track-number">${i+1}</div><div class="track-info"><div class="track-title">${escapeHtml(track.title)}</div><div class="track-artist">${escapeHtml(track.artist)}</div></div><div class="track-duration">${mins}:${secs < 10 ? '0' : ''}${secs}</div><button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}"><span class="material-symbols-outlined">more_vert</span></button>`;
+            div.addEventListener('click', (e) => { if (!e.target.closest('.menu-btn')) playTrack(track, 'myTracks'); });
+            div.querySelector('.menu-btn').addEventListener('click', (e) => { e.stopPropagation(); const rect = e.target.closest('.menu-btn').getBoundingClientRect(); showTrackMenu(rect.right - 180, rect.bottom + 5, track.id, track.owner_id, track.title); });
+            myTracksList.appendChild(div);
+        });
+    }
+    
+    function displayRecommendations(tracksList) {
+        recommendationsList.innerHTML = '';
+        if (!tracksList.length) { recommendationsList.innerHTML = '<div class="loading"><p>Нет рекомендаций</p></div>'; return; }
+        tracksList.forEach((track, i) => {
+            const mins = Math.floor((track.duration || 0) / 60), secs = (track.duration || 0) % 60;
+            const div = document.createElement('div');
+            div.className = 'track-item';
+            div.innerHTML = `<div class="track-number">${i+1}</div><div class="track-info"><div class="track-title">${escapeHtml(track.title)}</div><div class="track-artist">${escapeHtml(track.artist)}</div></div><div class="track-duration">${mins}:${secs < 10 ? '0' : ''}${secs}</div><button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}"><span class="material-symbols-outlined">more_vert</span></button>`;
+            div.addEventListener('click', (e) => { if (!e.target.closest('.menu-btn')) playTrack(track, 'recommendations'); });
+            div.querySelector('.menu-btn').addEventListener('click', (e) => { e.stopPropagation(); const rect = e.target.closest('.menu-btn').getBoundingClientRect(); showTrackMenu(rect.right - 180, rect.bottom + 5, track.id, track.owner_id, track.title); });
+            recommendationsList.appendChild(div);
+        });
+    }
+    
+    function showTrackMenu(x, y, trackId, ownerId, trackTitle) {
+        if (activeContextMenu) activeContextMenu.remove();
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        menu.innerHTML = `<div class="context-menu-item download"><span class="material-symbols-outlined">download</span><span>Скачать MP3</span></div><div class="context-menu-item delete"><span class="material-symbols-outlined">delete_forever</span><span>Удалить</span></div>`;
+        menu.querySelector('.download').addEventListener('click', () => { menu.remove(); activeContextMenu = null; downloadTrack(trackId, ownerId); });
+        menu.querySelector('.delete').addEventListener('click', async () => { menu.remove(); activeContextMenu = null; await deleteTrack(trackId, trackTitle); });
+        document.body.appendChild(menu);
+        activeContextMenu = menu;
+        setTimeout(() => document.addEventListener('click', function closeMenu(e) { if (!menu.contains(e.target)) { menu.remove(); activeContextMenu = null; document.removeEventListener('click', closeMenu); } }), 10);
+    }
+    
+    async function deleteTrack(trackId, trackTitle) {
+        try {
+            const response = await fetch('/api/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ track_id: trackId }) });
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const result = await response.json();
+            if (result.error) { showToast(`Ошибка: ${result.error}`, true); return; }
+            await loadMyTracks();
+            showToast(`Удалён: ${trackTitle}`);
+        } catch (err) { showToast(`Ошибка: ${err.message}`, true); }
+    }
+    
+    async function performGlobalSearch(query) {
+        if (!query.trim()) { displaySearchResults([]); return; }
+        searchResultsList.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div><p>Поиск...</p></div>';
+        try {
+            const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const data = await response.json();
+            if (data.error) { searchResultsList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`; return; }
+            searchResults = data;
+            displaySearchResults(searchResults);
+        } catch (err) { searchResultsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`; }
+    }
+    
+    async function performSearchPageSearch(query) {
+        if (!query.trim()) { 
+            searchResultsList.innerHTML = `
+                <div class="search-empty">
+                    <span class="material-symbols-outlined" style="font-size:48px;opacity:0.5;">search</span>
+                    <p style="margin-top:12px;">Введите название трека или исполнителя</p>
+                </div>
+            `;
+            return; 
+        }
+        searchResultsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Поиск...</p></div>';
+        try {
+            const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const data = await response.json();
+            if (data.error) { searchResultsList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`; return; }
+            searchResults = data;
+            displaySearchResults(searchResults);
+        } catch (err) { searchResultsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`; }
+    }
+    
+    function displaySearchResults(tracksList) {
+        searchResultsList.innerHTML = '';
+        if (!tracksList.length) { 
+            searchResultsList.innerHTML = `
+                <div class="search-empty">
+                    <span class="material-symbols-outlined" style="font-size:48px;opacity:0.5;">search</span>
+                    <p style="margin-top:12px;">Ничего не найдено</p>
+                </div>
+            `; 
+            return; 
+        }
+        tracksList.forEach((track, i) => {
+            const mins = Math.floor((track.duration || 0) / 60), secs = (track.duration || 0) % 60;
+            const div = document.createElement('div');
+            div.className = 'track-item';
+            div.innerHTML = `<div class="track-number">${i+1}</div><div class="track-info"><div class="track-title">${escapeHtml(track.title)}</div><div class="track-artist">${escapeHtml(track.artist)}</div></div><div class="track-duration">${mins}:${secs < 10 ? '0' : ''}${secs}</div><button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}"><span class="material-symbols-outlined">more_vert</span></button>`;
+            div.addEventListener('click', (e) => { if (!e.target.closest('.menu-btn')) playTrack(track, 'search'); });
+            div.querySelector('.menu-btn').addEventListener('click', (e) => { e.stopPropagation(); const rect = e.target.closest('.menu-btn').getBoundingClientRect(); showTrackMenu(rect.right - 180, rect.bottom + 5, track.id, track.owner_id, track.title); });
+            searchResultsList.appendChild(div);
+        });
+    }
+    
+    globalSearchInput.addEventListener('input', (e) => { if (searchDebounceTimer) clearTimeout(searchDebounceTimer); searchDebounceTimer = setTimeout(() => performGlobalSearch(e.target.value), 500); });
+    
+    // Search page input handler
+    if (searchPageInput) {
+        searchPageInput.addEventListener('input', (e) => {
+            if (searchPageDebounceTimer) clearTimeout(searchPageDebounceTimer);
+            searchPageDebounceTimer = setTimeout(() => performSearchPageSearch(e.target.value), 500);
+            
+            if (clearSearchPageInput) {
+                if (e.target.value) {
+                    clearSearchPageInput.style.display = 'flex';
+                } else {
+                    clearSearchPageInput.style.display = 'none';
+                }
+            }
+        });
+        
+        if (clearSearchPageInput) {
+            clearSearchPageInput.addEventListener('click', () => {
+                searchPageInput.value = '';
+                performSearchPageSearch('');
+                clearSearchPageInput.style.display = 'none';
+                searchPageInput.focus();
+            });
+        }
+    }
+    
+    function updateStats(tracksList) {
+        document.getElementById('totalCount').textContent = tracksList.length;
+        let totalSec = 0, artists = new Set();
+        tracksList.forEach(t => { totalSec += t.duration || 0; if (t.artist) artists.add(t.artist); });
+        document.getElementById('totalDuration').textContent = `${Math.floor(totalSec / 3600)}ч ${Math.floor((totalSec % 3600) / 60)}м`;
+        document.getElementById('totalArtists').textContent = artists.size;
+    }
     
     function showToast(message, isError = false) {
         const toast = document.getElementById('toast');
@@ -1989,130 +1296,78 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
     
-    function updateStats(tracksList) {
-        document.getElementById('totalCount').textContent = tracksList.length;
-        let totalSec = 0;
-        const artists = new Set();
-        tracksList.forEach(t => {
-            totalSec += t.duration || 0;
-            if (t.artist) artists.add(t.artist);
-        });
-        const hours = Math.floor(totalSec / 3600);
-        const mins = Math.floor((totalSec % 3600) / 60);
-        document.getElementById('totalDuration').textContent = `${hours}ч ${mins}м`;
-        document.getElementById('totalArtists').textContent = artists.size;
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+    
+    document.getElementById('playPauseBtn').addEventListener('click', () => { if (isPlaying) audioPlayer.pause(); else audioPlayer.play(); isPlaying = !isPlaying; updatePlayPauseButton(); });
+    audioPlayer.addEventListener('timeupdate', () => { if (audioPlayer.duration) { document.getElementById('progressFill').style.width = (audioPlayer.currentTime / audioPlayer.duration * 100) + '%'; document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime); document.getElementById('totalTime').textContent = formatTime(audioPlayer.duration); } });
+    audioPlayer.addEventListener('ended', () => { isPlaying = false; updatePlayPauseButton(); });
+    document.getElementById('progressBar').addEventListener('click', (e) => { if (audioPlayer.duration) { const rect = e.currentTarget.getBoundingClientRect(); audioPlayer.currentTime = ((e.clientX - rect.left) / rect.width) * audioPlayer.duration; } });
+    function formatTime(seconds) { if (isNaN(seconds)) return '0:00'; const mins = Math.floor(seconds / 60); const secs = Math.floor(seconds % 60); return `${mins}:${secs < 10 ? '0' : ''}${secs}`; }
+    
+    // ========== Настройки и невидимка ==========
+    
+    async function setInvisibleMode(enabled) {
+        try {
+            const endpoint = enabled ? '/api/set-offline' : '/api/set-online';
+            const response = await fetch(endpoint, { method: 'POST' });
+            if (response.status === 401) { window.location.href = '/login'; return false; }
+            const result = await response.json();
+            if (result.error) {
+                showToast(`Ошибка: ${result.error}`, true);
+                return false;
+            }
+            return true;
+        } catch (err) {
+            showToast(`Ошибка: ${err.message}`, true);
+            return false;
+        }
     }
     
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-    
-    let activeContextMenu = null;
-    
-    // Управление плеером
-    document.getElementById('playPauseBtn').addEventListener('click', () => {
-        if (isPlaying) {
-            audioPlayer.pause();
-        } else {
-            audioPlayer.play();
-        }
-        isPlaying = !isPlaying;
-        updatePlayPauseButton();
-    });
-    
-    document.getElementById('prevBtn').addEventListener('click', () => {
-        if (currentTrackSource === 'myTracks') {
-            if (currentTrackIndex > 0) {
-                playTrackFromIndex(currentTrackIndex - 1, 'myTracks');
-            }
-        } else if (currentTrackSource === 'search') {
-            if (currentTrackIndex > 0) {
-                playTrackFromIndex(currentTrackIndex - 1, 'search');
-            }
-        } else if (currentTrackSource === 'recommendations') {
-            if (currentTrackIndex > 0) {
-                playTrackFromIndex(currentTrackIndex - 1, 'recommendations');
-            }
-        }
-    });
-    
-    document.getElementById('nextBtn').addEventListener('click', () => {
-        if (currentTrackSource === 'myTracks') {
-            if (currentTrackIndex < myTracks.length - 1) {
-                playTrackFromIndex(currentTrackIndex + 1, 'myTracks');
-            }
-        } else if (currentTrackSource === 'search') {
-            if (currentTrackIndex < searchResults.length - 1) {
-                playTrackFromIndex(currentTrackIndex + 1, 'search');
-            }
-        } else if (currentTrackSource === 'recommendations') {
-            if (currentTrackIndex < recommendations.length - 1) {
-                playTrackFromIndex(currentTrackIndex + 1, 'recommendations');
-            }
-        }
-    });
-    
-    function playTrackFromIndex(index, source) {
-        let track;
-        if (source === 'myTracks') {
-            track = myTracks[index];
-            currentTrackSource = 'myTracks';
-            currentTrackIndex = index;
-        } else if (source === 'search') {
-            track = searchResults[index];
-            currentTrackSource = 'search';
-            currentTrackIndex = index;
-        } else if (source === 'recommendations') {
-            track = recommendations[index];
-            currentTrackSource = 'recommendations';
-            currentTrackIndex = index;
-        } else {
-            return;
+    // Initialize settings page
+    function initSettings() {
+        const themeSwitch = document.getElementById('themeSwitch');
+        const invisibleSwitch = document.getElementById('invisibleSwitch');
+        
+        if (themeSwitch) {
+            themeSwitch.checked = localStorage.getItem('theme') === 'dark';
+            themeSwitch.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    document.body.classList.remove('light');
+                    document.body.classList.add('dark');
+                    themeIcon.textContent = 'light_mode';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark');
+                    document.body.classList.add('light');
+                    themeIcon.textContent = 'dark_mode';
+                    localStorage.setItem('theme', 'light');
+                }
+            });
         }
         
-        if (track) {
-            playTrack(track, source);
+        if (invisibleSwitch) {
+            const savedInvisible = localStorage.getItem('invisibleMode') === 'true';
+            invisibleSwitch.checked = savedInvisible;
+            
+            invisibleSwitch.addEventListener('change', async (e) => {
+                const enabled = e.target.checked;
+                const success = await setInvisibleMode(enabled);
+                if (success) {
+                    localStorage.setItem('invisibleMode', enabled);
+                    showToast(enabled ? 'Режим невидимки включён' : 'Режим невидимки выключен');
+                } else {
+                    invisibleSwitch.checked = !enabled;
+                }
+            });
+            
+            if (savedInvisible) {
+                setInvisibleMode(true);
+            }
         }
     }
     
-    audioPlayer.addEventListener('timeupdate', () => {
-        if (audioPlayer.duration) {
-            const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            document.getElementById('progressFill').style.width = percent + '%';
-            document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
-            document.getElementById('totalTime').textContent = formatTime(audioPlayer.duration);
-        }
-    });
-    
-    audioPlayer.addEventListener('ended', () => {
-        isPlaying = false;
-        updatePlayPauseButton();
-    });
-    
-    document.getElementById('progressBar').addEventListener('click', (e) => {
-        if (audioPlayer.duration) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const percent = x / rect.width;
-            audioPlayer.currentTime = percent * audioPlayer.duration;
-        }
-    });
-    
-    function formatTime(seconds) {
-        if (isNaN(seconds)) return '0:00';
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    }
-    
-    // Загрузка данных
     loadMyTracks();
+    initSettings();
     </script>
 </body>
 </html>
