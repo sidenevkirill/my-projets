@@ -21,6 +21,24 @@ type Track struct {
 	URL      string `json:"url"`
 }
 
+type Playlist struct {
+	ID         int    `json:"id"`
+	OwnerID    int    `json:"owner_id"`
+	Title      string `json:"title"`
+	Count      int    `json:"count"`
+	Photo      struct {
+		ID        int    `json:"id"`
+		Photo75   string `json:"photo_75"`
+		Photo130  string `json:"photo_130"`
+		Photo270  string `json:"photo_270"`
+		Photo300  string `json:"photo_300"`
+		Photo600  string `json:"photo_600"`
+		Photo1200 string `json:"photo_1200"`
+	} `json:"photo"`
+	AccessKey  string `json:"access_key"`
+	IsFollowed bool   `json:"is_followed"`
+}
+
 type VKResponse struct {
 	Response *struct {
 		Count int     `json:"count"`
@@ -158,10 +176,32 @@ type SetOnlineResponse struct {
 	} `json:"error"`
 }
 
+// Константы для прокси
+const (
+	API_PROXY   = "https://vk-api-proxy.xtrafrancyz.net/method/"
+	OAUTH_PROXY = "https://vk-oauth-proxy.xtrafrancyz.net/"
+)
+
+var useProxy = false
+
 var trackURLCache = struct {
 	sync.RWMutex
 	data map[string]string
 }{data: make(map[string]string)}
+
+func getAPIBaseURL() string {
+	if useProxy {
+		return API_PROXY
+	}
+	return "https://api.vk.com/method/"
+}
+
+func getOAuthBaseURL() string {
+	if useProxy {
+		return OAUTH_PROXY
+	}
+	return "https://oauth.vk.com/"
+}
 
 func getTrackURL(token string, ownerID int, trackID int) string {
 	cacheKey := fmt.Sprintf("%d_%d", ownerID, trackID)
@@ -179,7 +219,7 @@ func getTrackURL(token string, ownerID int, trackID int) string {
 	params.Set("v", "5.131")
 	params.Set("audios", fmt.Sprintf("%d_%d", ownerID, trackID))
 
-	apiURL := "https://api.vk.com/method/audio.getById?" + params.Encode()
+	apiURL := getAPIBaseURL() + "audio.getById?" + params.Encode()
 
 	req, _ := http.NewRequest("GET", apiURL, nil)
 	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
@@ -227,7 +267,7 @@ func searchTracks(token string, query string) ([]Track, error) {
 	params.Set("q", query)
 	params.Set("count", "50")
 
-	apiURL := "https://api.vk.com/method/audio.search?" + params.Encode()
+	apiURL := getAPIBaseURL() + "audio.search?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -271,7 +311,7 @@ func addTrack(token string, ownerID int, trackID int) error {
 	params.Set("owner_id", strconv.Itoa(ownerID))
 	params.Set("audio_id", strconv.Itoa(trackID))
 
-	apiURL := "https://api.vk.com/method/audio.add?" + params.Encode()
+	apiURL := getAPIBaseURL() + "audio.add?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -320,7 +360,7 @@ func getAllTracks(token string, ownerID int) ([]Track, error) {
 			params.Set("owner_id", strconv.Itoa(ownerID))
 		}
 
-		apiURL := "https://api.vk.com/method/audio.get?" + params.Encode()
+		apiURL := getAPIBaseURL() + "audio.get?" + params.Encode()
 
 		req, err := http.NewRequest("GET", apiURL, nil)
 		if err != nil {
@@ -378,7 +418,7 @@ func deleteTrack(token string, ownerID int, trackID int) error {
 	params.Set("owner_id", strconv.Itoa(ownerID))
 	params.Set("audio_id", strconv.Itoa(trackID))
 
-	apiURL := "https://api.vk.com/method/audio.delete?" + params.Encode()
+	apiURL := getAPIBaseURL() + "audio.delete?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -421,7 +461,7 @@ func getUserInfo(token string) (*VKUserInfo, error) {
 	params.Set("v", "5.131")
 	params.Set("fields", "photo_50,photo_100")
 
-	apiURL := "https://api.vk.com/method/users.get?" + params.Encode()
+	apiURL := getAPIBaseURL() + "users.get?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -463,6 +503,170 @@ func getUserInfo(token string) (*VKUserInfo, error) {
 	return &result.Response[0], nil
 }
 
+// ========== Функции для работы с плейлистами ==========
+
+func getPlaylists(token string, ownerID int) ([]Playlist, error) {
+	client := &http.Client{Timeout: 15 * time.Second}
+
+	params := url.Values{}
+	params.Set("access_token", token)
+	params.Set("v", "5.131")
+	params.Set("owner_id", strconv.Itoa(ownerID))
+	params.Set("count", "100")
+	params.Set("extended", "1")
+
+	apiURL := getAPIBaseURL() + "audio.getPlaylists?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var rawResult map[string]interface{}
+	if err := json.Unmarshal(body, &rawResult); err != nil {
+		return nil, fmt.Errorf("ошибка парсинга: %v", err)
+	}
+
+	if errObj, ok := rawResult["error"]; ok {
+		errMap := errObj.(map[string]interface{})
+		return nil, fmt.Errorf("VK API ошибка: %v", errMap["error_msg"])
+	}
+
+	response, ok := rawResult["response"].(map[string]interface{})
+	if !ok {
+		return []Playlist{}, nil
+	}
+
+	var items []interface{}
+	if itemsRaw, ok := response["items"]; ok {
+		items = itemsRaw.([]interface{})
+	} else if playlistsRaw, ok := response["playlists"]; ok {
+		items = playlistsRaw.([]interface{})
+	} else {
+		return []Playlist{}, nil
+	}
+
+	playlists := make([]Playlist, 0, len(items))
+	for _, itemRaw := range items {
+		item := itemRaw.(map[string]interface{})
+
+		playlist := Playlist{}
+
+		if id, ok := item["id"].(float64); ok {
+			playlist.ID = int(id)
+		}
+		if ownerID, ok := item["owner_id"].(float64); ok {
+			playlist.OwnerID = int(ownerID)
+		}
+		if title, ok := item["title"].(string); ok {
+			playlist.Title = title
+		}
+		if count, ok := item["count"].(float64); ok {
+			playlist.Count = int(count)
+		}
+		if accessKey, ok := item["access_key"].(string); ok {
+			playlist.AccessKey = accessKey
+		}
+		if isFollowed, ok := item["is_followed"].(bool); ok {
+			playlist.IsFollowed = isFollowed
+		}
+
+		if photoRaw, ok := item["photo"]; ok {
+			if photoObj, ok := photoRaw.(map[string]interface{}); ok {
+				if photoID, ok := photoObj["id"].(float64); ok {
+					playlist.Photo.ID = int(photoID)
+				}
+				if url, ok := photoObj["photo_300"].(string); ok {
+					playlist.Photo.Photo300 = url
+				} else if url, ok := photoObj["photo_270"].(string); ok {
+					playlist.Photo.Photo270 = url
+				} else if url, ok := photoObj["photo_130"].(string); ok {
+					playlist.Photo.Photo130 = url
+				} else if url, ok := photoObj["photo_75"].(string); ok {
+					playlist.Photo.Photo75 = url
+				}
+			}
+		}
+
+		playlists = append(playlists, playlist)
+	}
+
+	return playlists, nil
+}
+
+func getPlaylistTracks(token string, ownerID int, playlistID int, accessKey string) ([]Track, error) {
+	client := &http.Client{Timeout: 15 * time.Second}
+
+	params := url.Values{}
+	params.Set("access_token", token)
+	params.Set("v", "5.131")
+	params.Set("owner_id", strconv.Itoa(ownerID))
+	params.Set("playlist_id", strconv.Itoa(playlistID))
+	if accessKey != "" {
+		params.Set("access_key", accessKey)
+	}
+	params.Set("count", "200")
+
+	apiURL := getAPIBaseURL() + "audio.get?" + params.Encode()
+
+	fmt.Printf("Requesting playlist tracks URL: %s\n", apiURL)
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result struct {
+		Response struct {
+			Count int     `json:"count"`
+			Items []Track `json:"items"`
+		} `json:"response"`
+		Error *struct {
+			ErrorCode int    `json:"error_code"`
+			ErrorMsg  string `json:"error_msg"`
+		} `json:"error"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("ошибка парсинга: %v", err)
+	}
+
+	if result.Error != nil {
+		return nil, fmt.Errorf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)
+	}
+
+	if result.Response.Items == nil {
+		return []Track{}, nil
+	}
+
+	fmt.Printf("Found %d tracks in playlist\n", len(result.Response.Items))
+	return result.Response.Items, nil
+}
+
 // ========== Функции для работы с сообщениями ==========
 
 func getConversations(token string, count int, offset int) (*ConversationsResponse, error) {
@@ -475,7 +679,7 @@ func getConversations(token string, count int, offset int) (*ConversationsRespon
 	params.Set("offset", strconv.Itoa(offset))
 	params.Set("extended", "1")
 
-	apiURL := "https://api.vk.com/method/messages.getConversations?" + params.Encode()
+	apiURL := getAPIBaseURL() + "messages.getConversations?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -517,7 +721,7 @@ func getMessages(token string, peerID int, count int, offset int) (*MessagesResp
 	params.Set("peer_id", strconv.Itoa(peerID))
 	params.Set("extended", "1")
 
-	apiURL := "https://api.vk.com/method/messages.getHistory?" + params.Encode()
+	apiURL := getAPIBaseURL() + "messages.getHistory?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -558,7 +762,7 @@ func sendMessage(token string, peerID int, message string) error {
 	params.Set("message", message)
 	params.Set("random_id", strconv.FormatInt(time.Now().UnixNano(), 10))
 
-	apiURL := "https://api.vk.com/method/messages.send?" + params.Encode()
+	apiURL := getAPIBaseURL() + "messages.send?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -605,7 +809,7 @@ func setOffline(token string) error {
 	params.Set("access_token", token)
 	params.Set("v", "5.131")
 
-	apiURL := "https://api.vk.com/method/account.setOffline?" + params.Encode()
+	apiURL := getAPIBaseURL() + "account.setOffline?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -643,7 +847,7 @@ func setOnline(token string) error {
 	params.Set("access_token", token)
 	params.Set("v", "5.131")
 
-	apiURL := "https://api.vk.com/method/account.setOnline?" + params.Encode()
+	apiURL := getAPIBaseURL() + "account.setOnline?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -674,7 +878,33 @@ func setOnline(token string) error {
 	return nil
 }
 
-// ========== Обработчик для аудиозаписей друга ==========
+// ========== Обработчики ==========
+
+func apiSetProxyHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		Enabled bool `json:"enabled"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request"})
+		return
+	}
+
+	useProxy = req.Enabled
+	fmt.Printf("Proxy mode: %v\n", useProxy)
+
+	json.NewEncoder(w).Encode(map[string]string{"success": "true", "proxy_enabled": strconv.FormatBool(useProxy)})
+}
+
+func apiGetProxyStatusHandler(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(map[string]bool{"proxy_enabled": useProxy})
+}
 
 func apiFriendTracksHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, _ := r.Cookie("vk_token")
@@ -699,8 +929,6 @@ func apiFriendTracksHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tracks)
 }
 
-// ========== Обработчик для аудиозаписей сообщества ==========
-
 func apiGroupTracksHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, _ := r.Cookie("vk_token")
 	groupIDStr := r.URL.Query().Get("group_id")
@@ -712,7 +940,6 @@ func apiGroupTracksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	groupID, _ := strconv.Atoi(groupIDStr)
-	// Для групп owner_id должен быть отрицательным
 	ownerID := -groupID
 
 	tracks, err := getAllTracks(tokenCookie.Value, ownerID)
@@ -726,7 +953,81 @@ func apiGroupTracksHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tracks)
 }
 
-// ========== Обработчик для невидимки ==========
+func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, err := r.Cookie("vk_token")
+	if err != nil || tokenCookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
+		return
+	}
+
+	userIDCookie, err := r.Cookie("vk_user_id")
+	if err != nil || userIDCookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "user_id not found"})
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDCookie.Value)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "invalid user_id"})
+		return
+	}
+
+	playlists, err := getPlaylists(tokenCookie.Value, userID)
+	if err != nil {
+		fmt.Printf("Error getting playlists: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	if playlists == nil {
+		playlists = []Playlist{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(playlists)
+}
+
+func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+	playlistIDStr := r.URL.Query().Get("playlist_id")
+	ownerIDStr := r.URL.Query().Get("owner_id")
+	accessKey := r.URL.Query().Get("access_key")
+
+	fmt.Printf("=== Playlist Tracks Request ===\n")
+	fmt.Printf("playlist_id: %s\n", playlistIDStr)
+	fmt.Printf("owner_id: %s\n", ownerIDStr)
+	fmt.Printf("access_key: %s\n", accessKey)
+
+	if playlistIDStr == "" || ownerIDStr == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "playlist_id and owner_id required"})
+		return
+	}
+
+	playlistID, _ := strconv.Atoi(playlistIDStr)
+	ownerID, _ := strconv.Atoi(ownerIDStr)
+
+	tracks, err := getPlaylistTracks(tokenCookie.Value, ownerID, playlistID, accessKey)
+	if err != nil {
+		fmt.Printf("Error getting playlist tracks: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	fmt.Printf("Returning %d tracks\n", len(tracks))
+
+	if tracks == nil {
+		tracks = []Track{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tracks)
+}
 
 func apiSetOfflineHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -774,8 +1075,6 @@ func apiSetOnlineHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"success": "true"})
 }
 
-// ========== Функции для друзей и групп ==========
-
 func getFriends(token string, count int, offset int) (*FriendsResponse, error) {
 	client := &http.Client{Timeout: 15 * time.Second}
 
@@ -786,7 +1085,7 @@ func getFriends(token string, count int, offset int) (*FriendsResponse, error) {
 	params.Set("offset", strconv.Itoa(offset))
 	params.Set("fields", "photo_100,online")
 
-	apiURL := "https://api.vk.com/method/friends.get?" + params.Encode()
+	apiURL := getAPIBaseURL() + "friends.get?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -828,7 +1127,7 @@ func getGroups(token string, count int, offset int) (*GroupsResponse, error) {
 	params.Set("extended", "1")
 	params.Set("fields", "photo_100")
 
-	apiURL := "https://api.vk.com/method/groups.get?" + params.Encode()
+	apiURL := getAPIBaseURL() + "groups.get?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -859,8 +1158,6 @@ func getGroups(token string, count int, offset int) (*GroupsResponse, error) {
 	return &result, nil
 }
 
-// ========== HTTP Обработчики ==========
-
 func vkCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	if code == "" {
@@ -876,8 +1173,8 @@ func vkCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := &http.Client{Timeout: 10 * time.Second}
-	apiURL := fmt.Sprintf("https://oauth.vk.com/access_token?client_id=54533272&client_secret=tPyNb8rQNMXaTHRNp4NZ&code=%s&redirect_uri=%s/auth/vk-callback&grant_type=authorization_code",
-		code, getBaseURL(r))
+	apiURL := fmt.Sprintf("%saccess_token?client_id=54533272&client_secret=tPyNb8rQNMXaTHRNp4NZ&code=%s&redirect_uri=%s/auth/vk-callback&grant_type=authorization_code",
+		getOAuthBaseURL(), code, getBaseURL(r))
 
 	resp, err := client.Get(apiURL)
 	if err != nil {
@@ -1006,7 +1303,7 @@ func downloadTrackHandler(w http.ResponseWriter, r *http.Request) {
 	params.Set("v", "5.131")
 	params.Set("audios", ownerID+"_"+trackID)
 
-	apiURL := "https://api.vk.com/method/audio.getById?" + params.Encode()
+	apiURL := getAPIBaseURL() + "audio.getById?" + params.Encode()
 
 	req, _ := http.NewRequest("GET", apiURL, nil)
 	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
@@ -1060,7 +1357,7 @@ func apiRecommendationsHandler(w http.ResponseWriter, r *http.Request) {
 	params.Set("v", "5.131")
 	params.Set("count", "100")
 
-	apiURL := "https://api.vk.com/method/audio.getRecommendations?" + params.Encode()
+	apiURL := getAPIBaseURL() + "audio.getRecommendations?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -1116,7 +1413,7 @@ func apiProfileHandler(w http.ResponseWriter, r *http.Request) {
 	params.Set("v", "5.131")
 	params.Set("fields", "photo_100")
 
-	apiURL := "https://api.vk.com/method/users.get?" + params.Encode()
+	apiURL := getAPIBaseURL() + "users.get?" + params.Encode()
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -1215,8 +1512,6 @@ func apiSearchMyTracksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(filtered)
 }
-
-// ========== Обработчики для сообщений ==========
 
 func apiConversationsHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, _ := r.Cookie("vk_token")
@@ -1359,8 +1654,6 @@ func apiSendMessageHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"success": "true"})
 }
 
-// ========== Обработчики для друзей и групп ==========
-
 func apiFriendsHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, _ := r.Cookie("vk_token")
 
@@ -1424,8 +1717,6 @@ func apiGroupsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
 }
-
-// ========== Основные обработчики ==========
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -1647,8 +1938,12 @@ func main() {
 	http.HandleFunc("/api/groups", authMiddleware(apiGroupsHandler))
 	http.HandleFunc("/api/friend-tracks", authMiddleware(apiFriendTracksHandler))
 	http.HandleFunc("/api/group-tracks", authMiddleware(apiGroupTracksHandler))
+	http.HandleFunc("/api/playlists", authMiddleware(apiPlaylistsHandler))
+	http.HandleFunc("/api/playlist-tracks", authMiddleware(apiPlaylistTracksHandler))
 	http.HandleFunc("/api/set-offline", authMiddleware(apiSetOfflineHandler))
 	http.HandleFunc("/api/set-online", authMiddleware(apiSetOnlineHandler))
+	http.HandleFunc("/api/set-proxy", authMiddleware(apiSetProxyHandler))
+	http.HandleFunc("/api/get-proxy-status", authMiddleware(apiGetProxyStatusHandler))
 
 	port := "8080"
 	fmt.Println("==================================================")
@@ -1660,6 +1955,8 @@ func main() {
 	fmt.Println("💬 Доступны диалоги и сообщения")
 	fmt.Println("👥 Доступны друзья и сообщества")
 	fmt.Println("📀 Доступны аудиозаписи")
+	fmt.Println("📋 Доступны плейлисты")
+	fmt.Println("🌐 Прокси для обхода блокировок (можно включить в настройках)")
 	fmt.Println("📥 Треки можно скачать через кнопку меню")
 	fmt.Println("⚠️ Удаление треков реально удаляет их из ВКонтакте!")
 	fmt.Println("📌 Нажми Ctrl+C для остановки")
