@@ -18,15 +18,8 @@
         .app-bar-title .material-symbols-outlined { font-size: 28px; color: var(--md-on-primary); }
         .app-bar-title h1 { font-size: 20px; font-weight: 500; color: var(--md-on-primary); }
         .app-bar-actions { display: flex; align-items: center; gap: 8px; }
-        .search-icon, .theme-toggle { background: none; border: none; cursor: pointer; color: var(--md-on-primary); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .search-icon:hover, .theme-toggle:hover { background: rgba(255,255,255,0.1); }
-        .search-bar-expanded { position: absolute; top: 0; left: 0; right: 0; height: 64px; background: var(--md-primary); padding: 0 16px; display: flex; align-items: center; gap: 12px; transform: translateY(-100%); transition: transform 0.3s; z-index: 101; }
-        .search-bar-expanded.active { transform: translateY(0); }
-        .search-bar-expanded .back-icon { background: none; border: none; cursor: pointer; color: var(--md-on-primary); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .search-bar-expanded .search-input-wrapper { flex: 1; display: flex; align-items: center; background: rgba(255,255,255,0.2); border-radius: 28px; padding: 4px 16px; gap: 12px; }
-        .search-bar-expanded .search-input-wrapper .material-symbols-outlined { color: rgba(255,255,255,0.7); font-size: 20px; }
-        .search-bar-expanded .search-input-wrapper input { flex: 1; background: none; border: none; padding: 10px 0; color: var(--md-on-primary); font-size: 16px; outline: none; }
-        .search-bar-expanded .clear-search { background: none; border: none; cursor: pointer; color: var(--md-on-primary); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .playlists-icon, .theme-toggle { background: none; border: none; cursor: pointer; color: var(--md-on-primary); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .playlists-icon:hover, .theme-toggle:hover { background: rgba(255,255,255,0.1); }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 72px; background: var(--md-surface); display: flex; align-items: center; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; border-top: 1px solid rgba(128,128,128,0.2); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; cursor: pointer; color: var(--md-on-surface-variant); transition: all 0.2s; padding: 8px 0; }
         .nav-item.active { color: var(--md-primary); }
@@ -35,6 +28,12 @@
         .page { position: fixed; top: 64px; left: 0; right: 0; bottom: 72px; overflow-y: auto; visibility: hidden; opacity: 0; transition: visibility 0.2s, opacity 0.2s; }
         .page.active { visibility: visible; opacity: 1; }
         .tabs-container { background: var(--md-surface); border-bottom: 1px solid rgba(128,128,128,0.2); padding: 0 16px; }
+        .friends-tabs { display: flex; gap: 8px; background: var(--md-surface); border-bottom: 1px solid rgba(128,128,128,0.2); padding: 0 16px; }
+        .friends-tab-btn { flex: 1; background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; color: var(--md-on-surface-variant); cursor: pointer; position: relative; }
+        .friends-tab-btn.active { color: var(--md-primary); }
+        .friends-tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--md-primary); }
+        .friends-tab-content { display: none; height: 100%; overflow-y: auto; }
+        .friends-tab-content.active { display: block; }
         .tabs { display: flex; gap: 8px; }
         .tab-btn { flex: 1; background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; color: var(--md-on-surface-variant); cursor: pointer; position: relative; }
         .tab-btn.active { color: var(--md-primary); }
@@ -58,18 +57,22 @@
         .menu-item-info { flex: 1; }
         .menu-item-title { font-weight: 500; color: var(--md-on-surface); font-size: 16px; margin-bottom: 4px; }
         .menu-item-desc { font-size: 12px; color: var(--md-on-surface-variant); }
-        .conversation-list, .friends-list, .groups-list { padding: 8px 12px; }
-        .conversation-item { display: flex; align-items: center; padding: 14px 16px; background: var(--md-surface); margin-bottom: 8px; border-radius: 12px; cursor: pointer; box-shadow: var(--shadow); }
-        .conversation-item:hover { background: var(--md-surface-light); transform: translateX(4px); }
-        .conv-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--md-primary-light); display: flex; align-items: center; justify-content: center; margin-right: 12px; color: white; overflow: hidden; flex-shrink: 0; }
-        .conv-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .conv-avatar .avatar-letter { font-size: 20px; font-weight: 500; text-transform: uppercase; }
-        .conv-info { flex: 1; min-width: 0; }
-        .conv-title { font-weight: 500; color: var(--md-on-surface); font-size: 15px; }
-        .conv-last { font-size: 12px; color: var(--md-on-surface-variant); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .conversation-list, .friends-list, .groups-list, .playlists-list { padding: 8px 12px; }
+        .conversation-item, .playlist-item { display: flex; align-items: center; padding: 14px 16px; background: var(--md-surface); margin-bottom: 8px; border-radius: 12px; cursor: pointer; box-shadow: var(--shadow); }
+        .conversation-item:hover, .playlist-item:hover { background: var(--md-surface-light); transform: translateX(4px); }
+        .conv-avatar, .playlist-cover { width: 48px; height: 48px; border-radius: 50%; background: var(--md-primary-light); display: flex; align-items: center; justify-content: center; margin-right: 12px; color: white; overflow: hidden; flex-shrink: 0; }
+        .playlist-cover { border-radius: 8px; }
+        .conv-avatar img, .playlist-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .conv-avatar .avatar-letter, .playlist-cover .material-symbols-outlined { font-size: 24px; font-weight: 500; text-transform: uppercase; }
+        .conv-info, .playlist-info { flex: 1; min-width: 0; }
+        .conv-title, .playlist-title { font-weight: 500; color: var(--md-on-surface); font-size: 15px; }
+        .conv-last, .playlist-count { font-size: 12px; color: var(--md-on-surface-variant); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .online-status { font-size: 11px; margin-top: 4px; }
+        .online-status.online { color: #4caf50; }
+        .online-status.offline { color: var(--md-on-surface-variant); }
         .unread-badge { background: var(--md-primary); color: white; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 12px; }
-        .chat-header, .friend-tracks-header, .group-tracks-header { display: flex; align-items: center; padding: 12px 16px; background: var(--md-surface); border-bottom: 1px solid rgba(128,128,128,0.2); gap: 12px; }
-        .back-to-conversations, .back-to-friends, .back-to-groups { background: none; border: none; cursor: pointer; color: var(--md-on-surface); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .chat-header, .friend-tracks-header, .group-tracks-header, .playlist-tracks-header { display: flex; align-items: center; padding: 12px 16px; background: var(--md-surface); border-bottom: 1px solid rgba(128,128,128,0.2); gap: 12px; }
+        .back-to-conversations, .back-to-friends, .back-to-groups, .back-to-playlists { background: none; border: none; cursor: pointer; color: var(--md-on-surface); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .chat-title { flex: 1; font-weight: 500; font-size: 18px; color: var(--md-on-surface); }
         .message-input-container { position: fixed; bottom: 72px; left: 0; right: 0; background: var(--md-surface); padding: 12px 16px; display: flex; gap: 8px; border-top: 1px solid rgba(128,128,128,0.2); }
         .message-input { flex: 1; background: var(--md-surface-light); border: none; border-radius: 24px; padding: 12px 16px; color: var(--md-on-surface); font-size: 14px; outline: none; }
@@ -83,9 +86,9 @@
         .message-item.in .message-bubble { background: var(--md-surface-light); color: var(--md-on-surface); border-bottom-left-radius: 4px; }
         .message-sender { font-size: 11px; color: var(--md-on-surface-variant); margin-bottom: 4px; margin-left: 8px; }
         .message-date { font-size: 10px; color: var(--md-on-surface-variant); margin-top: 4px; margin-left: 8px; }
-        .my-tracks-search, .search-page-search { padding: 12px 16px; background: var(--md-surface); border-bottom: 1px solid rgba(128,128,128,0.2); }
-        .my-tracks-search .search-input-wrapper, .search-page-search .search-input-wrapper { display: flex; align-items: center; background: var(--md-surface-light); border-radius: 28px; padding: 4px 16px; gap: 12px; }
-        .my-tracks-search .search-input-wrapper input, .search-page-search .search-input-wrapper input { flex: 1; background: none; border: none; padding: 10px 0; color: var(--md-on-surface); font-size: 14px; outline: none; }
+        .my-tracks-search { padding: 12px 16px; background: var(--md-surface); border-bottom: 1px solid rgba(128,128,128,0.2); }
+        .my-tracks-search .search-input-wrapper { display: flex; align-items: center; background: var(--md-surface-light); border-radius: 28px; padding: 4px 16px; gap: 12px; }
+        .my-tracks-search .search-input-wrapper input { flex: 1; background: none; border: none; padding: 10px 0; color: var(--md-on-surface); font-size: 14px; outline: none; }
         .stats { background: var(--md-surface); padding: 12px 20px; display: flex; justify-content: space-around; border-bottom: 1px solid rgba(128,128,128,0.2); margin-bottom: 8px; }
         .stats-value { font-size: 18px; font-weight: 500; color: var(--md-primary); }
         .stats-label { font-size: 11px; color: var(--md-on-surface-variant); margin-top: 4px; }
@@ -103,7 +106,26 @@
         .context-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; transition: background 0.2s; color: var(--md-on-surface); font-size: 14px; }
         .context-menu-item:hover { background: var(--md-surface-light); }
         .context-menu-item.delete { color: var(--md-error); }
-        .mini-player { position: fixed; bottom: 72px; left: 0; right: 0; background: var(--md-surface); border-top: 1px solid rgba(128,128,128,0.2); padding: 10px 16px; z-index: 99; }
+        
+        .mini-player {
+            position: fixed;
+            bottom: 72px;
+            left: 0;
+            right: 0;
+            background: var(--md-surface);
+            border-top: 1px solid rgba(128,128,128,0.2);
+            padding: 10px 16px;
+            z-index: 99;
+            transform: translateY(0);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .mini-player.hidden {
+            transform: translateY(100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        
         .now-playing { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         .track-info-mini { flex: 1; min-width: 0; }
         .track-title-mini { font-size: 13px; font-weight: 500; color: var(--md-on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -116,6 +138,7 @@
         .progress-bar { width: 100%; height: 3px; background: var(--md-surface-light); border-radius: 2px; cursor: pointer; }
         .progress-fill { height: 100%; background: var(--md-primary); border-radius: 2px; width: 0%; transition: width 0.1s linear; }
         .time-info { display: flex; justify-content: space-between; margin-top: 5px; font-size: 10px; color: var(--md-on-surface-variant); }
+        
         .loading { text-align: center; padding: 50px; color: var(--md-on-surface-variant); }
         .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--md-surface-light); border-top-color: var(--md-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -132,7 +155,6 @@
         .modal-footer { padding: 16px 24px; border-top: 1px solid rgba(128,128,128,0.2); text-align: center; }
         .modal-ok { background: var(--md-primary); color: white; border: none; padding: 10px 24px; border-radius: 28px; font-size: 14px; cursor: pointer; }
         
-        /* Settings page styles */
         .settings-container { padding: 16px; }
         .settings-section { background: var(--md-surface); border-radius: 16px; margin-bottom: 20px; overflow: hidden; box-shadow: var(--shadow); }
         .settings-section-title { padding: 16px 20px; font-size: 16px; font-weight: 500; color: var(--md-on-surface); border-bottom: 1px solid rgba(128,128,128,0.2); background: var(--md-surface-light); }
@@ -192,16 +214,12 @@
                 <h1 id="appBarTitle">Аудиозаписи</h1>
             </div>
             <div class="app-bar-actions">
-                <button class="search-icon" id="searchIcon"><span class="material-symbols-outlined">search</span></button>
-                <button class="theme-toggle" id="themeToggle"><span class="material-symbols-outlined">dark_mode</span></button>
-            </div>
-        </div>
-        <div class="search-bar-expanded" id="searchExpanded">
-            <button class="back-icon" id="closeSearch"><span class="material-symbols-outlined">arrow_back</span></button>
-            <div class="search-input-wrapper">
-                <span class="material-symbols-outlined">search</span>
-                <input type="text" id="globalSearchInput" placeholder="Глобальный поиск" autocomplete="off">
-                <button class="clear-search" id="clearSearchInput"><span class="material-symbols-outlined">close</span></button>
+                <button class="playlists-icon" id="playlistsIconBtn">
+                    <span class="material-symbols-outlined">playlist_play</span>
+                </button>
+                <button class="theme-toggle" id="themeToggle">
+                    <span class="material-symbols-outlined">dark_mode</span>
+                </button>
             </div>
         </div>
     </div>
@@ -231,6 +249,50 @@
         <div class="tab-content" id="recommendationsTab"><div class="track-list" id="recommendationsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка</p></div></div></div>
     </div>
     
+    <!-- Страница друзей -->
+    <div id="friendsPage" class="page">
+        <div class="friends-tabs">
+            <button class="friends-tab-btn active" data-friends-tab="allFriends">Все друзья</button>
+            <button class="friends-tab-btn" data-friends-tab="onlineFriends">Онлайн</button>
+        </div>
+        <div class="friends-tab-content active" id="allFriends">
+            <div class="friends-list" id="allFriendsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка друзей</p></div></div>
+        </div>
+        <div class="friends-tab-content" id="onlineFriends">
+            <div class="friends-list" id="onlineFriendsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка друзей</p></div></div>
+        </div>
+    </div>
+    
+    <div id="friendTracksPage" class="page">
+        <div class="friend-tracks-header">
+            <button class="back-to-friends" id="backToFriendsBtn">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div class="chat-title" id="friendTracksTitle">Треки друга</div>
+        </div>
+        <div class="track-list" id="friendTracksList">
+            <div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>
+        </div>
+    </div>
+    
+    <!-- Страница сообществ -->
+    <div id="groupsPage" class="page">
+        <div class="groups-list" id="groupsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка сообществ</p></div></div>
+    </div>
+    
+    <div id="groupTracksPage" class="page">
+        <div class="group-tracks-header">
+            <button class="back-to-groups" id="backToGroupsBtn">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div class="chat-title" id="groupTracksTitle">Треки сообщества</div>
+        </div>
+        <div class="track-list" id="groupTracksList">
+            <div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>
+        </div>
+    </div>
+    
+    <!-- Страница сообщений (доступна только через меню) -->
     <div id="messagesPage" class="page">
         <div id="conversationsView">
             <div class="conversation-list" id="conversationsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка диалогов</p></div></div>
@@ -248,34 +310,20 @@
         </div>
     </div>
     
-    <div id="friendsPage" class="page">
-        <div class="friends-list" id="friendsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка друзей</p></div></div>
+    <div id="playlistsPage" class="page">
+        <div class="playlists-list" id="playlistsList">
+            <div class="loading"><div class="loading-spinner"></div><p>Загрузка плейлистов</p></div>
+        </div>
     </div>
     
-    <div id="friendTracksPage" class="page">
-        <div class="friend-tracks-header">
-            <button class="back-to-friends" id="backToFriendsBtn">
+    <div id="playlistTracksPage" class="page">
+        <div class="playlist-tracks-header">
+            <button class="back-to-playlists" id="backToPlaylistsBtn">
                 <span class="material-symbols-outlined">arrow_back</span>
             </button>
-            <div class="chat-title" id="friendTracksTitle">Треки друга</div>
+            <div class="chat-title" id="playlistTracksTitle">Треки плейлиста</div>
         </div>
-        <div class="track-list" id="friendTracksList">
-            <div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>
-        </div>
-    </div>
-    
-    <div id="groupsPage" class="page">
-        <div class="groups-list" id="groupsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка сообществ</p></div></div>
-    </div>
-    
-    <div id="groupTracksPage" class="page">
-        <div class="group-tracks-header">
-            <button class="back-to-groups" id="backToGroupsBtn">
-                <span class="material-symbols-outlined">arrow_back</span>
-            </button>
-            <div class="chat-title" id="groupTracksTitle">Треки сообщества</div>
-        </div>
-        <div class="track-list" id="groupTracksList">
+        <div class="track-list" id="playlistTracksList">
             <div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>
         </div>
     </div>
@@ -299,6 +347,7 @@
     <div id="profilePage" class="page">
         <div id="profileContainer"></div>
         <div class="menu-list">
+            <div class="menu-item" id="menuMessages"><div class="menu-item-icon"><span class="material-symbols-outlined">chat</span></div><div class="menu-item-info"><div class="menu-item-title">Сообщения</div><div class="menu-item-desc">Диалоги и чаты</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
             <div class="menu-item" id="menuFriends"><div class="menu-item-icon"><span class="material-symbols-outlined">group</span></div><div class="menu-item-info"><div class="menu-item-title">Друзья</div><div class="menu-item-desc">Список друзей</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
             <div class="menu-item" id="menuGroups"><div class="menu-item-icon"><span class="material-symbols-outlined">groups</span></div><div class="menu-item-info"><div class="menu-item-title">Сообщества</div><div class="menu-item-desc">Мои группы</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
             <div class="menu-item" id="menuPlaylists"><div class="menu-item-icon"><span class="material-symbols-outlined">playlist_play</span></div><div class="menu-item-info"><div class="menu-item-title">Плейлисты</div><div class="menu-item-desc">Мои плейлисты</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
@@ -335,17 +384,32 @@
                     </label>
                 </div>
             </div>
+            <div class="settings-section">
+                <div class="settings-section-title">Сеть</div>
+                <div class="settings-item">
+                    <div class="settings-item-info">
+                        <div class="settings-item-title">Прокси для обхода блокировок</div>
+                        <div class="settings-item-desc">Использовать прокси-сервер для доступа к VK API</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="proxySwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
     
+    <!-- Нижняя навигация - БЕЗ раздела "Сообщения" -->
     <div class="bottom-nav">
         <button class="nav-item active" data-page="main"><span class="material-symbols-outlined">music_note</span><span>Главная</span></button>
-        <button class="nav-item" data-page="messages"><span class="material-symbols-outlined">chat</span><span>Сообщения</span></button>
+        <button class="nav-item" data-page="friends"><span class="material-symbols-outlined">group</span><span>Друзья</span></button>
+        <button class="nav-item" data-page="groups"><span class="material-symbols-outlined">groups</span><span>Сообщества</span></button>
         <button class="nav-item" data-page="search"><span class="material-symbols-outlined">search</span><span>Поиск</span></button>
         <button class="nav-item" data-page="profile"><span class="material-symbols-outlined">menu</span><span>Меню</span></button>
     </div>
     
-    <div class="mini-player">
+    <div class="mini-player hidden" id="miniPlayer">
         <div class="now-playing">
             <div class="track-info-mini"><div class="track-title-mini" id="nowPlayingTitle">Выберите трек</div><div class="track-artist-mini" id="nowPlayingArtist">-</div></div>
             <div class="player-controls">
@@ -385,20 +449,32 @@
 
     <script>
     let myTracks = [], myTracksFiltered = [], searchResults = [], recommendations = [], conversations = [];
+    let allFriendsList = [], onlineFriendsList = [];
     let currentChatPeerId = null, currentChatTitle = '';
     let currentTrackIndex = 0, currentTrackSource = 'myTracks';
     let currentFriendId = null, currentFriendName = '';
     let currentGroupId = null, currentGroupName = '';
+    let currentPlaylistId = null, currentPlaylistOwnerId = null, currentPlaylistAccessKey = null;
     let audioPlayer = new Audio(), isPlaying = false;
-    let searchDebounceTimer = null, myTracksSearchDebounceTimer = null, searchPageDebounceTimer = null, activeContextMenu = null;
+    let myTracksSearchDebounceTimer = null, searchPageDebounceTimer = null, activeContextMenu = null;
+    
+    // Переменные для очереди воспроизведения
+    let currentPlaylist = [];
+    let currentTrackIndexInPlaylist = -1;
+    let currentSource = null;
+    let currentPlaylistTracks = [];
+    let currentFriendTracks = [];
+    let currentGroupTracks = [];
     
     // DOM элементы
     const mainPage = document.getElementById('mainPage');
-    const messagesPage = document.getElementById('messagesPage');
     const friendsPage = document.getElementById('friendsPage');
     const friendTracksPage = document.getElementById('friendTracksPage');
     const groupsPage = document.getElementById('groupsPage');
     const groupTracksPage = document.getElementById('groupTracksPage');
+    const messagesPage = document.getElementById('messagesPage');
+    const playlistsPage = document.getElementById('playlistsPage');
+    const playlistTracksPage = document.getElementById('playlistTracksPage');
     const searchPage = document.getElementById('searchPage');
     const profilePage = document.getElementById('profilePage');
     const settingsPage = document.getElementById('settingsPage');
@@ -413,7 +489,8 @@
     const myTracksList = document.getElementById('myTracksList');
     const searchResultsList = document.getElementById('searchResultsList');
     const recommendationsList = document.getElementById('recommendationsList');
-    const friendsList = document.getElementById('friendsList');
+    const allFriendsListDiv = document.getElementById('allFriendsList');
+    const onlineFriendsListDiv = document.getElementById('onlineFriendsList');
     const friendTracksList = document.getElementById('friendTracksList');
     const friendTracksTitle = document.getElementById('friendTracksTitle');
     const backToFriendsBtn = document.getElementById('backToFriendsBtn');
@@ -421,28 +498,44 @@
     const groupTracksList = document.getElementById('groupTracksList');
     const groupTracksTitle = document.getElementById('groupTracksTitle');
     const backToGroupsBtn = document.getElementById('backToGroupsBtn');
+    const playlistsList = document.getElementById('playlistsList');
+    const playlistTracksList = document.getElementById('playlistTracksList');
+    const playlistTracksTitle = document.getElementById('playlistTracksTitle');
+    const backToPlaylistsBtn = document.getElementById('backToPlaylistsBtn');
     const profileContainer = document.getElementById('profileContainer');
     const appBarTitle = document.getElementById('appBarTitle');
     const appBarTitleBlock = document.getElementById('appBarTitleBlock');
     const navItems = document.querySelectorAll('.nav-item');
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
+    const friendsTabBtns = document.querySelectorAll('.friends-tab-btn');
+    const friendsTabContents = document.querySelectorAll('.friends-tab-content');
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = themeToggle.querySelector('.material-symbols-outlined');
-    const searchIcon = document.getElementById('searchIcon');
-    const searchExpanded = document.getElementById('searchExpanded');
-    const closeSearch = document.getElementById('closeSearch');
-    const globalSearchInput = document.getElementById('globalSearchInput');
-    const clearSearchInput = document.getElementById('clearSearchInput');
+    const playlistsIconBtn = document.getElementById('playlistsIconBtn');
     const myTracksSearchInput = document.getElementById('myTracksSearchInput');
     const clearMyTracksSearch = document.getElementById('clearMyTracksSearch');
     const searchPageInput = document.getElementById('searchPageInput');
     const clearSearchPageInput = document.getElementById('clearSearchPageInput');
+    const menuMessages = document.getElementById('menuMessages');
     const menuFriends = document.getElementById('menuFriends');
     const menuGroups = document.getElementById('menuGroups');
     const menuPlaylists = document.getElementById('menuPlaylists');
     const menuSettings = document.getElementById('menuSettings');
     const menuAbout = document.getElementById('menuAbout');
+    const miniPlayer = document.getElementById('miniPlayer');
+    
+    function showMiniPlayer() {
+        if (miniPlayer) {
+            miniPlayer.classList.remove('hidden');
+        }
+    }
+    
+    function hideMiniPlayer() {
+        if (miniPlayer) {
+            miniPlayer.classList.add('hidden');
+        }
+    }
     
     function switchTab(tabId) {
         tabContents.forEach(c => c.classList.remove('active'));
@@ -453,6 +546,16 @@
         if (tabId === 'recommendationsTab' && recommendations.length === 0) loadRecommendations();
     }
     tabBtns.forEach(btn => btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab'))));
+    
+    // Friends tabs
+    function switchFriendsTab(tabId) {
+        friendsTabContents.forEach(c => c.classList.remove('active'));
+        friendsTabBtns.forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        const activeBtn = document.querySelector(`.friends-tab-btn[data-friends-tab="${tabId}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+    }
+    friendsTabBtns.forEach(btn => btn.addEventListener('click', () => switchFriendsTab(btn.getAttribute('data-friends-tab'))));
     
     // Тема
     const savedTheme = localStorage.getItem('theme');
@@ -469,19 +572,15 @@
         }
     });
     
-    function openSearch() { searchExpanded.classList.add('active'); appBarTitleBlock.style.opacity = '0'; setTimeout(() => globalSearchInput.focus(), 100); }
-    function closeSearchFn() { searchExpanded.classList.remove('active'); appBarTitleBlock.style.opacity = '1'; globalSearchInput.value = ''; performGlobalSearch(''); }
-    searchIcon.addEventListener('click', openSearch);
-    closeSearch.addEventListener('click', closeSearchFn);
-    clearSearchInput.addEventListener('click', () => { globalSearchInput.value = ''; performGlobalSearch(''); globalSearchInput.focus(); });
-    
     function switchPage(pageId) {
         mainPage.classList.remove('active');
-        messagesPage.classList.remove('active');
         friendsPage.classList.remove('active');
         friendTracksPage.classList.remove('active');
         groupsPage.classList.remove('active');
         groupTracksPage.classList.remove('active');
+        messagesPage.classList.remove('active');
+        playlistsPage.classList.remove('active');
+        playlistTracksPage.classList.remove('active');
         searchPage.classList.remove('active');
         profilePage.classList.remove('active');
         settingsPage.classList.remove('active');
@@ -489,32 +588,34 @@
         if (pageId === 'main') {
             mainPage.classList.add('active');
             appBarTitle.textContent = 'Музыка';
-            if (myTracks.length === 0) loadMyTracks(); closeSearchFn();
-        } else if (pageId === 'messages') {
-            messagesPage.classList.add('active');
-            appBarTitle.textContent = 'Сообщения';
-            showConversationsView(); loadConversations(); closeSearchFn();
+            if (myTracks.length === 0) loadMyTracks();
         } else if (pageId === 'friends') {
             friendsPage.classList.add('active');
             appBarTitle.textContent = 'Друзья';
-            loadFriends(); closeSearchFn();
+            loadFriends();
         } else if (pageId === 'groups') {
             groupsPage.classList.add('active');
             appBarTitle.textContent = 'Сообщества';
-            loadGroups(); closeSearchFn();
+            loadGroups();
+        } else if (pageId === 'messages') {
+            messagesPage.classList.add('active');
+            appBarTitle.textContent = 'Сообщения';
+            showConversationsView(); loadConversations();
+        } else if (pageId === 'playlists') {
+            playlistsPage.classList.add('active');
+            appBarTitle.textContent = 'Плейлисты';
+            loadPlaylists();
         } else if (pageId === 'search') {
             searchPage.classList.add('active');
             appBarTitle.textContent = 'Поиск';
             if (searchPageInput && searchPageInput.value.trim()) performSearchPageSearch(searchPageInput.value);
-            closeSearchFn();
         } else if (pageId === 'profile') {
             profilePage.classList.add('active');
             appBarTitle.textContent = 'Меню';
-            loadProfile(); closeSearchFn();
+            loadProfile();
         } else if (pageId === 'settings') {
             settingsPage.classList.add('active');
             appBarTitle.textContent = 'Настройки';
-            closeSearchFn();
         }
         
         navItems.forEach(item => {
@@ -524,9 +625,12 @@
     }
     navItems.forEach(item => item.addEventListener('click', () => switchPage(item.getAttribute('data-page'))));
     
+    playlistsIconBtn.addEventListener('click', () => switchPage('playlists'));
+    
+    menuMessages.addEventListener('click', () => switchPage('messages'));
     menuFriends.addEventListener('click', () => switchPage('friends'));
     menuGroups.addEventListener('click', () => switchPage('groups'));
-    menuPlaylists.addEventListener('click', () => showToast('В разработке'));
+    menuPlaylists.addEventListener('click', () => switchPage('playlists'));
     menuSettings.addEventListener('click', () => switchPage('settings'));
     menuAbout.addEventListener('click', () => { document.getElementById('aboutModal').classList.add('active'); });
     document.getElementById('closeModalBtn').onclick = () => document.getElementById('aboutModal').classList.remove('active');
@@ -674,6 +778,7 @@
             const response = await fetch(`/api/friend-tracks?user_id=${friendId}`);
             if (response.status === 401) { window.location.href = '/login'; return; }
             const tracks = await response.json();
+            currentFriendTracks = tracks;
             displayFriendTracks(tracks);
         } catch (err) {
             friendTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
@@ -803,6 +908,7 @@
             const response = await fetch(`/api/group-tracks?group_id=${groupId}`);
             if (response.status === 401) { window.location.href = '/login'; return; }
             const tracks = await response.json();
+            currentGroupTracks = tracks;
             displayGroupTracks(tracks);
         } catch (err) {
             groupTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
@@ -897,22 +1003,264 @@
     
     if (backToGroupsBtn) backToGroupsBtn.addEventListener('click', backToGroups);
     
+    async function loadPlaylists() {
+        playlistsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка плейлистов</p></div>';
+        try {
+            const response = await fetch('/api/playlists');
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const playlists = await response.json();
+            
+            if (!playlists || !Array.isArray(playlists)) {
+                console.warn('Плейлисты не являются массивом:', playlists);
+                playlistsList.innerHTML = '<div class="loading"><p>Нет плейлистов</p></div>';
+                return;
+            }
+            
+            displayPlaylists(playlists);
+        } catch (err) {
+            console.error('Ошибка загрузки плейлистов:', err);
+            playlistsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    function displayPlaylists(playlists) {
+        playlistsList.innerHTML = '';
+        if (!playlists || playlists.length === 0) {
+            playlistsList.innerHTML = '<div class="loading"><p>Нет плейлистов</p></div>';
+            return;
+        }
+        
+        for (const playlist of playlists) {
+            const div = document.createElement('div');
+            div.className = 'playlist-item';
+            const trackCount = playlist.count || 0;
+            
+            let photoUrl = '';
+            if (playlist.photo) {
+                if (typeof playlist.photo === 'string') {
+                    photoUrl = playlist.photo;
+                } else if (playlist.photo.photo_300) {
+                    photoUrl = playlist.photo.photo_300;
+                } else if (playlist.photo.photo_270) {
+                    photoUrl = playlist.photo.photo_270;
+                } else if (playlist.photo.photo_130) {
+                    photoUrl = playlist.photo.photo_130;
+                } else if (playlist.photo.photo_75) {
+                    photoUrl = playlist.photo.photo_75;
+                }
+            }
+            
+            div.innerHTML = `
+                <div class="playlist-cover">
+                    ${photoUrl ? `<img src="${photoUrl}" alt="${escapeHtml(playlist.title)}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : ''}
+                    <span class="material-symbols-outlined" style="${photoUrl ? 'display:none' : 'display:flex'}">library_music</span>
+                </div>
+                <div class="playlist-info">
+                    <div class="playlist-title">${escapeHtml(playlist.title)}</div>
+                    <div class="playlist-count">${trackCount} треков</div>
+                </div>
+                <div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div>
+            `;
+            
+            div.onclick = () => openPlaylistTracks(playlist.id, playlist.owner_id, playlist.title, playlist.access_key);
+            playlistsList.appendChild(div);
+        }
+    }
+    
+    async function openPlaylistTracks(playlistId, ownerId, title, accessKey) {
+        currentPlaylistId = playlistId;
+        currentPlaylistOwnerId = ownerId;
+        currentPlaylistAccessKey = accessKey;
+        playlistTracksTitle.textContent = `Треки: ${escapeHtml(title)}`;
+        
+        playlistsPage.classList.remove('active');
+        playlistTracksPage.classList.add('active');
+        appBarTitle.textContent = `Треки ${escapeHtml(title)}`;
+        
+        playlistTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков...</p></div>';
+        
+        try {
+            let url = `/api/playlist-tracks?playlist_id=${playlistId}&owner_id=${ownerId}`;
+            if (accessKey) url += `&access_key=${accessKey}`;
+            const response = await fetch(url);
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const tracks = await response.json();
+            
+            if (!tracks || !Array.isArray(tracks)) {
+                console.error('Tracks is not an array:', tracks);
+                playlistTracksList.innerHTML = '<div class="error">Ошибка: неверный формат данных</div>';
+                return;
+            }
+            
+            currentPlaylistTracks = tracks;
+            
+            if (tracks.length === 0) {
+                playlistTracksList.innerHTML = '<div class="loading"><p>В плейлисте нет треков</p></div>';
+                return;
+            }
+            
+            displayPlaylistTracks(tracks);
+        } catch (err) {
+            console.error('Error loading playlist tracks:', err);
+            playlistTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+        }
+    }
+    
+    function displayPlaylistTracks(tracksList) {
+        playlistTracksList.innerHTML = '';
+        if (!tracksList.length) {
+            playlistTracksList.innerHTML = '<div class="loading"><p>В плейлисте нет треков</p></div>';
+            return;
+        }
+        
+        tracksList.forEach((track, i) => {
+            const mins = Math.floor((track.duration || 0) / 60);
+            const secs = (track.duration || 0) % 60;
+            const div = document.createElement('div');
+            div.className = 'track-item';
+            div.innerHTML = `
+                <div class="track-number">${i+1}</div>
+                <div class="track-info">
+                    <div class="track-title">${escapeHtml(track.title)}</div>
+                    <div class="track-artist">${escapeHtml(track.artist)}</div>
+                </div>
+                <div class="track-duration">${mins}:${secs < 10 ? '0' : ''}${secs}</div>
+                <button class="menu-btn" data-id="${track.id}" data-owner-id="${track.owner_id}">
+                    <span class="material-symbols-outlined">more_vert</span>
+                </button>
+            `;
+            
+            div.addEventListener('click', (e) => {
+                if (!e.target.closest('.menu-btn')) {
+                    playTrack(track, 'playlist');
+                }
+            });
+            
+            const menuBtn = div.querySelector('.menu-btn');
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const rect = menuBtn.getBoundingClientRect();
+                const trackId = parseInt(menuBtn.getAttribute('data-id'));
+                const ownerId = parseInt(menuBtn.getAttribute('data-owner-id'));
+                const trackTitle = track.title;
+                showPlaylistTrackMenu(rect.right - 180, rect.bottom + 5, trackId, ownerId, trackTitle);
+            });
+            
+            playlistTracksList.appendChild(div);
+        });
+    }
+    
+    function showPlaylistTrackMenu(x, y, trackId, ownerId, trackTitle) {
+        if (activeContextMenu) activeContextMenu.remove();
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        menu.innerHTML = `
+            <div class="context-menu-item download"><span class="material-symbols-outlined">download</span><span>Скачать MP3</span></div>
+            <div class="context-menu-item add"><span class="material-symbols-outlined">add_circle</span><span>Добавить в мои треки</span></div>
+        `;
+        
+        menu.querySelector('.download').addEventListener('click', () => {
+            menu.remove();
+            activeContextMenu = null;
+            downloadTrack(trackId, ownerId);
+        });
+        
+        menu.querySelector('.add').addEventListener('click', async () => {
+            menu.remove();
+            activeContextMenu = null;
+            await addTrackToVK(trackId, ownerId, trackTitle);
+        });
+        
+        document.body.appendChild(menu);
+        activeContextMenu = menu;
+        setTimeout(() => document.addEventListener('click', function closeMenu(e) {
+            if (!menu.contains(e.target)) {
+                menu.remove();
+                activeContextMenu = null;
+                document.removeEventListener('click', closeMenu);
+            }
+        }), 10);
+    }
+    
+    function backToPlaylists() {
+        playlistTracksPage.classList.remove('active');
+        playlistsPage.classList.add('active');
+        appBarTitle.textContent = 'Плейлисты';
+        currentPlaylistId = null;
+        currentPlaylistOwnerId = null;
+    }
+    
+    if (backToPlaylistsBtn) backToPlaylistsBtn.addEventListener('click', backToPlaylists);
+    
     async function loadFriends() {
-        friendsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка друзей</p></div>';
+        allFriendsListDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка друзей</p></div>';
+        onlineFriendsListDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка друзей</p></div>';
         try {
             const response = await fetch('/api/friends');
             if (response.status === 401) { window.location.href = '/login'; return; }
             const friends = await response.json();
-            displayFriends(friends);
+            allFriendsList = friends;
+            onlineFriendsList = friends.filter(f => f.online === 1);
+            displayAllFriends(allFriendsList);
+            displayOnlineFriends(onlineFriendsList);
         } catch (err) {
-            friendsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+            allFriendsListDiv.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
+            onlineFriendsListDiv.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
         }
     }
     
-    function displayFriends(friends) {
-        friendsList.innerHTML = '';
+    function displayAllFriends(friends) {
+        allFriendsListDiv.innerHTML = '';
         if (!friends || friends.length === 0) {
-            friendsList.innerHTML = '<div class="loading"><p>Нет друзей</p></div>';
+            allFriendsListDiv.innerHTML = '<div class="loading"><p>Нет друзей</p></div>';
+            return;
+        }
+        
+        for (const friend of friends) {
+            const div = document.createElement('div');
+            div.className = 'conversation-item';
+            const avatarLetter = getAvatarText(friend.full_name);
+            const hasPhoto = friend.photo && friend.photo !== '';
+            const onlineStatus = friend.online === 1;
+            
+            div.innerHTML = `
+                <div class="conv-avatar">
+                    ${hasPhoto ? `<img src="${friend.photo}" alt="${escapeHtml(friend.full_name)}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : ''}
+                    <span class="avatar-letter" style="${hasPhoto ? 'display:none' : 'display:flex'}">${escapeHtml(avatarLetter)}</span>
+                </div>
+                <div class="conv-info">
+                    <div class="conv-title">${escapeHtml(friend.full_name)}</div>
+                    <div class="online-status ${onlineStatus ? 'online' : 'offline'}">
+                        ${onlineStatus ? '🟢 Онлайн' : '⚫ Офлайн'}
+                    </div>
+                </div>
+                <div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div>
+            `;
+            
+            div.onclick = () => openFriendTracks(friend.id, friend.full_name);
+            
+            const img = div.querySelector('img');
+            const letterSpan = div.querySelector('.avatar-letter');
+            if (img && img.complete && img.naturalWidth === 0) {
+                img.style.display = 'none';
+                if (letterSpan) letterSpan.style.display = 'flex';
+            }
+            
+            allFriendsListDiv.appendChild(div);
+        }
+    }
+    
+    function displayOnlineFriends(friends) {
+        onlineFriendsListDiv.innerHTML = '';
+        if (!friends || friends.length === 0) {
+            onlineFriendsListDiv.innerHTML = '<div class="loading"><p>Нет друзей онлайн</p></div>';
             return;
         }
         
@@ -929,8 +1277,9 @@
                 </div>
                 <div class="conv-info">
                     <div class="conv-title">${escapeHtml(friend.full_name)}</div>
-                    <div class="conv-last">${friend.online ? '🟢 Онлайн' : '⚫ Офлайн'}</div>
+                    <div class="online-status online">🟢 Онлайн</div>
                 </div>
+                <div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div>
             `;
             
             div.onclick = () => openFriendTracks(friend.id, friend.full_name);
@@ -942,7 +1291,7 @@
                 if (letterSpan) letterSpan.style.display = 'flex';
             }
             
-            friendsList.appendChild(div);
+            onlineFriendsListDiv.appendChild(div);
         }
     }
     
@@ -980,6 +1329,7 @@
                     <div class="conv-title">${escapeHtml(group.name)}</div>
                     <div class="conv-last">${group.type === 'group' ? 'Группа' : 'Публичная страница'}</div>
                 </div>
+                <div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div>
             `;
             
             div.onclick = () => openGroupTracks(group.id, group.name);
@@ -998,17 +1348,161 @@
     function downloadTrack(trackId, ownerId) { window.location.href = `/download?id=${trackId}&owner_id=${ownerId}`; }
     async function getTrackUrl(trackId, ownerId) { const response = await fetch(`/get-track-url?id=${trackId}&owner_id=${ownerId}`); const data = await response.json(); return data.url; }
     
-    async function playTrack(track, source) {
-        if (!track || !track.id) { showToast('Информация о треке недоступна', true); return; }
+    // ========== УПРАВЛЕНИЕ ПЛЕЕРОМ И ОЧЕРЕДЬЮ ==========
+    
+    async function playTrackWithQueue(track, source, playlist = null) {
+        if (!track || !track.id) { 
+            showToast('Информация о треке недоступна', true); 
+            return false;
+        }
+        
+        if (playlist) {
+            currentPlaylist = playlist;
+            currentTrackIndexInPlaylist = playlist.findIndex(t => t.id === track.id && t.owner_id === track.owner_id);
+            currentSource = source;
+        } else {
+            let tracksList = [];
+            switch(source) {
+                case 'myTracks':
+                    tracksList = myTracksFiltered.length > 0 ? myTracksFiltered : myTracks;
+                    break;
+                case 'search':
+                    tracksList = searchResults;
+                    break;
+                case 'recommendations':
+                    tracksList = recommendations;
+                    break;
+                case 'friend':
+                    tracksList = currentFriendTracks;
+                    break;
+                case 'group':
+                    tracksList = currentGroupTracks;
+                    break;
+                case 'playlist':
+                    tracksList = currentPlaylistTracks;
+                    break;
+                default:
+                    tracksList = [track];
+            }
+            
+            currentPlaylist = [...tracksList];
+            currentTrackIndexInPlaylist = currentPlaylist.findIndex(t => t.id === track.id && t.owner_id === track.owner_id);
+            currentSource = source;
+        }
+        
+        if (currentTrackIndexInPlaylist === -1 && currentPlaylist.length > 0) {
+            currentTrackIndexInPlaylist = 0;
+        }
+        
         const url = await getTrackUrl(track.id, track.owner_id);
-        if (!url) { showToast('Ссылка на трек недоступна', true); return; }
+        if (!url) { 
+            showToast('Ссылка на трек недоступна', true); 
+            return false;
+        }
+        
         audioPlayer.src = url.replace(/\\\//g, '/');
         audioPlayer.load();
-        audioPlayer.play().then(() => { isPlaying = true; updatePlayPauseButton(); updateNowPlayingInfo(track); }).catch(e => { showToast('Ошибка воспроизведения', true); });
+        
+        try {
+            await audioPlayer.play();
+            isPlaying = true;
+            updatePlayPauseButton();
+            updateNowPlayingInfo(track);
+            showMiniPlayer();
+            return true;
+        } catch(e) {
+            showToast('Ошибка воспроизведения', true);
+            return false;
+        }
     }
     
-    function updateNowPlayingInfo(track) { document.getElementById('nowPlayingTitle').textContent = track.title || 'Без названия'; document.getElementById('nowPlayingArtist').textContent = track.artist || 'Неизвестный исполнитель'; }
-    function updatePlayPauseButton() { const btn = document.getElementById('playPauseBtn'); const icon = btn.querySelector('.material-symbols-outlined'); icon.textContent = isPlaying ? 'pause' : 'play_arrow'; }
+    async function playNextTrack() {
+        if (!currentPlaylist.length || currentTrackIndexInPlaylist === -1) {
+            let tracksList = [];
+            if (myTracksFiltered.length > 0) tracksList = myTracksFiltered;
+            else if (myTracks.length > 0) tracksList = myTracks;
+            else if (recommendations.length > 0) tracksList = recommendations;
+            
+            if (tracksList.length > 0) {
+                currentPlaylist = [...tracksList];
+                currentTrackIndexInPlaylist = 0;
+                currentSource = 'myTracks';
+            } else {
+                showToast('Нет треков в очереди', true);
+                return;
+            }
+        }
+        
+        const nextIndex = currentTrackIndexInPlaylist + 1;
+        if (nextIndex < currentPlaylist.length) {
+            currentTrackIndexInPlaylist = nextIndex;
+            const nextTrack = currentPlaylist[currentTrackIndexInPlaylist];
+            await playTrackWithQueue(nextTrack, currentSource, currentPlaylist);
+        } else {
+            showToast('Конец плейлиста', true);
+            audioPlayer.pause();
+            isPlaying = false;
+            updatePlayPauseButton();
+            hideMiniPlayer();
+        }
+    }
+    
+    async function playPrevTrack() {
+        if (!currentPlaylist.length || currentTrackIndexInPlaylist === -1) {
+            showToast('Нет предыдущих треков', true);
+            return;
+        }
+        
+        const prevIndex = currentTrackIndexInPlaylist - 1;
+        if (prevIndex >= 0) {
+            currentTrackIndexInPlaylist = prevIndex;
+            const prevTrack = currentPlaylist[currentTrackIndexInPlaylist];
+            await playTrackWithQueue(prevTrack, currentSource, currentPlaylist);
+        } else {
+            showToast('Это первый трек в списке', true);
+        }
+    }
+    
+    async function playTrack(track, source) {
+        await playTrackWithQueue(track, source);
+    }
+    
+    function updateNowPlayingInfo(track) { 
+        document.getElementById('nowPlayingTitle').textContent = track.title || 'Без названия'; 
+        document.getElementById('nowPlayingArtist').textContent = track.artist || 'Неизвестный исполнитель'; 
+    }
+    
+    function updatePlayPauseButton() { 
+        const btn = document.getElementById('playPauseBtn'); 
+        const icon = btn.querySelector('.material-symbols-outlined'); 
+        icon.textContent = isPlaying ? 'pause' : 'play_arrow'; 
+    }
+    
+    // Обновляем обработчик окончания трека
+    audioPlayer.addEventListener('ended', async () => { 
+        isPlaying = false; 
+        updatePlayPauseButton();
+        await playNextTrack();
+    });
+    
+    // Добавляем обработчики для кнопок prev/next
+    document.getElementById('prevBtn').addEventListener('click', playPrevTrack);
+    document.getElementById('nextBtn').addEventListener('click', playNextTrack);
+    
+    // Обновляем playPauseBtn
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const originalPlayPauseHandler = playPauseBtn.onclick;
+    playPauseBtn.addEventListener('click', () => { 
+        if (isPlaying) {
+            audioPlayer.pause();
+        } else {
+            audioPlayer.play();
+        }
+        isPlaying = !isPlaying; 
+        updatePlayPauseButton(); 
+    });
+    
+    // ========== КОНЕЦ УПРАВЛЕНИЯ ПЛЕЕРОМ ==========
     
     async function loadMyTracks() {
         myTracksList.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>';
@@ -1149,19 +1643,6 @@
         } catch (err) { showToast(`Ошибка: ${err.message}`, true); }
     }
     
-    async function performGlobalSearch(query) {
-        if (!query.trim()) { displaySearchResults([]); return; }
-        searchResultsList.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div><p>Поиск...</p></div>';
-        try {
-            const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-            if (response.status === 401) { window.location.href = '/login'; return; }
-            const data = await response.json();
-            if (data.error) { searchResultsList.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`; return; }
-            searchResults = data;
-            displaySearchResults(searchResults);
-        } catch (err) { searchResultsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`; }
-    }
-    
     async function performSearchPageSearch(query) {
         if (!query.trim()) { 
             searchResultsList.innerHTML = `
@@ -1204,8 +1685,6 @@
             searchResultsList.appendChild(div);
         });
     }
-    
-    globalSearchInput.addEventListener('input', (e) => { if (searchDebounceTimer) clearTimeout(searchDebounceTimer); searchDebounceTimer = setTimeout(() => performGlobalSearch(e.target.value), 500); });
     
     if (searchPageInput) {
         searchPageInput.addEventListener('input', (e) => {
@@ -1250,11 +1729,27 @@
     
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
     
-    document.getElementById('playPauseBtn').addEventListener('click', () => { if (isPlaying) audioPlayer.pause(); else audioPlayer.play(); isPlaying = !isPlaying; updatePlayPauseButton(); });
-    audioPlayer.addEventListener('timeupdate', () => { if (audioPlayer.duration) { document.getElementById('progressFill').style.width = (audioPlayer.currentTime / audioPlayer.duration * 100) + '%'; document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime); document.getElementById('totalTime').textContent = formatTime(audioPlayer.duration); } });
-    audioPlayer.addEventListener('ended', () => { isPlaying = false; updatePlayPauseButton(); });
-    document.getElementById('progressBar').addEventListener('click', (e) => { if (audioPlayer.duration) { const rect = e.currentTarget.getBoundingClientRect(); audioPlayer.currentTime = ((e.clientX - rect.left) / rect.width) * audioPlayer.duration; } });
-    function formatTime(seconds) { if (isNaN(seconds)) return '0:00'; const mins = Math.floor(seconds / 60); const secs = Math.floor(seconds % 60); return `${mins}:${secs < 10 ? '0' : ''}${secs}`; }
+    audioPlayer.addEventListener('timeupdate', () => { 
+        if (audioPlayer.duration) { 
+            document.getElementById('progressFill').style.width = (audioPlayer.currentTime / audioPlayer.duration * 100) + '%'; 
+            document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime); 
+            document.getElementById('totalTime').textContent = formatTime(audioPlayer.duration); 
+        } 
+    });
+    
+    document.getElementById('progressBar').addEventListener('click', (e) => { 
+        if (audioPlayer.duration) { 
+            const rect = e.currentTarget.getBoundingClientRect(); 
+            audioPlayer.currentTime = ((e.clientX - rect.left) / rect.width) * audioPlayer.duration; 
+        } 
+    });
+    
+    function formatTime(seconds) { 
+        if (isNaN(seconds)) return '0:00'; 
+        const mins = Math.floor(seconds / 60); 
+        const secs = Math.floor(seconds % 60); 
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`; 
+    }
     
     async function setInvisibleMode(enabled) {
         try {
@@ -1271,6 +1766,51 @@
             showToast(`Ошибка: ${err.message}`, true);
             return false;
         }
+    }
+    
+    const proxySwitch = document.getElementById('proxySwitch');
+    
+    async function loadProxyStatus() {
+        try {
+            const response = await fetch('/api/get-proxy-status');
+            if (response.status === 401) return;
+            const data = await response.json();
+            if (proxySwitch) {
+                proxySwitch.checked = data.proxy_enabled;
+            }
+        } catch (err) {
+            console.error('Error loading proxy status:', err);
+        }
+    }
+    
+    async function setProxy(enabled) {
+        try {
+            const response = await fetch('/api/set-proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled: enabled })
+            });
+            if (response.status === 401) { window.location.href = '/login'; return false; }
+            const result = await response.json();
+            if (result.success) {
+                showToast(enabled ? 'Прокси включён' : 'Прокси выключен');
+                return true;
+            }
+            return false;
+        } catch (err) {
+            showToast('Ошибка: ' + err.message, true);
+            return false;
+        }
+    }
+    
+    if (proxySwitch) {
+        proxySwitch.addEventListener('change', async (e) => {
+            const enabled = e.target.checked;
+            const success = await setProxy(enabled);
+            if (!success) {
+                proxySwitch.checked = !enabled;
+            }
+        });
     }
     
     function initSettings() {
@@ -1317,6 +1857,8 @@
     
     loadMyTracks();
     initSettings();
+    loadProxyStatus();
+    hideMiniPlayer();
     </script>
 </body>
 </html>
