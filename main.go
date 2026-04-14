@@ -55,6 +55,107 @@ type VKUserInfo struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Photo50   string `json:"photo_50"`
+	Photo100  string `json:"photo_100"`
+}
+
+type ConversationsResponse struct {
+	Response struct {
+		Count int `json:"count"`
+		Items []struct {
+			Conversation struct {
+				Peer struct {
+					ID int `json:"id"`
+				} `json:"peer"`
+				UnreadCount int `json:"unread_count"`
+			} `json:"conversation"`
+			LastMessage struct {
+				ID     int    `json:"id"`
+				Date   int64  `json:"date"`
+				FromID int    `json:"from_id"`
+				Text   string `json:"text"`
+				Out    int    `json:"out"`
+			} `json:"last_message"`
+		} `json:"items"`
+		Profiles []struct {
+			ID        int    `json:"id"`
+			FirstName string `json:"first_name"`
+			LastName  string `json:"last_name"`
+		} `json:"profiles"`
+	} `json:"response"`
+	Error *struct {
+		ErrorCode int    `json:"error_code"`
+		ErrorMsg  string `json:"error_msg"`
+	} `json:"error"`
+}
+
+type MessagesResponse struct {
+	Response struct {
+		Count int `json:"count"`
+		Items []struct {
+			ID     int    `json:"id"`
+			Date   int64  `json:"date"`
+			FromID int    `json:"from_id"`
+			PeerID int    `json:"peer_id"`
+			Text   string `json:"text"`
+			Out    int    `json:"out"`
+		} `json:"items"`
+		Profiles []struct {
+			ID        int    `json:"id"`
+			FirstName string `json:"first_name"`
+			LastName  string `json:"last_name"`
+		} `json:"profiles"`
+	} `json:"response"`
+	Error *struct {
+		ErrorCode int    `json:"error_code"`
+		ErrorMsg  string `json:"error_msg"`
+	} `json:"error"`
+}
+
+type Friend struct {
+	ID        int    `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Photo100  string `json:"photo_100"`
+	Online    int    `json:"online"`
+}
+
+type Group struct {
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
+	ScreenName string `json:"screen_name"`
+	Photo100   string `json:"photo_100"`
+	IsClosed   int    `json:"is_closed"`
+	Type       string `json:"type"`
+}
+
+type FriendsResponse struct {
+	Response struct {
+		Count int      `json:"count"`
+		Items []Friend `json:"items"`
+	} `json:"response"`
+	Error *struct {
+		ErrorCode int    `json:"error_code"`
+		ErrorMsg  string `json:"error_msg"`
+	} `json:"error"`
+}
+
+type GroupsResponse struct {
+	Response struct {
+		Count int     `json:"count"`
+		Items []Group `json:"items"`
+	} `json:"response"`
+	Error *struct {
+		ErrorCode int    `json:"error_code"`
+		ErrorMsg  string `json:"error_msg"`
+	} `json:"error"`
+}
+
+type SetOnlineResponse struct {
+	Response int `json:"response"`
+	Error    *struct {
+		ErrorCode int    `json:"error_code"`
+		ErrorMsg  string `json:"error_msg"`
+	} `json:"error"`
 }
 
 var trackURLCache = struct {
@@ -124,7 +225,7 @@ func searchTracks(token string, query string) ([]Track, error) {
 	params.Set("access_token", token)
 	params.Set("v", "5.131")
 	params.Set("q", query)
-	params.Set("count", "30")
+	params.Set("count", "50")
 
 	apiURL := "https://api.vk.com/method/audio.search?" + params.Encode()
 
@@ -318,7 +419,7 @@ func getUserInfo(token string) (*VKUserInfo, error) {
 	params := url.Values{}
 	params.Set("access_token", token)
 	params.Set("v", "5.131")
-	params.Set("fields", "photo_50")
+	params.Set("fields", "photo_50,photo_100")
 
 	apiURL := "https://api.vk.com/method/users.get?" + params.Encode()
 
@@ -362,7 +463,404 @@ func getUserInfo(token string) (*VKUserInfo, error) {
 	return &result.Response[0], nil
 }
 
-// Обработчик колбэка от VK OAuth
+// ========== Функции для работы с сообщениями ==========
+
+func getConversations(token string, count int, offset int) (*ConversationsResponse, error) {
+	client := &http.Client{Timeout: 15 * time.Second}
+
+	params := url.Values{}
+	params.Set("access_token", token)
+	params.Set("v", "5.131")
+	params.Set("count", strconv.Itoa(count))
+	params.Set("offset", strconv.Itoa(offset))
+	params.Set("extended", "1")
+
+	apiURL := "https://api.vk.com/method/messages.getConversations?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result ConversationsResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("ошибка парсинга: %v", err)
+	}
+
+	if result.Error != nil {
+		return nil, fmt.Errorf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)
+	}
+
+	return &result, nil
+}
+
+func getMessages(token string, peerID int, count int, offset int) (*MessagesResponse, error) {
+	client := &http.Client{Timeout: 15 * time.Second}
+
+	params := url.Values{}
+	params.Set("access_token", token)
+	params.Set("v", "5.131")
+	params.Set("count", strconv.Itoa(count))
+	params.Set("offset", strconv.Itoa(offset))
+	params.Set("peer_id", strconv.Itoa(peerID))
+	params.Set("extended", "1")
+
+	apiURL := "https://api.vk.com/method/messages.getHistory?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result MessagesResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("ошибка парсинга: %v", err)
+	}
+
+	if result.Error != nil {
+		return nil, fmt.Errorf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)
+	}
+
+	return &result, nil
+}
+
+func sendMessage(token string, peerID int, message string) error {
+	client := &http.Client{Timeout: 15 * time.Second}
+
+	params := url.Values{}
+	params.Set("access_token", token)
+	params.Set("v", "5.131")
+	params.Set("peer_id", strconv.Itoa(peerID))
+	params.Set("message", message)
+	params.Set("random_id", strconv.FormatInt(time.Now().UnixNano(), 10))
+
+	apiURL := "https://api.vk.com/method/messages.send?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var result struct {
+		Response int `json:"response"`
+		Error    *struct {
+			ErrorCode int    `json:"error_code"`
+			ErrorMsg  string `json:"error_msg"`
+		} `json:"error"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		return err
+	}
+
+	if result.Error != nil {
+		return fmt.Errorf("VK API ошибка: %s", result.Error.ErrorMsg)
+	}
+
+	return nil
+}
+
+// ========== Функции для работы с онлайн-статусом (невидимка) ==========
+
+func setOffline(token string) error {
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	params := url.Values{}
+	params.Set("access_token", token)
+	params.Set("v", "5.131")
+
+	apiURL := "https://api.vk.com/method/account.setOffline?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var result SetOnlineResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return fmt.Errorf("ошибка парсинга: %v", err)
+	}
+
+	if result.Error != nil {
+		return fmt.Errorf("VK API ошибка: %s", result.Error.ErrorMsg)
+	}
+
+	return nil
+}
+
+func setOnline(token string) error {
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	params := url.Values{}
+	params.Set("access_token", token)
+	params.Set("v", "5.131")
+
+	apiURL := "https://api.vk.com/method/account.setOnline?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var result SetOnlineResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return fmt.Errorf("ошибка парсинга: %v", err)
+	}
+
+	if result.Error != nil {
+		return fmt.Errorf("VK API ошибка: %s", result.Error.ErrorMsg)
+	}
+
+	return nil
+}
+
+// ========== Обработчик для аудиозаписей друга ==========
+
+func apiFriendTracksHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+	userIDStr := r.URL.Query().Get("user_id")
+
+	if userIDStr == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "user_id required"})
+		return
+	}
+
+	userID, _ := strconv.Atoi(userIDStr)
+
+	tracks, err := getAllTracks(tokenCookie.Value, userID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tracks)
+}
+
+// ========== Обработчик для аудиозаписей сообщества ==========
+
+func apiGroupTracksHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+	groupIDStr := r.URL.Query().Get("group_id")
+
+	if groupIDStr == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "group_id required"})
+		return
+	}
+
+	groupID, _ := strconv.Atoi(groupIDStr)
+	// Для групп owner_id должен быть отрицательным
+	ownerID := -groupID
+
+	tracks, err := getAllTracks(tokenCookie.Value, ownerID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tracks)
+}
+
+// ========== Обработчик для невидимки ==========
+
+func apiSetOfflineHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	tokenCookie, _ := r.Cookie("vk_token")
+	if tokenCookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
+		return
+	}
+
+	err := setOffline(tokenCookie.Value)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"success": "true"})
+}
+
+func apiSetOnlineHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	tokenCookie, _ := r.Cookie("vk_token")
+	if tokenCookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
+		return
+	}
+
+	err := setOnline(tokenCookie.Value)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"success": "true"})
+}
+
+// ========== Функции для друзей и групп ==========
+
+func getFriends(token string, count int, offset int) (*FriendsResponse, error) {
+	client := &http.Client{Timeout: 15 * time.Second}
+
+	params := url.Values{}
+	params.Set("access_token", token)
+	params.Set("v", "5.131")
+	params.Set("count", strconv.Itoa(count))
+	params.Set("offset", strconv.Itoa(offset))
+	params.Set("fields", "photo_100,online")
+
+	apiURL := "https://api.vk.com/method/friends.get?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result FriendsResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("ошибка парсинга: %v", err)
+	}
+
+	if result.Error != nil {
+		return nil, fmt.Errorf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)
+	}
+
+	return &result, nil
+}
+
+func getGroups(token string, count int, offset int) (*GroupsResponse, error) {
+	client := &http.Client{Timeout: 15 * time.Second}
+
+	params := url.Values{}
+	params.Set("access_token", token)
+	params.Set("v", "5.131")
+	params.Set("count", strconv.Itoa(count))
+	params.Set("offset", strconv.Itoa(offset))
+	params.Set("extended", "1")
+	params.Set("fields", "photo_100")
+
+	apiURL := "https://api.vk.com/method/groups.get?" + params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result GroupsResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("ошибка парсинга: %v", err)
+	}
+
+	if result.Error != nil {
+		return nil, fmt.Errorf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)
+	}
+
+	return &result, nil
+}
+
+// ========== HTTP Обработчики ==========
+
 func vkCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	if code == "" {
@@ -377,7 +875,6 @@ func vkCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Обмениваем код на токен
 	client := &http.Client{Timeout: 10 * time.Second}
 	apiURL := fmt.Sprintf("https://oauth.vk.com/access_token?client_id=54533272&client_secret=tPyNb8rQNMXaTHRNp4NZ&code=%s&redirect_uri=%s/auth/vk-callback&grant_type=authorization_code",
 		code, getBaseURL(r))
@@ -394,8 +891,6 @@ func vkCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login?error=read", http.StatusSeeOther)
 		return
 	}
-
-	fmt.Printf("OAuth response: %s\n", string(body))
 
 	var result struct {
 		AccessToken string `json:"access_token"`
@@ -419,14 +914,12 @@ func vkCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Проверяем токен
 	userInfo, err := getUserInfo(result.AccessToken)
 	if err != nil {
 		http.Redirect(w, r, "/login?error=invalid_token", http.StatusSeeOther)
 		return
 	}
 
-	// Сохраняем токен
 	http.SetCookie(w, &http.Cookie{
 		Name:     "vk_token",
 		Value:    result.AccessToken,
@@ -723,196 +1216,216 @@ func apiSearchMyTracksHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(filtered)
 }
 
-// Получение списка плейлистов пользователя
-func apiPlaylistsHandler(w http.ResponseWriter, r *http.Request) {
-	tokenCookie, _ := r.Cookie("vk_token")
-	userIDCookie, _ := r.Cookie("vk_user_id")
-	userID, _ := strconv.Atoi(userIDCookie.Value)
+// ========== Обработчики для сообщений ==========
 
-	client := &http.Client{Timeout: 15 * time.Second}
-	params := url.Values{}
-	params.Set("access_token", tokenCookie.Value)
-	params.Set("v", "5.131")
-	params.Set("owner_id", strconv.Itoa(userID))
-	params.Set("count", "100")
-	params.Set("extended", "1")
-
-	apiURL := "https://api.vk.com/method/audio.getPlaylists?" + params.Encode()
-
-	req, err := http.NewRequest("GET", apiURL, nil)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-		return
-	}
-	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-		return
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-		return
-	}
-
-	var result struct {
-		Response struct {
-			Count int `json:"count"`
-			Items []struct {
-				ID        int    `json:"id"`
-				OwnerID   int    `json:"owner_id"`
-				Title     string `json:"title"`
-				Count     int    `json:"count"`
-				AccessKey string `json:"access_key"`
-				Photo     struct {
-					Photo1280 string `json:"photo_1280"`
-					Photo640  string `json:"photo_640"`
-					Photo320  string `json:"photo_320"`
-				} `json:"photo"`
-			} `json:"items"`
-		} `json:"response"`
-		Error *struct {
-			ErrorCode int    `json:"error_code"`
-			ErrorMsg  string `json:"error_msg"`
-		} `json:"error"`
-	}
-
-	if err := json.Unmarshal(body, &result); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("Ошибка парсинга: %v", err)})
-		return
-	}
-
-	if result.Error != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)})
-		return
-	}
-
-	playlists := make([]map[string]interface{}, 0)
-	for _, item := range result.Response.Items {
-		playlist := map[string]interface{}{
-			"id":         item.ID,
-			"owner_id":   item.OwnerID,
-			"title":      item.Title,
-			"count":      item.Count,
-			"access_key": item.AccessKey,
-		}
-		if item.Photo.Photo320 != "" {
-			playlist["cover"] = item.Photo.Photo320
-		} else if item.Photo.Photo640 != "" {
-			playlist["cover"] = item.Photo.Photo640
-		}
-		playlists = append(playlists, playlist)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(playlists)
-}
-
-// Получение треков плейлиста
-func apiPlaylistTracksHandler(w http.ResponseWriter, r *http.Request) {
+func apiConversationsHandler(w http.ResponseWriter, r *http.Request) {
 	tokenCookie, _ := r.Cookie("vk_token")
 
-	// Извлекаем параметры из URL
-	path := r.URL.Path
-	parts := strings.Split(path, "/")
-	if len(parts) < 5 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid playlist ID"})
+	if tokenCookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
 		return
 	}
 
-	playlistID := parts[3]
-	ownerID := parts[4]
-
-	client := &http.Client{Timeout: 15 * time.Second}
-	params := url.Values{}
-	params.Set("access_token", tokenCookie.Value)
-	params.Set("v", "5.131")
-	params.Set("owner_id", ownerID)
-	params.Set("playlist_id", playlistID)
-
-	apiURL := "https://api.vk.com/method/audio.getPlaylistById?" + params.Encode()
-
-	req, err := http.NewRequest("GET", apiURL, nil)
+	conversations, err := getConversations(tokenCookie.Value, 200, 0)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-		return
-	}
-	req.Header.Set("User-Agent", "KateMobileAndroid/51.1-442")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-		return
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
+		fmt.Printf("Error getting conversations: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}
 
-	var result struct {
-		Response struct {
-			ID     int    `json:"id"`
-			Title  string `json:"title"`
-			Audios []struct {
-				ID       int    `json:"id"`
-				OwnerID  int    `json:"owner_id"`
-				Artist   string `json:"artist"`
-				Title    string `json:"title"`
-				Duration int    `json:"duration"`
-				URL      string `json:"url"`
-			} `json:"audios"`
-		} `json:"response"`
-		Error *struct {
-			ErrorCode int    `json:"error_code"`
-			ErrorMsg  string `json:"error_msg"`
-		} `json:"error"`
+	profilesMap := make(map[int]struct {
+		FirstName string
+		LastName  string
+	})
+	for _, profile := range conversations.Response.Profiles {
+		profilesMap[profile.ID] = struct {
+			FirstName string
+			LastName  string
+		}{profile.FirstName, profile.LastName}
 	}
 
-	if err := json.Unmarshal(body, &result); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("Ошибка парсинга: %v", err)})
-		return
-	}
+	result := make([]map[string]interface{}, 0)
+	for _, item := range conversations.Response.Items {
+		peerID := item.Conversation.Peer.ID
 
-	if result.Error != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("VK API ошибка: %s (код %d)", result.Error.ErrorMsg, result.Error.ErrorCode)})
-		return
-	}
+		title := ""
+		if peerID > 0 {
+			if profile, ok := profilesMap[peerID]; ok {
+				title = profile.FirstName + " " + profile.LastName
+			} else {
+				title = fmt.Sprintf("Dialog %d", peerID)
+			}
+		} else {
+			title = "Unknown dialog"
+		}
 
-	tracks := make([]Track, 0)
-	for _, item := range result.Response.Audios {
-		// Нормализуем URL если есть
-		url := strings.ReplaceAll(item.URL, "\\/", "/")
-		tracks = append(tracks, Track{
-			ID:       item.ID,
-			OwnerID:  item.OwnerID,
-			Artist:   item.Artist,
-			Title:    item.Title,
-			Duration: item.Duration,
-			URL:      url,
+		result = append(result, map[string]interface{}{
+			"peer_id":   peerID,
+			"title":     title,
+			"unread":    item.Conversation.UnreadCount,
+			"last_text": item.LastMessage.Text,
+			"last_date": item.LastMessage.Date,
+			"last_from": item.LastMessage.FromID,
 		})
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(tracks)
+	json.NewEncoder(w).Encode(result)
 }
+
+func apiMessagesHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+	peerIDStr := r.URL.Query().Get("peer_id")
+
+	if peerIDStr == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "peer_id required"})
+		return
+	}
+
+	peerID, _ := strconv.Atoi(peerIDStr)
+
+	messages, err := getMessages(tokenCookie.Value, peerID, 100, 0)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	profilesMap := make(map[int]struct {
+		FirstName string
+		LastName  string
+	})
+	for _, profile := range messages.Response.Profiles {
+		profilesMap[profile.ID] = struct {
+			FirstName string
+			LastName  string
+		}{profile.FirstName, profile.LastName}
+	}
+
+	result := make([]map[string]interface{}, 0)
+	for _, msg := range messages.Response.Items {
+		senderName := ""
+		if profile, ok := profilesMap[msg.FromID]; ok {
+			senderName = profile.FirstName + " " + profile.LastName
+		}
+		if senderName == "" {
+			senderName = fmt.Sprintf("User %d", msg.FromID)
+		}
+
+		result = append(result, map[string]interface{}{
+			"id":        msg.ID,
+			"date":      msg.Date,
+			"from_id":   msg.FromID,
+			"from_name": senderName,
+			"text":      msg.Text,
+			"out":       msg.Out,
+			"peer_id":   msg.PeerID,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func apiSendMessageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	tokenCookie, _ := r.Cookie("vk_token")
+
+	var req struct {
+		PeerID  int    `json:"peer_id"`
+		Message string `json:"message"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request"})
+		return
+	}
+
+	err := sendMessage(tokenCookie.Value, req.PeerID, req.Message)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"success": "true"})
+}
+
+// ========== Обработчики для друзей и групп ==========
+
+func apiFriendsHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+
+	if tokenCookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
+		return
+	}
+
+	friends, err := getFriends(tokenCookie.Value, 500, 0)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	result := make([]map[string]interface{}, 0)
+	for _, friend := range friends.Response.Items {
+		result = append(result, map[string]interface{}{
+			"id":         friend.ID,
+			"first_name": friend.FirstName,
+			"last_name":  friend.LastName,
+			"full_name":  friend.FirstName + " " + friend.LastName,
+			"photo":      friend.Photo100,
+			"online":     friend.Online,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func apiGroupsHandler(w http.ResponseWriter, r *http.Request) {
+	tokenCookie, _ := r.Cookie("vk_token")
+
+	if tokenCookie.Value == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
+		return
+	}
+
+	groups, err := getGroups(tokenCookie.Value, 500, 0)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	result := make([]map[string]interface{}, 0)
+	for _, group := range groups.Response.Items {
+		result = append(result, map[string]interface{}{
+			"id":          group.ID,
+			"name":        group.Name,
+			"screen_name": group.ScreenName,
+			"photo":       group.Photo100,
+			"type":        group.Type,
+			"is_closed":   group.IsClosed,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+// ========== Основные обработчики ==========
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -1127,8 +1640,15 @@ func main() {
 	http.HandleFunc("/api/user", authMiddleware(apiUserInfoHandler))
 	http.HandleFunc("/api/recommendations", authMiddleware(apiRecommendationsHandler))
 	http.HandleFunc("/api/profile", authMiddleware(apiProfileHandler))
-	http.HandleFunc("/api/playlists", authMiddleware(apiPlaylistsHandler))
-	http.HandleFunc("/api/playlist/", authMiddleware(apiPlaylistTracksHandler))
+	http.HandleFunc("/api/conversations", authMiddleware(apiConversationsHandler))
+	http.HandleFunc("/api/messages", authMiddleware(apiMessagesHandler))
+	http.HandleFunc("/api/send-message", authMiddleware(apiSendMessageHandler))
+	http.HandleFunc("/api/friends", authMiddleware(apiFriendsHandler))
+	http.HandleFunc("/api/groups", authMiddleware(apiGroupsHandler))
+	http.HandleFunc("/api/friend-tracks", authMiddleware(apiFriendTracksHandler))
+	http.HandleFunc("/api/group-tracks", authMiddleware(apiGroupTracksHandler))
+	http.HandleFunc("/api/set-offline", authMiddleware(apiSetOfflineHandler))
+	http.HandleFunc("/api/set-online", authMiddleware(apiSetOnlineHandler))
 
 	port := "8080"
 	fmt.Println("==================================================")
@@ -1137,8 +1657,10 @@ func main() {
 	fmt.Printf("\n✅ Сервер запущен: http://localhost:%s\n", port)
 	fmt.Println("🌐 Открой в браузере: http://localhost:8080")
 	fmt.Println("🔐 Доступен вход через ВКонтакте или по токену")
-	fmt.Println("📀 Доступны плейлисты пользователя")
-	fmt.Println("📥 Треки можно скачать через кнопку меню (три точки)")
+	fmt.Println("💬 Доступны диалоги и сообщения")
+	fmt.Println("👥 Доступны друзья и сообщества")
+	fmt.Println("📀 Доступны аудиозаписи")
+	fmt.Println("📥 Треки можно скачать через кнопку меню")
 	fmt.Println("⚠️ Удаление треков реально удаляет их из ВКонтакте!")
 	fmt.Println("📌 Нажми Ctrl+C для остановки")
 	fmt.Println("==================================================")
