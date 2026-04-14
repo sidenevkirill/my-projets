@@ -42,6 +42,8 @@
         .tab-content { display: none; height: calc(100% - 56px); overflow-y: auto; }
         .tab-content.active { display: block; }
         .profile-card { background: var(--md-primary); margin: 16px; border-radius: 24px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow); }
+        .profile-avatar { width: 56px; height: 56px; border-radius: 28px; overflow: hidden; flex-shrink: 0; }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .vk-icon-placeholder { width: 56px; height: 56px; background: rgba(255,255,255,0.2); border-radius: 28px; display: flex; align-items: center; justify-content: center; }
         .profile-info { flex: 1; }
         .profile-name { font-size: 18px; font-weight: 600; color: white; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -94,29 +96,6 @@
         .track-info { flex: 1; min-width: 0; }
         .track-title { font-weight: 500; color: var(--md-on-surface); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .track-artist { font-size: 12px; color: var(--md-on-surface-variant); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .profile-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 28px;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.vk-icon-placeholder {
-    width: 56px;
-    height: 56px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
         .track-duration { width: 55px; color: var(--md-on-surface-variant); font-size: 12px; text-align: right; }
         .menu-btn { width: 36px; height: 36px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--md-on-surface-variant); }
         .context-menu { position: fixed; background: var(--md-surface); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 200; min-width: 200px; overflow: hidden; animation: fadeIn 0.15s ease; }
@@ -209,10 +188,8 @@
     <div class="app-bar">
         <div class="app-bar-content">
             <div class="app-bar-title" id="appBarTitleBlock">
-                <span class="material-symbols-outlined"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
-                        <path d="M21.579 6.855c.14-.465 0-.855-.6-.855h-1.98c-.5 0-.75.265-.88.555 0 0-1.035 2.515-2.5 4.15-.475.475-.69.625-.95.625-.13 0-.32-.15-.32-.6v-3.44c0-.53-.155-.755-.58-.755h-3.12c-.325 0-.52.24-.52.48 0 .5.74.62.815 2.03v3.05c0 .665-.12.785-.38.785-.69 0-2.37-2.5-3.36-5.36-.195-.56-.39-.78-.9-.78h-1.98c-.6 0-.72.265-.72.555 0 .52.7 3.1 3.26 6.51 1.71 2.41 4.12 3.72 6.3 3.72 1.32 0 1.48-.3 1.48-.81v-1.88c0-.6.13-.72.55-.72.31 0 .85.16 2.1 1.35 1.44 1.44 1.68 2.09 2.5 2.09h1.98c.6 0 .9-.3.73-.89-.19-.59-.87-1.45-1.77-2.47-.49-.62-1.22-1.28-1.44-1.62-.31-.4-.22-.58 0-.94 0 0 2.55-3.59 2.82-4.81z"></path>
-                    </svg></span>
-                <h1 id="appBarTitle">Moosic</h1>
+                <span class="material-symbols-outlined">music_note</span>
+                <h1 id="appBarTitle">Аудиозаписи</h1>
             </div>
             <div class="app-bar-actions">
                 <button class="search-icon" id="searchIcon"><span class="material-symbols-outlined">search</span></button>
@@ -320,24 +297,7 @@
     </div>
     
     <div id="profilePage" class="page">
-        <div id="profileContainer">
-            <div class="profile-card">
-                <div class="vk-icon-placeholder">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
-                        <path d="M21.579 6.855c.14-.465 0-.855-.6-.855h-1.98c-.5 0-.75.265-.88.555 0 0-1.035 2.515-2.5 4.15-.475.475-.69.625-.95.625-.13 0-.32-.15-.32-.6v-3.44c0-.53-.155-.755-.58-.755h-3.12c-.325 0-.52.24-.52.48 0 .5.74.62.815 2.03v3.05c0 .665-.12.785-.38.785-.69 0-2.37-2.5-3.36-5.36-.195-.56-.39-.78-.9-.78h-1.98c-.6 0-.72.265-.72.555 0 .52.7 3.1 3.26 6.51 1.71 2.41 4.12 3.72 6.3 3.72 1.32 0 1.48-.3 1.48-.81v-1.88c0-.6.13-.72.55-.72.31 0 .85.16 2.1 1.35 1.44 1.44 1.68 2.09 2.5 2.09h1.98c.6 0 .9-.3.73-.89-.19-.59-.87-1.45-1.77-2.47-.49-.62-1.22-1.28-1.44-1.62-.31-.4-.22-.58 0-.94 0 0 2.55-3.59 2.82-4.81z"/>
-                    </svg>
-                </div>
-                <div class="profile-info">
-                    <div class="profile-name">
-                        <span id="profileFullName">Загрузка...</span>
-                        <button id="logoutIconBtn" class="logout-icon-btn" title="Выйти">
-                            <span class="material-symbols-outlined">logout</span>
-                        </button>
-                    </div>
-                    <div class="profile-id" id="profileId">ID: --</div>
-                </div>
-            </div>
-        </div>
+        <div id="profileContainer"></div>
         <div class="menu-list">
             <div class="menu-item" id="menuFriends"><div class="menu-item-icon"><span class="material-symbols-outlined">group</span></div><div class="menu-item-info"><div class="menu-item-title">Друзья</div><div class="menu-item-desc">Список друзей</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
             <div class="menu-item" id="menuGroups"><div class="menu-item-icon"><span class="material-symbols-outlined">groups</span></div><div class="menu-item-info"><div class="menu-item-title">Сообщества</div><div class="menu-item-desc">Мои группы</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
@@ -1076,72 +1036,65 @@
     }
     
     async function loadProfile() {
-    const profileHtml = `
-        <div class="profile-card">
-            <div class="profile-avatar" id="profileAvatar">
-                <div class="vk-icon-placeholder" id="avatarPlaceholder">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
-                        <path d="M21.579 6.855c.14-.465 0-.855-.6-.855h-1.98c-.5 0-.75.265-.88.555 0 0-1.035 2.515-2.5 4.15-.475.475-.69.625-.95.625-.13 0-.32-.15-.32-.6v-3.44c0-.53-.155-.755-.58-.755h-3.12c-.325 0-.52.24-.52.48 0 .5.74.62.815 2.03v3.05c0 .665-.12.785-.38.785-.69 0-2.37-2.5-3.36-5.36-.195-.56-.39-.78-.9-.78h-1.98c-.6 0-.72.265-.72.555 0 .52.7 3.1 3.26 6.51 1.71 2.41 4.12 3.72 6.3 3.72 1.32 0 1.48-.3 1.48-.81v-1.88c0-.6.13-.72.55-.72.31 0 .85.16 2.1 1.35 1.44 1.44 1.68 2.09 2.5 2.09h1.98c.6 0 .9-.3.73-.89-.19-.59-.87-1.45-1.77-2.47-.49-.62-1.22-1.28-1.44-1.62-.31-.4-.22-.58 0-.94 0 0 2.55-3.59 2.82-4.81z"/>
-                    </svg>
+        const profileHtml = `
+            <div class="profile-card">
+                <div class="profile-avatar" id="profileAvatar">
+                    <div class="vk-icon-placeholder" id="avatarPlaceholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                            <path d="M21.579 6.855c.14-.465 0-.855-.6-.855h-1.98c-.5 0-.75.265-.88.555 0 0-1.035 2.515-2.5 4.15-.475.475-.69.625-.95.625-.13 0-.32-.15-.32-.6v-3.44c0-.53-.155-.755-.58-.755h-3.12c-.325 0-.52.24-.52.48 0 .5.74.62.815 2.03v3.05c0 .665-.12.785-.38.785-.69 0-2.37-2.5-3.36-5.36-.195-.56-.39-.78-.9-.78h-1.98c-.6 0-.72.265-.72.555 0 .52.7 3.1 3.26 6.51 1.71 2.41 4.12 3.72 6.3 3.72 1.32 0 1.48-.3 1.48-.81v-1.88c0-.6.13-.72.55-.72.31 0 .85.16 2.1 1.35 1.44 1.44 1.68 2.09 2.5 2.09h1.98c.6 0 .9-.3.73-.89-.19-.59-.87-1.45-1.77-2.47-.49-.62-1.22-1.28-1.44-1.62-.31-.4-.22-.58 0-.94 0 0 2.55-3.59 2.82-4.81z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name">
+                        <span id="profileFullName">Загрузка...</span>
+                        <button id="logoutIconBtn" class="logout-icon-btn" title="Выйти">
+                            <span class="material-symbols-outlined">logout</span>
+                        </button>
+                    </div>
+                    <div class="profile-id" id="profileId">ID: --</div>
                 </div>
             </div>
-            <div class="profile-info">
-                <div class="profile-name">
-                    <span id="profileFullName">Загрузка...</span>
-                    <button id="logoutIconBtn" class="logout-icon-btn" title="Выйти">
-                        <span class="material-symbols-outlined">logout</span>
-                    </button>
-                </div>
-                <div class="profile-id" id="profileId">ID: --</div>
-            </div>
-        </div>
-    `;
-    profileContainer.innerHTML = profileHtml;
-    
-    try {
-        const response = await fetch('/api/profile');
-        if (response.status === 401) { window.location.href = '/login'; return; }
-        const data = await response.json();
-        if (data.error) { return; }
+        `;
+        profileContainer.innerHTML = profileHtml;
         
-        const nameSpan = document.getElementById('profileFullName');
-        if (nameSpan) nameSpan.textContent = data.full_name;
-        const idDiv = document.getElementById('profileId');
-        if (idDiv) idDiv.textContent = `ID: ${data.id}`;
-        
-        // Обновляем аватарку
-        const avatarContainer = document.getElementById('profileAvatar');
-        const placeholder = document.getElementById('avatarPlaceholder');
-        
-        if (data.photo && data.photo !== '') {
-            // Если есть фото, показываем его
-            const img = document.createElement('img');
-            img.src = data.photo;
-            img.alt = data.full_name;
-            img.style.width = '56px';
-            img.style.height = '56px';
-            img.style.borderRadius = '28px';
-            img.style.objectFit = 'cover';
-            img.onerror = () => {
-                // Если фото не загрузилось, показываем плейсхолдер
-                img.style.display = 'none';
-                if (placeholder) placeholder.style.display = 'flex';
-            };
-            img.onload = () => {
-                if (placeholder) placeholder.style.display = 'none';
-            };
-            avatarContainer.innerHTML = '';
-            avatarContainer.appendChild(img);
+        try {
+            const response = await fetch('/api/profile');
+            if (response.status === 401) { window.location.href = '/login'; return; }
+            const data = await response.json();
+            if (data.error) { return; }
+            
+            const nameSpan = document.getElementById('profileFullName');
+            if (nameSpan) nameSpan.textContent = data.full_name;
+            const idDiv = document.getElementById('profileId');
+            if (idDiv) idDiv.textContent = `ID: ${data.id}`;
+            
+            const avatarContainer = document.getElementById('profileAvatar');
+            const placeholder = document.getElementById('avatarPlaceholder');
+            
+            if (data.photo && data.photo !== '') {
+                const img = document.createElement('img');
+                img.src = data.photo;
+                img.alt = data.full_name;
+                img.onerror = () => {
+                    img.style.display = 'none';
+                    if (placeholder) placeholder.style.display = 'flex';
+                };
+                img.onload = () => {
+                    if (placeholder) placeholder.style.display = 'none';
+                };
+                avatarContainer.innerHTML = '';
+                avatarContainer.appendChild(img);
+            }
+            
+            const logoutBtn = document.getElementById('logoutIconBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => { window.location.href = '/logout'; });
+            }
+        } catch (err) {
+            console.error('Ошибка загрузки профиля:', err);
         }
-        
-        const logoutBtn = document.getElementById('logoutIconBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => { window.location.href = '/logout'; });
-        }
-    } catch (err) {
-        console.error('Ошибка загрузки профиля:', err);
     }
-}
     
     function displayMyTracks(tracksList) {
         myTracksList.innerHTML = '';
@@ -1254,7 +1207,6 @@
     
     globalSearchInput.addEventListener('input', (e) => { if (searchDebounceTimer) clearTimeout(searchDebounceTimer); searchDebounceTimer = setTimeout(() => performGlobalSearch(e.target.value), 500); });
     
-    // Search page input handler
     if (searchPageInput) {
         searchPageInput.addEventListener('input', (e) => {
             if (searchPageDebounceTimer) clearTimeout(searchPageDebounceTimer);
@@ -1304,8 +1256,6 @@
     document.getElementById('progressBar').addEventListener('click', (e) => { if (audioPlayer.duration) { const rect = e.currentTarget.getBoundingClientRect(); audioPlayer.currentTime = ((e.clientX - rect.left) / rect.width) * audioPlayer.duration; } });
     function formatTime(seconds) { if (isNaN(seconds)) return '0:00'; const mins = Math.floor(seconds / 60); const secs = Math.floor(seconds % 60); return `${mins}:${secs < 10 ? '0' : ''}${secs}`; }
     
-    // ========== Настройки и невидимка ==========
-    
     async function setInvisibleMode(enabled) {
         try {
             const endpoint = enabled ? '/api/set-offline' : '/api/set-online';
@@ -1323,7 +1273,6 @@
         }
     }
     
-    // Initialize settings page
     function initSettings() {
         const themeSwitch = document.getElementById('themeSwitch');
         const invisibleSwitch = document.getElementById('invisibleSwitch');
