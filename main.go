@@ -1,13 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -185,6 +185,12 @@ func getTrackURLHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"url": trackURL})
 }
 
+// Health check handler
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "ok", "service": "vk-proxy"})
+}
+
 func main() {
 	port := "8081"
 	
@@ -198,6 +204,13 @@ func main() {
 	
 	http.HandleFunc("/method/", vkProxyHandler)
 	http.HandleFunc("/get-track-url", getTrackURLHandler)
+	http.HandleFunc("/health", healthHandler)
+	
+	log.Printf("Available endpoints:")
+	log.Printf("  - http://localhost:%s/method/{method}?access_token=...", port)
+	log.Printf("  - http://localhost:%s/get-track-url?access_token=...&owner_id=...&id=...", port)
+	log.Printf("  - http://localhost:%s/health", port)
+	log.Printf("==================================================")
 	
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatalf("Server error: %v", err)
