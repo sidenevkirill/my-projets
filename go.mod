@@ -1,3 +1,3 @@
-module my-projets
+module my-proxy
 
 go 1.24
