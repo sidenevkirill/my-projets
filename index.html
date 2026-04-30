@@ -6,12 +6,55 @@
     <title>VK Moosic</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
+    
+    <!-- Yandex.RTB -->
+    <script>window.yaContextCb=window.yaContextCb||[]</script>
+    <script src="https://yandex.ru/ads/system/context.js" async></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Roboto', sans-serif; height: 100vh; overflow: hidden; transition: background-color 0.3s ease; }
         body.light { --md-primary: #4b7cad; --md-primary-dark: #3a6288; --md-primary-light: #6b9bc4; --md-background: #f5f5f5; --md-surface: #ffffff; --md-surface-light: #f0f0f0; --md-error: #cf6679; --md-on-primary: #ffffff; --md-on-surface: #1e1e1e; --md-on-surface-variant: #6b6b6b; --shadow: 0 2px 4px rgba(0,0,0,0.1); }
         body.dark { --md-primary: #4b7cad; --md-primary-dark: #3a6288; --md-primary-light: #6b9bc4; --md-background: #121212; --md-surface: #1e1e1e; --md-surface-light: #2d2d2d; --md-error: #cf6679; --md-on-primary: #ffffff; --md-on-surface: #ffffff; --md-on-surface-variant: #a0a0a0; --shadow: 0 2px 4px rgba(0,0,0,0.2); }
         body { background: var(--md-background); }
+        
+        /* Стили для рекламы */
+        .ad-container {
+            background: var(--md-surface-light);
+            margin: 8px 12px;
+            border-radius: 16px;
+            overflow: hidden;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ad-label {
+            font-size: 10px;
+            color: var(--md-on-surface-variant);
+            text-align: center;
+            padding: 4px 12px 0;
+            opacity: 0.6;
+        }
+        .yandex-rtb-block {
+            display: block;
+            width: 100%;
+        }
+        
+        /* Баннерная реклама */
+        .banner-ad {
+            background: var(--md-surface);
+            margin: 8px 12px;
+            border-radius: 16px;
+            overflow: hidden;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .banner-ad .ad-label {
+            padding: 8px 12px 4px;
+        }
+        
         .app-bar { position: fixed; top: 0; left: 0; right: 0; background: var(--md-primary); box-shadow: var(--shadow); z-index: 100; }
         .app-bar-content { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; height: 64px; }
         .app-bar-title { display: flex; align-items: center; gap: 12px; }
@@ -245,8 +288,20 @@
                 <div class="stats-item"><div class="stats-value" id="totalArtists">0</div><div class="stats-label">Исполнителей</div></div>
             </div>
             <div class="track-list" id="myTracksList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка</p></div></div>
+            <!-- Реклама внизу списка треков -->
+            <div class="ad-container" id="myTracksAd">
+                <div class="ad-label">Реклама</div>
+                <div id="yandex_rtb_my_tracks"></div>
+            </div>
         </div>
-        <div class="tab-content" id="recommendationsTab"><div class="track-list" id="recommendationsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка</p></div></div></div>
+        <div class="tab-content" id="recommendationsTab">
+            <div class="track-list" id="recommendationsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка</p></div></div>
+            <!-- Реклама внизу рекомендаций -->
+            <div class="ad-container" id="recommendationsAd">
+                <div class="ad-label">Реклама</div>
+                <div id="yandex_rtb_recommendations"></div>
+            </div>
+        </div>
     </div>
     
     <!-- Страница друзей -->
@@ -261,6 +316,11 @@
         <div class="friends-tab-content" id="onlineFriends">
             <div class="friends-list" id="onlineFriendsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка друзей</p></div></div>
         </div>
+        <!-- Реклама на странице друзей -->
+        <div class="banner-ad" id="friendsAd">
+            <div class="ad-label">Реклама</div>
+            <div id="yandex_rtb_friends"></div>
+        </div>
     </div>
     
     <div id="friendTracksPage" class="page">
@@ -273,11 +333,19 @@
         <div class="track-list" id="friendTracksList">
             <div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>
         </div>
+        <div class="ad-container" id="friendTracksAd">
+            <div class="ad-label">Реклама</div>
+            <div id="yandex_rtb_friend_tracks"></div>
+        </div>
     </div>
     
     <!-- Страница сообществ -->
     <div id="groupsPage" class="page">
         <div class="groups-list" id="groupsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка сообществ</p></div></div>
+        <div class="banner-ad" id="groupsAd">
+            <div class="ad-label">Реклама</div>
+            <div id="yandex_rtb_groups"></div>
+        </div>
     </div>
     
     <div id="groupTracksPage" class="page">
@@ -290,9 +358,13 @@
         <div class="track-list" id="groupTracksList">
             <div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>
         </div>
+        <div class="ad-container" id="groupTracksAd">
+            <div class="ad-label">Реклама</div>
+            <div id="yandex_rtb_group_tracks"></div>
+        </div>
     </div>
     
-    <!-- Страница сообщений (доступна только через меню) -->
+    <!-- Страница сообщений -->
     <div id="messagesPage" class="page">
         <div id="conversationsView">
             <div class="conversation-list" id="conversationsList"><div class="loading"><div class="loading-spinner"></div><p>Загрузка диалогов</p></div></div>
@@ -308,11 +380,19 @@
                 <button class="send-message-btn" id="sendMessageBtn"><span class="material-symbols-outlined">send</span></button>
             </div>
         </div>
+        <div class="banner-ad" id="messagesAd">
+            <div class="ad-label">Реклама</div>
+            <div id="yandex_rtb_messages"></div>
+        </div>
     </div>
     
     <div id="playlistsPage" class="page">
         <div class="playlists-list" id="playlistsList">
             <div class="loading"><div class="loading-spinner"></div><p>Загрузка плейлистов</p></div>
+        </div>
+        <div class="banner-ad" id="playlistsAd">
+            <div class="ad-label">Реклама</div>
+            <div id="yandex_rtb_playlists"></div>
         </div>
     </div>
     
@@ -325,6 +405,10 @@
         </div>
         <div class="track-list" id="playlistTracksList">
             <div class="loading"><div class="loading-spinner"></div><p>Загрузка треков</p></div>
+        </div>
+        <div class="ad-container" id="playlistTracksAd">
+            <div class="ad-label">Реклама</div>
+            <div id="yandex_rtb_playlist_tracks"></div>
         </div>
     </div>
     
@@ -342,6 +426,10 @@
                 <p style="margin-top:12px;">Введите название трека или исполнителя</p>
             </div>
         </div>
+        <div class="ad-container" id="searchAd">
+            <div class="ad-label">Реклама</div>
+            <div id="yandex_rtb_search"></div>
+        </div>
     </div>
     
     <div id="profilePage" class="page">
@@ -353,6 +441,10 @@
             <div class="menu-item" id="menuPlaylists"><div class="menu-item-icon"><span class="material-symbols-outlined">playlist_play</span></div><div class="menu-item-info"><div class="menu-item-title">Плейлисты</div><div class="menu-item-desc">Мои плейлисты</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
             <div class="menu-item" id="menuSettings"><div class="menu-item-icon"><span class="material-symbols-outlined">settings</span></div><div class="menu-item-info"><div class="menu-item-title">Настройки</div><div class="menu-item-desc">Тема, невидимка и другое</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
             <div class="menu-item" id="menuAbout"><div class="menu-item-icon"><span class="material-symbols-outlined">info</span></div><div class="menu-item-info"><div class="menu-item-title">О приложении</div><div class="menu-item-desc">Версия 0.2.0</div></div><div class="menu-item-arrow"><span class="material-symbols-outlined">chevron_right</span></div></div>
+        </div>
+        <div class="banner-ad" id="profileAd">
+            <div class="ad-label">Реклама</div>
+            <div id="yandex_rtb_profile"></div>
         </div>
     </div>
     
@@ -398,9 +490,13 @@
                 </div>
             </div>
         </div>
+        <div class="banner-ad" id="settingsAd">
+            <div class="ad-label">Реклама</div>
+            <div id="yandex_rtb_settings"></div>
+        </div>
     </div>
     
-    <!-- Нижняя навигация - БЕЗ раздела "Сообщения" -->
+    <!-- Нижняя навигация -->
     <div class="bottom-nav">
         <button class="nav-item active" data-page="main"><span class="material-symbols-outlined">music_note</span><span>Главная</span></button>
         <button class="nav-item" data-page="friends"><span class="material-symbols-outlined">group</span><span>Друзья</span></button>
@@ -448,6 +544,159 @@
     </div>
 
     <script>
+    // Инициализация Яндекс.Рекламы
+    function initYandexAds() {
+        // Реклама на главной странице (мои треки)
+        if (document.getElementById('yandex_rtb_my_tracks')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_my_tracks"
+                });
+            });
+        }
+        
+        // Реклама на странице рекомендаций
+        if (document.getElementById('yandex_rtb_recommendations')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_recommendations"
+                });
+            });
+        }
+        
+        // Реклама на странице друзей
+        if (document.getElementById('yandex_rtb_friends')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_friends"
+                });
+            });
+        }
+        
+        // Реклама на странице треков друга
+        if (document.getElementById('yandex_rtb_friend_tracks')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_friend_tracks"
+                });
+            });
+        }
+        
+        // Реклама на странице сообществ
+        if (document.getElementById('yandex_rtb_groups')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_groups"
+                });
+            });
+        }
+        
+        // Реклама на странице треков сообщества
+        if (document.getElementById('yandex_rtb_group_tracks')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_group_tracks"
+                });
+            });
+        }
+        
+        // Реклама на странице сообщений
+        if (document.getElementById('yandex_rtb_messages')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_messages"
+                });
+            });
+        }
+        
+        // Реклама на странице плейлистов
+        if (document.getElementById('yandex_rtb_playlists')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_playlists"
+                });
+            });
+        }
+        
+        // Реклама на странице треков плейлиста
+        if (document.getElementById('yandex_rtb_playlist_tracks')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_playlist_tracks"
+                });
+            });
+        }
+        
+        // Реклама на странице поиска
+        if (document.getElementById('yandex_rtb_search')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_search"
+                });
+            });
+        }
+        
+        // Реклама на странице профиля
+        if (document.getElementById('yandex_rtb_profile')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_profile"
+                });
+            });
+        }
+        
+        // Реклама на странице настроек
+        if (document.getElementById('yandex_rtb_settings')) {
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({
+                    blockId: "R-A-19070288-2",
+                    type: "fullscreen",
+                    platform: "touch",
+                    container: "yandex_rtb_settings"
+                });
+            });
+        }
+    }
+    
+    // Вызываем инициализацию рекламы после загрузки страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initYandexAds, 100);
+    });
+    
+    // Остальной код JavaScript остается без изменений
     let myTracks = [], myTracksFiltered = [], searchResults = [], recommendations = [], conversations = [];
     let allFriendsList = [], onlineFriendsList = [];
     let currentChatPeerId = null, currentChatTitle = '';
@@ -622,6 +871,9 @@
             if (item.getAttribute('data-page') === pageId) item.classList.add('active');
             else item.classList.remove('active');
         });
+        
+        // Переинициализируем рекламу при смене страницы
+        setTimeout(initYandexAds, 200);
     }
     navItems.forEach(item => item.addEventListener('click', () => switchPage(item.getAttribute('data-page'))));
     
@@ -783,6 +1035,8 @@
         } catch (err) {
             friendTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
         }
+        
+        setTimeout(initYandexAds, 200);
     }
     
     function displayFriendTracks(tracksList) {
@@ -889,6 +1143,7 @@
         appBarTitle.textContent = 'Друзья';
         currentFriendId = null;
         currentFriendName = '';
+        setTimeout(initYandexAds, 200);
     }
     
     backToFriendsBtn.addEventListener('click', backToFriends);
@@ -913,6 +1168,8 @@
         } catch (err) {
             groupTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
         }
+        
+        setTimeout(initYandexAds, 200);
     }
     
     function displayGroupTracks(tracksList) {
@@ -999,6 +1256,7 @@
         appBarTitle.textContent = 'Сообщества';
         currentGroupId = null;
         currentGroupName = '';
+        setTimeout(initYandexAds, 200);
     }
     
     if (backToGroupsBtn) backToGroupsBtn.addEventListener('click', backToGroups);
@@ -1026,6 +1284,8 @@
             console.error('Ошибка загрузки плейлистов:', err);
             playlistsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
         }
+        
+        setTimeout(initYandexAds, 200);
     }
     
     function displayPlaylists(playlists) {
@@ -1109,6 +1369,8 @@
             console.error('Error loading playlist tracks:', err);
             playlistTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
         }
+        
+        setTimeout(initYandexAds, 200);
     }
     
     function displayPlaylistTracks(tracksList) {
@@ -1195,6 +1457,7 @@
         appBarTitle.textContent = 'Плейлисты';
         currentPlaylistId = null;
         currentPlaylistOwnerId = null;
+        setTimeout(initYandexAds, 200);
     }
     
     if (backToPlaylistsBtn) backToPlaylistsBtn.addEventListener('click', backToPlaylists);
@@ -1214,6 +1477,8 @@
             allFriendsListDiv.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
             onlineFriendsListDiv.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
         }
+        
+        setTimeout(initYandexAds, 200);
     }
     
     function displayAllFriends(friends) {
@@ -1305,6 +1570,8 @@
         } catch (err) {
             groupsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
         }
+        
+        setTimeout(initYandexAds, 200);
     }
     
     function displayGroups(groups) {
@@ -1478,20 +1745,16 @@
         icon.textContent = isPlaying ? 'pause' : 'play_arrow'; 
     }
     
-    // Обновляем обработчик окончания трека
     audioPlayer.addEventListener('ended', async () => { 
         isPlaying = false; 
         updatePlayPauseButton();
         await playNextTrack();
     });
     
-    // Добавляем обработчики для кнопок prev/next
     document.getElementById('prevBtn').addEventListener('click', playPrevTrack);
     document.getElementById('nextBtn').addEventListener('click', playNextTrack);
     
-    // Обновляем playPauseBtn
     const playPauseBtn = document.getElementById('playPauseBtn');
-    const originalPlayPauseHandler = playPauseBtn.onclick;
     playPauseBtn.addEventListener('click', () => { 
         if (isPlaying) {
             audioPlayer.pause();
@@ -1515,6 +1778,8 @@
             displayMyTracks(myTracksFiltered);
             updateStats(myTracks);
         } catch (err) { myTracksList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`; }
+        
+        setTimeout(initYandexAds, 200);
     }
     
     async function loadRecommendations() {
@@ -1527,6 +1792,8 @@
             recommendations = data;
             displayRecommendations(recommendations);
         } catch (err) { recommendationsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`; }
+        
+        setTimeout(initYandexAds, 200);
     }
     
     async function loadProfile() {
@@ -1588,6 +1855,8 @@
         } catch (err) {
             console.error('Ошибка загрузки профиля:', err);
         }
+        
+        setTimeout(initYandexAds, 200);
     }
     
     function displayMyTracks(tracksList) {
@@ -1662,6 +1931,8 @@
             searchResults = data;
             displaySearchResults(searchResults);
         } catch (err) { searchResultsList.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`; }
+        
+        setTimeout(initYandexAds, 200);
     }
     
     function displaySearchResults(tracksList) {
@@ -1831,6 +2102,7 @@
                     themeIcon.textContent = 'dark_mode';
                     localStorage.setItem('theme', 'light');
                 }
+                setTimeout(initYandexAds, 100);
             });
         }
         
