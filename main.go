@@ -18,7 +18,19 @@ const (
 func main() {
 	port := "8080"
 
-	// Обработчик для всех методов VK API
+	// Обработчик для главной страницы (HTML)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			// Отдаём HTML-страницу
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			http.ServeFile(w, r, "index.html")
+			return
+		}
+		// Для всех остальных путей - 404
+		http.NotFound(w, r)
+	})
+
+	// Обработчик для API методов (не должен мешать статике)
 	http.HandleFunc("/method/", func(w http.ResponseWriter, r *http.Request) {
 		// Получаем метод из URL (например, /method/audio.get -> audio.get)
 		method := strings.TrimPrefix(r.URL.Path, "/method/")
@@ -104,20 +116,12 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
-	// Корневой эндпоинт для проверки
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
-			"status":  "running",
-			"message": "VK API Proxy is working",
-		})
-	})
-
 	log.Printf("==================================================")
-	log.Printf("VK API PROXY (Kate Mobile compatible)")
+	log.Printf("VK MOOSIC WEB PLAYER with ADS")
 	log.Printf("==================================================")
-	log.Printf("✅ Proxy server starting on http://localhost:%s", port)
-	log.Printf("🔑 Using Kate Mobile API v%s", KATE_API_VERSION)
+	log.Printf("✅ Server starting on http://localhost:%s", port)
+	log.Printf("🎵 Music player with Yandex Ads")
+	log.Printf("📢 Реклама будет отображаться на всех страницах")
 	log.Printf("==================================================")
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
